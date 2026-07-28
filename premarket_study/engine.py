@@ -55,7 +55,7 @@ class Result:
 
 def run_model(dates, O, H, L, C, p: Params,
               bayes_signal=None, ou_anchor=None, open_cap=None,
-              collect=False) -> Result:
+              bayes_gain=0.0, collect=False) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -104,9 +104,14 @@ def run_model(dates, O, H, L, C, p: Params,
         W[i] = math.sqrt(P11[i] + 2 * P12[i] + P22[i] + qL[i] + r[i])
 
     # --- Bayes bid X (row>=1) ---
+    # Bayes fair value = Kalman one-step prediction, optionally nudged toward a fresher
+    # morning signal (PM-VWAP or the open): fair' = fair + gain*(signal - fair). The
+    # filter's own learning still runs off realised closes; only today's bid is refined.
     X = [None] * N
     for i in range(1, N):
         fair = Lvl[i - 1] + Slp[i - 1]
+        if bayes_signal is not None and bayes_signal[i] is not None:
+            fair = fair + bayes_gain * (bayes_signal[i] - fair)
         X[i] = min(fair - p.k * W[i - 1], oc(i), G[i - 1] * (1 - p.peak_cap))
 
     # --- OU machinery + bid AM (row>=W) ---

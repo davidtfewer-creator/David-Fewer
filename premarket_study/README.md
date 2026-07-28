@@ -101,3 +101,22 @@ numbers that assume perfect knowledge of the open — unattainable live.
 This is **one stock, full history**. Change (A) is a live-fidelity improvement with
 *frozen* parameters (not a fit), which is the robust kind — but before trusting it live:
 extend to the other names, and ideally run a warm-started walk-forward per name.
+
+## Pre-market VWAP / actual open as the SIGNAL (not the cap) — hurts
+
+Distinct from the open-cap work: this tests the user's actual question — is a *less-noisy*
+(PM-VWAP) or *fresher* (actual open) **signal** for setting the bid better? Execution held
+fixed at correct limit mechanics; frozen params; both injection points (OU forecast anchor,
+Bayes fair-value nudge). All ten names:
+
+| Signal change | avg Δ annual | beats baseline |
+|---|---|---|
+| OU anchor = PM-VWAP | −8.4pp | 2/10 |
+| OU anchor = actual open | −10.0pp | 2/10 |
+| Bayes fair → open (gain 0.5) | −14.6pp | 0/10 |
+
+Fills mostly *decrease*, not increase. **Mechanism:** the edge is a *stable, smoothed*
+reference that rests a patient discounted bid below the market, which daily volatility comes
+down to and fills. A fresher/less-noisy signal makes the bid *chase* the current price — it
+moves away from where dips form — so it fills less and earns less. The smoothing is the
+feature, not noise to remove. (Consistent with the frequency case study: more fills ≠ better.)
