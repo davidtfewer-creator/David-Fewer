@@ -214,6 +214,7 @@ def run_model(dates, O, H, L, C, p: Params,
     frames = {}
     if collect:
         frames = dict(F=F, G=G, W=W, X=X, AM=AM, OUmean=OUmean, OUar=OUar,
-                      OUsig=OUsig, OUf=OUf, t1=t1, t2=t2, equity=equity)
+                      OUsig=OUsig, OUf=OUf, t1=t1, t2=t2, equity=equity,
+                      Lvl=Lvl, Slp=Slp)
     return Result(terminal, profit, ann, bayes_buys + ou_buys, bayes_buys, ou_buys,
                   t1['stops'] + t2['stops'], fY, fAF, sharpe, maxdd, frames)
