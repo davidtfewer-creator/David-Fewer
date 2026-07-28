@@ -1,0 +1,24 @@
+CLEAN TIEBREAKER — both signals re-optimised per fold, judged OOS
+
+=== NVDA  (N=582) ===
+  fold         test   reopt-close   reopt-open   winner
+  1   [291:387]         26.8%        40.4%   open  (open gain=0.64)
+  2   [388:483]         10.7%        29.3%   open  (open gain=0.65)
+  3   [484:581]         40.6%        48.7%   open  (open gain=0.84)
+  -> NVDA: reopt-open beats reopt-close in 3/3 folds; avg OOS close=26.0%  open=39.4%
+
+=== AVGO  (N=582) ===
+  fold         test   reopt-close   reopt-open   winner
+  1   [291:387]         31.8%        26.4%   close  (open gain=0.39)
+  2   [388:483]         17.6%        40.6%   open  (open gain=0.96)
+  3   [484:581]         29.1%        56.7%   open  (open gain=0.81)
+  -> AVGO: reopt-open beats reopt-close in 2/3 folds; avg OOS close=26.1%  open=41.2%
+
+=== SPOT  (N=582) ===
+  fold         test   reopt-close   reopt-open   winner
+  1   [291:387]         22.2%        10.1%   close  (open gain=0.11)
+  2   [388:483]          2.2%       -20.2%   close  (open gain=0.79)
+  3   [484:581]         43.7%        69.6%   open  (open gain=0.73)
+  -> SPOT: reopt-open beats reopt-close in 1/3 folds; avg OOS close=22.7%  open=19.8%
+
+OVERALL avg OOS across 3 names:  reopt-close=24.9%  reopt-open=33.5%

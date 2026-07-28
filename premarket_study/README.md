@@ -139,3 +139,33 @@ survive, the average OOS edge is nil, and the loss fold shows the overfitting as
 wins, big losses). Caveat: the frozen baseline was full-history-tuned (mildly optimistic on the
 test slices), so a cleaner tiebreaker re-tunes *both* signals per fold. On this evidence it
 doesn't justify displacing the validated close-signal model, but it's the closest call so far.
+
+## Clean tiebreaker: open vs close signal, both re-optimised per fold (`optimize_tiebreaker.py`)
+
+Removes the incumbent's full-history peeking: both signals re-optimised on each training
+fold, judged OOS. Two comparisons, answering different questions:
+
+**(i) Same-policy, no-peek — reopt-open vs reopt-close:** open wins **6/9 folds**; overall
+OOS open **33.5%** vs close **24.9%**. *But* re-optimising the close signal is self-defeating
+(reopt-close 24.9% vs the frozen close incumbent's 40.9% — the §2 lesson again), so this is
+partly beating a strawman.
+
+**(ii) Decision-relevant — reopt-open vs the FROZEN close incumbent (what's deployed):**
+
+| name | frozen-close (incumbent) | reopt-open | open beats |
+|---|---|---|---|
+| NVDA | 39.4% | 39.5% | 2/3 (tie on avg) |
+| AVGO | 33.6% | 41.2% | 2/3 (+7.6pp) |
+| SPOT | 49.6% | 19.8% | 1/3 (−29.8pp, collapse fold) |
+| **overall** | **40.9%** | **33.5%** | — |
+
+**Verdict:** against the actual deployed model, the re-tuned open signal does **not** win
+overall (33.5% vs 40.9%) — it ties NVDA, wins AVGO, loses badly on SPOT (with a −20pp fold).
+So there is **no robust, general edge**, and it would reintroduce ongoing re-optimisation (this
+project's nemesis) plus tail risk. Keep the frozen close-signal model.
+
+**But the instinct wasn't baseless:** under a same-policy comparison the open signal is
+*more robust to re-optimisation* than close (holds ~39% on NVDA where reopt-close collapses to
+26%), hinting the fresh open info has real predictive content. Not enough to switch on 3 names,
+but the honest "something" — worth a larger (all-10, more-fold, robustified) test before final
+burial if ever revisited.
