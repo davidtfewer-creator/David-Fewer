@@ -1,0 +1,7 @@
+# Derived data extracted from the user's proprietary workbooks
+premarket_study/*.csv
+# Uploaded workbooks (never committed)
+*.xlsx
+*.xlsm
+__pycache__/
+*.pyc
