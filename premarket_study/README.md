@@ -120,3 +120,22 @@ reference that rests a patient discounted bid below the market, which daily vola
 down to and fills. A fresher/less-noisy signal makes the bid *chase* the current price — it
 moves away from where dips form — so it fills less and earns less. The smoothing is the
 feature, not noise to remove. (Consistent with the frequency case study: more fills ≠ better.)
+
+## Fair-fight: re-optimise NVDA params for the actual-open SIGNAL (`optimize_open_signal_nvda.py`)
+
+The frozen params were tuned for the close signal, so we gave the open-signal its own tuning
+(OU anchor = open; Bayes fair nudged toward open with free gain; all 11 params optimised for
+profit + trade floor), judged out-of-sample.
+
+- **In-sample (full history):** ann 150.2% → **200.6%**, buys 186 → **268**, gain 0.87 — a big
+  apparent win in *both* profit and trades. (The mirage — an in-sample re-fit always wins.)
+- **Walk-forward OOS (reopt-open vs frozen-close):** fold1 34.3 vs 26.5 (reopt), fold2 30.9 vs
+  51.2 (frozen, −20pp collapse), fold3 51.3 vs 40.6 (reopt). **2/3 folds to reopt, but average
+  essentially tied (38.8% vs 39.4%, −0.6pp)** with a fat-tail losing fold.
+
+**Read:** unlike the other rejected ideas, this is *borderline* — the open-signal, properly
+tuned, is roughly competitive OOS, not clearly worse. But the +50pp in-sample gain does **not**
+survive, the average OOS edge is nil, and the loss fold shows the overfitting asymmetry (small
+wins, big losses). Caveat: the frozen baseline was full-history-tuned (mildly optimistic on the
+test slices), so a cleaner tiebreaker re-tunes *both* signals per fold. On this evidence it
+doesn't justify displacing the validated close-signal model, but it's the closest call so far.

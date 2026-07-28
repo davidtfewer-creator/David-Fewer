@@ -1,0 +1,15 @@
+NVDA fair-fight: re-optimise for the ACTUAL-OPEN signal   (N=582)
+
+Frozen close-signal baseline (full history): ann=150.2%  buys=186  Sharpe=4.53
+
+Optimising open-signal on FULL history (min buys floor=111) ...
+  IN-SAMPLE open-signal optimum: ann=200.6%  buys=268  Sharpe=3.92  (gain=0.87, W=43)
+  -> in-sample Δ vs frozen: +50.4pp
+
+WALK-FORWARD (optimise open-signal on train, judge unseen test):
+  fold          test   frozen close   reopt open-sig   winner
+  1   [291:387]           26.5%           34.3% (buys~37)   reopt-open
+  2   [388:483]           51.2%           30.9% (buys~33)   frozen
+  3   [484:581]           40.6%           51.3% (buys~39)   reopt-open
+
+  Re-optimised open-signal beats frozen close-signal OOS in 2/3 folds.
