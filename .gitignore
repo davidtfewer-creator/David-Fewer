@@ -8,3 +8,5 @@ __pycache__/
 
 # optimizer console output (derived)
 premarket_study/opt_out.txt
+premarket_study/data_*.csv
+premarket_study/params_all.json

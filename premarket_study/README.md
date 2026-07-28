@@ -73,6 +73,29 @@ close-optimized params generalize better than any VWAP-specific re-tune — rein
 that the edge is structural. The PM-VWAP open cap is a clean *signal* improvement to layer
 **on top of** the frozen params, not a reason to re-fit them.
 
+## Does the open-cap win generalize? — Yes, all ten names (`multi_stock.py`)
+
+Engine validated against **all ten** workbooks' cached results (annual return, buys, stops)
+exactly. Then, frozen params throughout, compared the live open-cap proxy prev-close vs
+PM-VWAP (both traded against actual OHLC). The workbook's headline returns are *oracle*
+numbers that assume perfect knowledge of the open — unattainable live.
+
+| | avg annual return | avg Sharpe | avg maxDD |
+|---|---|---|---|
+| Oracle (true open — sim only) | ~221% | — | — |
+| Live: prev-close cap (current) | 111.5% | 1.90 | 32.8% |
+| **Live: PM-VWAP cap (proposed)** | **164.4%** | **2.94** | **23.6%** |
+
+- **PM-VWAP beats prev-close on annual return in 10/10 stocks**, and in **68/100
+  stock-quarters** — consistent across names and across time.
+- Return +52.9pp on average, Sharpe 1.90→2.94, and max drawdown *falls* 32.8%→23.6%.
+- The biggest gains are on the high-gap names (VST +91pp, RKLB +155pp, SOFI +93pp) —
+  exactly where a stale prev-close proxy misfires most.
+- **Interpretation:** the workbook's returns are simulation-with-oracle-open. Live, the
+  prev-close proxy realises only ~half of that. **PM-VWAP recovers ~half of the remaining
+  sim-to-live gap, with lower drawdown** — a pure live-fidelity gain, no parameter fitting,
+  no lookahead (PM VWAP is known pre-open; fills use the actual day's range).
+
 ## Caveats (per the project's recurring principle)
 
 This is **one stock, full history**. Change (A) is a live-fidelity improvement with
