@@ -49,8 +49,32 @@ later than the Bayes tranche — `AF`/`AR` initialise on row 9, not row 8.)
   quarters. Keep the OU anchor on previous close.
 - **Best live design: PM-VWAP for the open cap, previous close for the OU anchor.**
 
+## Should we re-optimize the parameters for the VWAP variant? — No (`optimize_nvda.py`)
+
+The frozen params were tuned for the close-cap model, so it's fair to ask whether the
+VWAP-cap variant wants its own tuning. Ran a walk-forward re-optimization (differential
+evolution, robustness term, min-trade floor) — optimize on train, judge on the unseen
+test slice — comparing frozen-VWAP vs reopt-VWAP:
+
+| Fold | Test slice | frozen+close | frozen+VWAP | reopt+VWAP | winner |
+|---|---|---|---|---|---|
+| 1 | [291:387] | 23.1% | 23.8% | 34.4% | reopt |
+| 2 | [388:483] | 49.1% | 47.6% | 12.1% | frozen |
+| 3 | [484:581] | 32.5% | 33.0% | 14.2% | frozen |
+| **avg OOS** | | **34.9%** | **34.8%** | **20.2%** | **frozen** |
+
+Re-optimizing beats frozen out-of-sample in only **1/3 folds**, and when it loses it
+*collapses* (fold 2: 12% vs 48%). Average OOS return drops from **34.8% → 20.2%**. The
+re-optimized params swing wildly fold-to-fold (ψ −74%, φ_L +67%, λ −29% in the last
+fold) — no stable optimum, exactly the "parameter CV ≈ 0.4–0.6" result from §2.
+
+**Conclusion: keep the frozen (close-optimized) params even under the VWAP cap.** The
+close-optimized params generalize better than any VWAP-specific re-tune — reinforcing
+that the edge is structural. The PM-VWAP open cap is a clean *signal* improvement to layer
+**on top of** the frozen params, not a reason to re-fit them.
+
 ## Caveats (per the project's recurring principle)
 
-This is **one stock, in-sample, full history**. Change (A) is a live-fidelity improvement
-with *frozen* parameters (not a fit), which is the robust kind — but before trusting it:
-extend to the other names, and ideally run a true warm-started walk-forward.
+This is **one stock, full history**. Change (A) is a live-fidelity improvement with
+*frozen* parameters (not a fit), which is the robust kind — but before trusting it live:
+extend to the other names, and ideally run a warm-started walk-forward per name.

@@ -5,3 +5,6 @@ premarket_study/*.csv
 *.xlsm
 __pycache__/
 *.pyc
+
+# optimizer console output (derived)
+premarket_study/opt_out.txt
