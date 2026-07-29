@@ -235,3 +235,24 @@ rungs is net drag — normal dips at k are the profit engine, deep dips too rare
 with the enhanced margin. Best case is ≈baseline return with slightly lower drawdown + more trades
 (a marginally more conservative profile), not a profit gain. The only way deep-dip buying could
 *add* return is extra capital (leverage/pooling), not reallocating a fixed pot — a different lever.
+
+## Bayes-only ladder as a trade-volume option — all-ten (in-sample)
+
+Config: ladder the Bayes sleeve only (OU single-bid), depths [k,1.5k,2k], weights [0.8,0.15,0.05],
+first-rung TP. Motivation: more backtest trades → more statistical confidence in the edge.
+
+| avg across 10 | Return | Sharpe | maxDD | Trades |
+|---|---|---|---|---|
+| Baseline | 222% | 4.20 | 17% | 258 |
+| Bayes-only ladder | 208% | **4.46** | 16% | **388 (+50%)** |
+
+Total trades 2,581 → 3,878 (+50%). **Unlike frequency-max (Sharpe 4.3→2.1), this raises trades
+AND Sharpe** — the extra trades are the deep rungs bought cheaper and booked at the first-rung
+target, so they're "good" volume. Cost is ~14pp absolute return (reserve-holding dilutes the
+biggest winners); risk-adjusted it's neutral-to-better.
+
+**Caveat:** Bayes–OU correlation rises on ~half the names (AVGO +0.44, PLTR/VRT/TSLA/SOFI +0.27..0.35;
+NVDA/TSM stay <0) — laddering Bayes deeper makes it fire on big down-days when OU also fires, eroding
+the hedge on those names. In-sample only; needs walk-forward before adoption. First genuinely
+adoptable tweak (besides the uncapped-bid execution fix) *if* trade-count/robustness is valued
+over absolute return.
