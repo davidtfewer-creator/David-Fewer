@@ -22,7 +22,7 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R, tp_mode=
     shares = 0.0; cost_px = 0.0; filled = set(); incyc = False; bd = None
     anchor_px = 0.0                                 # shallowest (highest) filled rung price
     budgets = None; trades = 0
-    equity = [0.0] * N; daily_trades = [0] * N
+    equity = [0.0] * N; daily_trades = [0] * N; rec_fund = []; rec_sh = []
     for i in range(N):
         if i > 0:                                   # interest on idle cash
             fund += fund * p.interest * (dates[i] - dates[i-1]).days / 365.0
@@ -57,7 +57,8 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R, tp_mode=
                     fund += shares * (sell - p.comm)
                     shares = 0.0; cost_px = 0.0; filled = set(); incyc = False; bd = None
         equity[i] = fund + shares * C[i]
-    return equity, trades, daily_trades
+        rec_fund.append(fund); rec_sh.append(shares)
+    return equity, trades, daily_trades, rec_fund, rec_sh
 
 
 def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blended',
@@ -84,9 +85,9 @@ def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blend
         return [min(r - m * sig, O[i], peak) for m in mult_ou]
 
     first_ou = next((i for i in range(N) if f['OUf'][i] is not None), N)
-    eqB, tB, dtB = _tranche(dates, O, H, L, C, p, bayes_rungs, p.premium,
+    eqB, tB, dtB, fundB, shB = _tranche(dates, O, H, L, C, p, bayes_rungs, p.premium,
                        p.capital * p.bayes_pct, 1, len(mult_bayes), tp_mode, w_bayes)
-    eqO, tO, dtO = _tranche(dates, O, H, L, C, p, ou_rungs, p.ou_prem,
+    eqO, tO, dtO, fundO, shO = _tranche(dates, O, H, L, C, p, ou_rungs, p.ou_prem,
                        p.capital * (1 - p.bayes_pct), first_ou, len(mult_ou), tp_mode, w_ou)
 
     eq = [eqB[i] + eqO[i] for i in range(N)]
@@ -107,4 +108,6 @@ def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blend
 
     return dict(annual=ann, sharpe=sharpe, maxdd=mdd, trades=tB+tO,
                 bayes_trades=tB, ou_trades=tO, corr=corr, equity=eq, terminal=eq[-1],
-                daily_trades=[dtB[i] + dtO[i] for i in range(N)])
+                daily_trades=[dtB[i] + dtO[i] for i in range(N)],
+                bayes_fund=fundB, bayes_shares=shB, eqB=eqB, eqO=eqO,
+                bayes_daily_trades=dtB)
