@@ -1,0 +1,65 @@
+ALL-TEN CLEAN TIEBREAKER  (frozen-close incumbent | reopt-close | reopt-open)
+
+=== NVDA ===
+   [291:387]  frozen=  26.5%  reopt-close=  26.8%  reopt-open=  40.4%   OPEN
+   [388:483]  frozen=  51.2%  reopt-close=  10.7%  reopt-open=  29.3%   incumbent
+   [484:581]  frozen=  40.6%  reopt-close=  40.6%  reopt-open=  48.7%   OPEN
+   avg: frozen=39.4%  reopt-close=26.0%  reopt-open=39.4%   open>incumbent 2/3
+
+=== TSM ===
+   [291:387]  frozen=  24.3%  reopt-close=  22.9%  reopt-open=  32.7%   OPEN
+   [388:483]  frozen=  49.9%  reopt-close=  49.9%  reopt-open=  54.5%   OPEN
+   [484:581]  frozen=  46.4%  reopt-close=  46.4%  reopt-open=  73.5%   OPEN
+   avg: frozen=40.2%  reopt-close=39.7%  reopt-open=53.6%   open>incumbent 3/3
+
+=== TSLA ===
+   [291:387]  frozen=  82.7%  reopt-close=  80.5%  reopt-open= 106.1%   OPEN
+   [388:483]  frozen=  20.3%  reopt-close=  14.2%  reopt-open=  16.5%   incumbent
+   [484:581]  frozen=  -0.0%  reopt-close=  -0.0%  reopt-open= -13.2%   incumbent
+   avg: frozen=34.3%  reopt-close=31.6%  reopt-open=36.5%   open>incumbent 1/3
+
+=== VRT ===
+   [291:387]  frozen=  51.0%  reopt-close=  52.1%  reopt-open=  51.1%   OPEN
+   [388:483]  frozen=  95.0%  reopt-close=  95.0%  reopt-open=  58.7%   incumbent
+   [484:581]  frozen=  19.0%  reopt-close=  19.0%  reopt-open=  93.8%   OPEN
+   avg: frozen=55.0%  reopt-close=55.4%  reopt-open=67.9%   open>incumbent 2/3
+
+=== VST ===
+   [291:387]  frozen=  60.7%  reopt-close=  66.2%  reopt-open=  89.9%   OPEN
+   [388:483]  frozen=  75.7%  reopt-close=  28.1%  reopt-open=  37.1%   incumbent
+   [484:581]  frozen=  59.1%  reopt-close=  36.9%  reopt-open=  54.8%   incumbent
+   avg: frozen=65.2%  reopt-close=43.8%  reopt-open=60.6%   open>incumbent 1/3
+
+=== AVGO ===
+   [291:387]  frozen=  39.8%  reopt-close=  31.8%  reopt-open=  26.4%   incumbent
+   [388:483]  frozen=  17.6%  reopt-close=  17.6%  reopt-open=  40.6%   OPEN
+   [484:581]  frozen=  43.2%  reopt-close=  29.1%  reopt-open=  56.7%   OPEN
+   avg: frozen=33.6%  reopt-close=26.1%  reopt-open=41.2%   open>incumbent 2/3
+
+=== PLTR ===
+   [291:387]  frozen=  77.6%  reopt-close=  37.0%  reopt-open=  23.9%   incumbent
+   [388:483]  frozen=   5.7%  reopt-close= -11.6%  reopt-open= -18.8%   incumbent
+   [484:581]  frozen=   9.1%  reopt-close=   6.7%  reopt-open=  20.4%   OPEN
+   avg: frozen=30.8%  reopt-close=10.7%  reopt-open=8.5%   open>incumbent 1/3
+
+=== RKLB ===
+   [291:387]  frozen= 139.6%  reopt-close=  75.1%  reopt-open= 109.0%   incumbent
+   [388:483]  frozen= 137.3%  reopt-close=  39.9%  reopt-open=  23.3%   incumbent
+   [484:581]  frozen=  45.1%  reopt-close=  -3.7%  reopt-open=  82.7%   OPEN
+   avg: frozen=107.3%  reopt-close=37.1%  reopt-open=71.7%   open>incumbent 1/3
+
+=== SOFI ===
+   [291:387]  frozen=  91.3%  reopt-close=  69.0%  reopt-open=  76.3%   incumbent
+   [388:483]  frozen=  99.3%  reopt-close=   5.9%  reopt-open= -10.9%   incumbent
+   [484:581]  frozen=  29.9%  reopt-close=  29.9%  reopt-open=  83.2%   OPEN
+   avg: frozen=73.5%  reopt-close=34.9%  reopt-open=49.6%   open>incumbent 1/3
+
+=== SPOT ===
+   [291:387]  frozen=  55.8%  reopt-close=  22.2%  reopt-open=  10.1%   incumbent
+   [388:483]  frozen=  49.4%  reopt-close=   2.2%  reopt-open= -20.2%   incumbent
+   [484:581]  frozen=  43.7%  reopt-close=  43.7%  reopt-open=  69.6%   OPEN
+   avg: frozen=49.6%  reopt-close=22.7%  reopt-open=19.8%   open>incumbent 1/3
+
+======================================================================
+OVERALL avg OOS (10 names):  frozen-close=52.9%   reopt-close=32.8%   reopt-open=44.9%
+reopt-open beats FROZEN incumbent in 15/30 folds and 5/10 names (on avg).

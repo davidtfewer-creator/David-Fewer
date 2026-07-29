@@ -169,3 +169,27 @@ project's nemesis) plus tail risk. Keep the frozen close-signal model.
 26%), hinting the fresh open info has real predictive content. Not enough to switch on 3 names,
 but the honest "something" — worth a larger (all-10, more-fold, robustified) test before final
 burial if ever revisited.
+
+## All-ten clean tiebreaker — the definitive test (`optimize_tiebreaker_all.py`)
+
+Same tiebreaker across all ten names, three OOS numbers per fold on the same unseen slice:
+frozen-close (deployed incumbent) | reopt-close | reopt-open. 30 folds total.
+
+| Model | avg OOS return |
+|---|---|
+| **Frozen close (incumbent)** | **52.9%** |
+| reopt-open | 44.9% |
+| reopt-close | 32.8% |
+
+- **reopt-open beats the frozen incumbent in only 15/30 folds and 5/10 names** — a coin-flip
+  by count, and the incumbent wins the aggregate by **+8pp (52.9% vs 44.9%)**.
+- **Why the incumbent wins the aggregate:** the open signal wins *small* on mid-range names
+  (TSM +13, VRT +13, AVGO +8, TSLA +2) but loses *big* on the highest-return names — RKLB
+  (107→72), SPOT (50→20), SOFI (74→50), PLTR (31→9), where the frozen params capture the big
+  trends and re-tuning-to-open gives them up.
+- reopt-close (32.8%) is worst of all — re-optimising the close signal overfits (§2 again).
+
+**Definitive verdict:** no robust, general edge from the actual-open (or PM-VWAP) signal. A
+~50% fold/name hit-rate with the incumbent winning the magnitude battle is what *no edge* looks
+like. **Keep the frozen close-signal model** — best aggregate, simplest, no re-optimisation,
+no tail blow-ups. The open signal's competitiveness on some mid-caps is real but not bankable.
