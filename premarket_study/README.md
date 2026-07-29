@@ -193,3 +193,26 @@ frozen-close (deployed incumbent) | reopt-close | reopt-open. 30 folds total.
 ~50% fold/name hit-rate with the incumbent winning the magnitude battle is what *no edge* looks
 like. **Keep the frozen close-signal model** — best aggregate, simplest, no re-optimisation,
 no tail blow-ups. The open signal's competitiveness on some mid-caps is real but not bankable.
+
+## Laddered scale-in entries — tested, rejected (`ladder_engine.py`, `test_ladder_nvda.py`)
+
+Idea: replace each tranche's single bid with R rungs at increasing σ-depths to deploy the
+idle ~75% cash on bigger dips. Sanity: 1-rung ladder reproduces baseline (151% vs 150%, 186
+trades, corr −0.01). NVDA sweep, both sleeves laddered, 3 equal rungs, blended TP:
+
+| Config | Ann | Sharpe | maxDD | Trades | Bayes–OU corr |
+|---|---|---|---|---|---|
+| Baseline (1-rung) | 150% | 4.53 | 12.5% | 186 | −0.01 |
+| span [.6,1,1.4]×σ | 128% | 3.69 | 16.0% | 504 | +0.40 |
+| deep [1,1.5,2]×σ | 79% | 3.60 | 11.5% | 350 | +0.01 |
+| wide [.5,1,1.8]×σ | 101% | 3.04 | 15.9% | 445 | +0.49 |
+| shallow [.4,.7,1]×σ | 89% | 2.14 | 22.6% | 498 | +0.66 |
+| span, Bayes-only | 133% | 4.28 | 11.1% | 425 | +0.03 |
+
+**Every config hurts, in-sample (the optimistic case), so no walk-forward needed.** Two
+mechanisms: (1) laddering forces reserve-holding, which starves the frequent normal dips that
+are the profit engine → lower return; (2) laddering *both* sleeves drives Bayes–OU correlation
+from −0.01 to +0.40…+0.66, collapsing the decorrelation hedge (~0.7 Sharpe). Volume rose (186→
+350–500) but profit fell — "more trades ≠ more profit" again. **The idle cash is the inherent
+cost of patience + decorrelation, not recoverable dry powder.** Remaining structural lever that
+doesn't fight either edge: breadth (more independent names).
