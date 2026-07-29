@@ -22,7 +22,7 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R, tp_mode=
     shares = 0.0; cost_px = 0.0; filled = set(); incyc = False; bd = None
     anchor_px = 0.0                                 # shallowest (highest) filled rung price
     budgets = None; trades = 0
-    equity = [0.0] * N
+    equity = [0.0] * N; daily_trades = [0] * N
     for i in range(N):
         if i > 0:                                   # interest on idle cash
             fund += fund * p.interest * (dates[i] - dates[i-1]).days / 365.0
@@ -38,7 +38,7 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R, tp_mode=
                     sh = bj / (price + p.comm)
                     shares += sh; cost_px += sh * price; fund -= bj
                     anchor_px = max(anchor_px, price)   # shallowest rung = highest fill price
-                    filled.add(j); trades += 1
+                    filled.add(j); trades += 1; daily_trades[i] += 1
                     if not incyc:
                         incyc = True; bd = dates[i]
             if incyc and shares > 0:                # exit check (TP or 50-day stop)
@@ -57,7 +57,7 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R, tp_mode=
                     fund += shares * (sell - p.comm)
                     shares = 0.0; cost_px = 0.0; filled = set(); incyc = False; bd = None
         equity[i] = fund + shares * C[i]
-    return equity, trades
+    return equity, trades, daily_trades
 
 
 def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blended',
@@ -84,9 +84,9 @@ def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blend
         return [min(r - m * sig, O[i], peak) for m in mult_ou]
 
     first_ou = next((i for i in range(N) if f['OUf'][i] is not None), N)
-    eqB, tB = _tranche(dates, O, H, L, C, p, bayes_rungs, p.premium,
+    eqB, tB, dtB = _tranche(dates, O, H, L, C, p, bayes_rungs, p.premium,
                        p.capital * p.bayes_pct, 1, len(mult_bayes), tp_mode, w_bayes)
-    eqO, tO = _tranche(dates, O, H, L, C, p, ou_rungs, p.ou_prem,
+    eqO, tO, dtO = _tranche(dates, O, H, L, C, p, ou_rungs, p.ou_prem,
                        p.capital * (1 - p.bayes_pct), first_ou, len(mult_ou), tp_mode, w_ou)
 
     eq = [eqB[i] + eqO[i] for i in range(N)]
@@ -106,4 +106,5 @@ def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blend
     corr = cov/(sB*sO) if sB > 0 and sO > 0 else 0.0
 
     return dict(annual=ann, sharpe=sharpe, maxdd=mdd, trades=tB+tO,
-                bayes_trades=tB, ou_trades=tO, corr=corr, equity=eq, terminal=eq[-1])
+                bayes_trades=tB, ou_trades=tO, corr=corr, equity=eq, terminal=eq[-1],
+                daily_trades=[dtB[i] + dtO[i] for i in range(N)])

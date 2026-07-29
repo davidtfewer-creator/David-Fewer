@@ -256,3 +256,21 @@ NVDA/TSM stay <0) — laddering Bayes deeper makes it fire on big down-days when
 the hedge on those names. In-sample only; needs walk-forward before adoption. First genuinely
 adoptable tweak (besides the uncapped-bid execution fix) *if* trade-count/robustness is valued
 over absolute return.
+
+## Bayes-only ladder — walk-forward (sub-period consistency, 30 slices)
+
+Frozen params (nothing fit), so the test is consistency across 10 names × 3 time-thirds.
+Three configs vs baseline single-bid (all Bayes-only, first-rung TP):
+
+| Config | avg Δret/slice | avg ΔSharpe | trades× | Sharpe≥base | trades↑ | worst slice | avg corr |
+|---|---|---|---|---|---|---|---|
+| A [.80,.15,.05] d[k,1.5,2] | −4.8pp | +0.06 | 1.53× | 18/30 | 30/30 | −22.9pp | 0.19 |
+| B [.85,.12,.03] d[k,1.5,2] | −3.4pp | +0.06 | 1.53× | 17/30 | 30/30 | −19.5pp | 0.19 |
+| C [.80,.15,.05] d[k,1.3,1.7] | −2.9pp | +0.06 | 1.65× | 17/30 | 30/30 | −21.6pp | 0.19 |
+
+**Survives OOS:** trade increase in 30/30 slices (+53–65%); Sharpe neutral (avg +0.06, ≥base
+~57% of slices) — confirms it is NOT the frequency-max trap (more trades, no risk-adjusted
+degradation). Return cost modest (−3 to −5pp/slice); **C (gentler depths) dominates** — most
+trades, least cost. Costs: tail ~−20pp worst slice (B mildest); OU hedge softens to corr ~0.19
+under any geometry (deep rungs fire on big down-days when OU also fires). **Adoptable if
+trade-count/robustness is valued over peak absolute return; recommended config C.**
