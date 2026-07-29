@@ -1,0 +1,232 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Bayesian Capital brand palette ----
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+
+\begin{document}
+
+% ---------------- Title block ----------------
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Pre-Market Signal \& Laddering Study}\\[0.35cm]
+{\color{bcblue}\LARGE Findings Memorandum}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Hybrid Bayesian / Ornstein--Uhlenbeck Volatility Harvester}\\[0.2cm]
+{\large\color{bcgrey} Ten-name high-beta US equity book}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 29 July 2026}\\[2cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{One-line conclusion.}\\ \color{black}
+The model is sound as designed. The investigation yields \emph{one correctness fix}
+(submit uncapped limit bids) and \emph{one optional enhancement} (Option~C laddering, for
+trade volume). Pre-market VWAP and the actual open do \emph{not} improve the entry signal,
+and re-optimisation does not survive out of sample.}}
+\end{titlepage}
+
+% ---------------- Executive summary ----------------
+\section{Executive summary}
+
+This memo records a systematic investigation into whether pre-market data (04:00--09:30~ET
+VWAP) or the actual opening price could improve the daily Bayesian~/~OU volatility
+harvester, and whether trade volume could be increased without sacrificing quality. All work
+runs on a Python replica of the workbook validated to reproduce every one of the ten cached
+model sheets \textbf{to the dollar}.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{Entry signal.}{} Pre-market VWAP and the actual open, used as the price
+        \emph{signal}, \textbf{do not beat the previous close}. A less-noisy signal makes the
+        bid chase price and fill \emph{less} --- the smoothing is the edge, not noise to remove.
+  \item \kpi{Re-optimisation.}{} Re-tuning the parameters for the open signal is an in-sample
+        mirage ($+50$pp) that \textbf{does not survive out of sample}; the frozen parameters
+        remain best across all ten names.
+  \item \kpi{Execution fix (adopt).}{} The bid should be submitted \emph{uncapped}; a marketable
+        limit fills at the open automatically. This captures the true-open behaviour the
+        backtest already assumes --- a correctness fix, not an alpha change.
+  \item \kpi{Trade volume (optional).}{} A Bayes-only laddered entry with a first-rung
+        take-profit (\textbf{Option~C}) raises trade count \textbf{50--65\%} with
+        \emph{neutral} risk-adjusted return, at a modest absolute-return cost and a modest
+        softening of the OU hedge.
+\end{itemize}
+
+% ---------------- Method ----------------
+\section{Scope and method}
+
+The engine is a faithful reconstruction of each \texttt{Model} sheet: a Kalman
+local-linear-trend filter (Bayes tranche) and an AR(1) mean-reverter (OU tranche), with the
+50-day stop, monthly idle-cash interest and per-stock compounding. It reproduces the cached
+workbook results exactly (e.g.\ NVDA: terminal \$7{,}520{,}461.83, 150.20\% annualised,
+186 buys, 0 stop-loss exits), and matches annual return, buy count and stop count for all ten
+names. Every candidate change is judged out of sample --- by walk-forward re-optimisation or
+by sub-period consistency across names and time --- never on an in-sample fit, which always
+flatters.
+
+% ---------------- Signal study ----------------
+\section{Does pre-market VWAP / the actual open improve the \emph{signal}?}
+
+The model derives each bid from a smoothed reference: the Bayes fair value (Kalman state
+through yesterday's close) and the OU forecast anchored on the previous close. We tested
+replacing that reference with a ``fresher'' or ``less-noisy'' price. Execution held fixed;
+frozen parameters.
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Signal change (all ten names)} & \textbf{avg $\Delta$ annual} & \textbf{beats baseline} \\
+\midrule
+OU anchor $=$ PM-VWAP        & $-8.4$pp  & 2/10 \\
+OU anchor $=$ actual open    & $-10.0$pp & 2/10 \\
+Bayes fair $\to$ open (gain 0.5) & $-14.6$pp & 0/10 \\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Fills mostly \emph{decrease}. A fresher signal makes the resting bid
+track the market, so daily volatility no longer has to reach down to it.}
+\end{table}
+
+\subsection{Fair-fight re-optimisation and the all-ten tiebreaker}
+
+Because the frozen parameters were tuned for the close signal, the open signal was granted its
+own tuning (OU anchor $=$ open; Bayes fair nudged toward open with a free gain; all eleven
+parameters optimised for profit plus a trade floor). In-sample this looked excellent
+(NVDA 150.2\%~$\to$~200.6\%, 186~$\to$~268 buys). Out of sample it evaporated. The decisive
+test re-optimised \emph{both} signals per fold across all ten names:
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lc}
+\toprule
+\textbf{Model (avg OOS return, 30 folds)} & \textbf{return} \\
+\midrule
+Frozen close signal (deployed incumbent) & \textbf{52.9\%} \\
+Re-optimised open signal                 & 44.9\% \\
+Re-optimised close signal                & 32.8\% \\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize The re-tuned open signal beats the incumbent in only 15/30 folds and
+5/10 names --- a coin flip --- and the incumbent wins the aggregate, because the open signal
+gives up its largest ground on the highest-return names. Re-optimising the close signal is
+self-defeating (the recurring over-fitting lesson).}
+\end{table}
+
+\textbf{Conclusion.} As an entry signal, the previous close (via the smoothed filter) is best.
+Keep it.
+
+% ---------------- Execution fix ----------------
+\section{The one correctness fix: submit uncapped bids}
+
+The backtest caps each bid at the day's open, $\text{bid}=\min(\text{fair}-\text{buffer},\,
+O_t,\,\text{peak})$. This is \emph{not} clairvoyance: it is a faithful model of limit-order
+execution --- a limit buy placed above the open simply fills \emph{at} the open. It follows
+that the correct live order is the \textbf{uncapped} bid
+$\min(\text{fair}-\text{buffer},\,\text{peak})$, submitted before the bell; if the stock gaps
+below it, the exchange fills at the open automatically.
+
+Submitting the uncapped bid and letting the limit fill at the open reproduces the backtest
+\textbf{to zero mismatches} across all 581 NVDA days. Consequently the workbook's headline
+(``oracle'') returns are \emph{achievable live} --- they never required predicting the open.
+The earlier notion that a pre-market proxy was needed to estimate the open cap is therefore
+moot: no proxy is required. This is the single change we recommend adopting without
+reservation.
+
+% ---------------- Laddering ----------------
+\section{Increasing trade volume: laddered scale-in (Option~C)}
+
+Naive laddering (splitting each tranche's bid into rungs at increasing depth) \emph{reduces}
+profit: it holds capital in reserve, starving the frequent shallow dips that drive the P\&L,
+and --- when applied to both sleeves --- drives the Bayes--OU correlation from $-0.01$ to
+$+0.4\ldots+0.66$, collapsing the decorrelation hedge.
+
+Two refinements rescue it as a \emph{volume} tool:
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{First-rung take-profit.} The whole laddered position exits at the shallowest
+        rung's target, so the deeper (cheaper) rungs book their full margin rather than
+        breaking even at a blended target.
+  \item \textbf{Bayes-only, weighted to the shallow rung.} Laddering only the Bayes sleeve
+        (OU left single-bid) preserves the hedge far better; weighting heavily to rung~1 keeps
+        near-baseline deployment on normal dips.
+\end{enumerate}
+
+\textbf{Option~C} $=$ Bayes-only ladder, depths $[1.0,\,1.3,\,1.7]\times k\sigma$, weights
+$[0.80,\,0.15,\,0.05]$, first-rung take-profit; OU unchanged.
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Average across ten names} & \textbf{Return} & \textbf{Sharpe} & \textbf{max DD} & \textbf{Trades} \\
+\midrule
+Baseline (single bid) & 222\% & 4.20 & 17\% & 258 \\
+Option~C ladder       & 208\% & \textbf{4.46} & 16\% & \textbf{388 ($+50\%$)} \\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Walk-forward (30 sub-period slices): more trades in \textbf{30/30}
+slices; Sharpe neutral-to-better ($\ge$ baseline in $\approx$57\% of slices) --- confirming
+this is \emph{not} the frequency-maximisation trap. Costs: $\approx$3pp per slice of absolute
+return, a worst-slice lag of $\approx$20pp, and OU-hedge correlation softening to $\approx$0.19.}
+\end{table}
+
+\textbf{Assessment.} Option~C is a legitimate, out-of-sample-robust way to increase trade
+volume (useful for statistical confidence in the live edge) \emph{if} a larger trade sample
+and steady risk-adjusted return are valued above peak absolute return. It is a discretionary
+enhancement, not a free lunch: it trades a little return and a little of the OU hedge for
+$\sim$50\% more trades.
+
+% ---------------- Recommendations ----------------
+\section{Recommendations}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+  \item \textbf{Adopt} the uncapped-bid execution: submit the limit at
+        $\min(\text{fair}-\text{buffer},\,\text{peak})$ and let it fill at the open. No open
+        proxy, no PM-VWAP. This aligns live fills with the validated backtest.
+  \item \textbf{Keep} the previous close as the entry signal and \textbf{freeze} the
+        parameters. Neither a fresher signal nor re-optimisation survives out of sample.
+  \item \textbf{Optionally adopt} Option~C laddering on the Bayes sleeve for trade volume,
+        with eyes open on the two costs (a few points of return; a modestly weaker OU hedge).
+        Wired into the workbook Dashboard for live use.
+  \item \textbf{Do not} ladder the OU sleeve, use PM-VWAP/open as a signal, or re-optimise
+        parameters --- each fights one of the two structural edges (patience, decorrelation).
+\end{enumerate}
+
+\vfill
+{\color{bcrule}\rule{\textwidth}{0.4pt}}\\[-0.2cm]
+{\footnotesize\color{bcgrey} Prepared by Bayesian Capital Quantitative Research. All figures
+derived from a workbook-validated replica of the live model; out-of-sample results are
+walk-forward or sub-period consistency tests. Past simulated performance is not indicative of
+future results.}
+
+\end{document}

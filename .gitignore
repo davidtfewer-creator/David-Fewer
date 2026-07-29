@@ -10,3 +10,12 @@ __pycache__/
 premarket_study/opt_out.txt
 premarket_study/data_*.csv
 premarket_study/params_all.json
+
+# LaTeX build artifacts
+memo/*.aux
+memo/*.log
+memo/*.out
+memo/*.pdf
+memo/b*.log
+memo/build*.log
+*.pdf
