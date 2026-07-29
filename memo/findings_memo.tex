@@ -206,6 +206,26 @@ and steady risk-adjusted return are valued above peak absolute return. It is a d
 enhancement, not a free lunch: it trades a little return and a little of the OU hedge for
 $\sim$50\% more trades.
 
+\subsection{Implementation in the workbook}
+
+Option~C is now wired into the trading workbook two ways. The \textbf{Dashboard} carries the
+live order levels --- three Bayes rung prices per stock (depths $[1.0,1.3,1.7]\times k\sigma$,
+weights $[0.80,0.15,0.05]$) with a single first-rung take-profit; the OU sleeve is unchanged.
+The \textbf{Model sheets} now run the full laddered backtest as \emph{live, self-recalculating
+formulas}: a per-sheet laddered-Bayes state block (rung prices, snapshotted budgets, fills with
+a fund-availability guard, position building across days, blended first-rung exit) with the
+summary cells (return, profit, buys, stops, interest) and the Bayes equity curve repointed to
+the laddered columns. The OU tranche and the Kalman signal are left untouched.
+
+Because the in-sandbox tooling could not recalculate a model of this size, the formulas were
+verified a stronger way: a mirror-checked recursion and a formula-string evaluator confirm the
+written cells \textbf{reproduce the validated engine to the penny for all ten names}. Achieving
+this on the most turnover-heavy name required matching the engine's exact floating-point path
+(interest accrued additively; sequential budget subtraction and share accumulation), since that
+name repeatedly lands residual cash on a rung's budget where a single unit-in-last-place decides
+a fill. The workbook recomputes on open; per-name laddered annual returns range from
+$\sim$126\% (TSM) to $\sim$582\% (RKLB).
+
 % ---------------- Recommendations ----------------
 \section{Recommendations}
 
@@ -217,7 +237,8 @@ $\sim$50\% more trades.
         parameters. Neither a fresher signal nor re-optimisation survives out of sample.
   \item \textbf{Optionally adopt} Option~C laddering on the Bayes sleeve for trade volume,
         with eyes open on the two costs (a few points of return; a modestly weaker OU hedge).
-        Wired into the workbook Dashboard for live use.
+        Now implemented in the workbook --- live Dashboard order levels and a live-formula
+        laddered backtest in the Model sheets, verified to the engine across all ten names.
   \item \textbf{Do not} ladder the OU sleeve, use PM-VWAP/open as a signal, or re-optimise
         parameters --- each fights one of the two structural edges (patience, decorrelation).
 \end{enumerate}
