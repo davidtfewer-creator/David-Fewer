@@ -216,3 +216,22 @@ from −0.01 to +0.40…+0.66, collapsing the decorrelation hedge (~0.7 Sharpe).
 350–500) but profit fell — "more trades ≠ more profit" again. **The idle cash is the inherent
 cost of patience + decorrelation, not recoverable dry powder.** Remaining structural lever that
 doesn't fight either edge: breadth (more independent names).
+
+## Laddering, part 2 — first-rung take-profit + rung weighting (user's idea)
+
+The blended TP made the shallow rung break even, wasting the deep rungs. User's fix: exit the
+whole stack at the *shallowest* rung's target (anchor + premium) so deep rungs book full margin.
+
+- **first-rung TP rescued the "deep" ladder** (rung1 at k, deeper below): 79% → **113%** (+34pp).
+  But it *hurts* shallow-rung1 geometries (span/wide → 77%/68%): a shallow rung1 sets too high an
+  exit → holds too long → 50-day stop-outs → drawdown to 22%.
+- **Weighting toward rung1=k** (`ladder_engine.py` now takes per-rung weights) climbs monotonically
+  toward baseline: w=[.6,.25,.15]→130%, [.7,.2,.1]→135%, [.8,.15,.05]→141%; Bayes-only
+  [.8,.15,.05]→**144%** (Sharpe 4.54, maxDD 11.3%, 302 trades).
+
+**Definitive:** no ladder config beats the 150% baseline on return; it approaches from below and
+maxes at baseline (= all weight at k = no laddering). Every dollar moved from depth-k to deeper
+rungs is net drag — normal dips at k are the profit engine, deep dips too rare to compensate even
+with the enhanced margin. Best case is ≈baseline return with slightly lower drawdown + more trades
+(a marginally more conservative profile), not a profit gain. The only way deep-dip buying could
+*add* return is extra capital (leverage/pooling), not reallocating a fixed pot — a different lever.

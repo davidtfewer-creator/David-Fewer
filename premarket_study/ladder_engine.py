@@ -13,11 +13,15 @@ import math
 from engine import Params, run_model
 
 
-def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R):
+def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R, tp_mode='blended',
+             weights=None):
     N = len(C)
+    if weights is None:
+        weights = [1.0 / R] * R
     fund = pot0
     shares = 0.0; cost_px = 0.0; filled = set(); incyc = False; bd = None
-    rung_budget = None; trades = 0
+    anchor_px = 0.0                                 # shallowest (highest) filled rung price
+    budgets = None; trades = 0
     equity = [0.0] * N
     for i in range(N):
         if i > 0:                                   # interest on idle cash
@@ -25,19 +29,23 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R):
         rp = rung_fn(i) if i >= first_valid else None
         if rp is not None:
             if not incyc:                           # snapshot pot at cycle start
-                rung_budget = fund / R; filled = set()
+                budgets = [fund * w for w in weights]; filled = set(); anchor_px = 0.0
             for j, price in enumerate(rp):          # fill any rung the low reaches
                 if j in filled or price is None or price <= 0:
                     continue
-                if L[i] <= price and fund >= rung_budget - 1e-9 and rung_budget > 0:
-                    sh = rung_budget / (price + p.comm)
-                    shares += sh; cost_px += sh * price; fund -= rung_budget
+                bj = budgets[j]
+                if L[i] <= price and fund >= bj - 1e-9 and bj > 0:
+                    sh = bj / (price + p.comm)
+                    shares += sh; cost_px += sh * price; fund -= bj
+                    anchor_px = max(anchor_px, price)   # shallowest rung = highest fill price
                     filled.add(j); trades += 1
                     if not incyc:
                         incyc = True; bd = dates[i]
-            if incyc and shares > 0:                # exit check (blended TP or 50-day stop)
-                avg = cost_px / shares
-                target = avg + C[i-1] * prem
+            if incyc and shares > 0:                # exit check (TP or 50-day stop)
+                # 'blended': sell at avg cost + premium.  'first': sell all at the
+                # shallowest rung's target (anchor + premium) so deep rungs book bigger margin.
+                ref_px = anchor_px if tp_mode == 'first' else cost_px / shares
+                target = ref_px + C[i-1] * prem
                 held = (dates[i] - bd).days >= p.stop_days
                 if H[i] >= target:
                     sell = target
@@ -52,8 +60,12 @@ def _tranche(dates, O, H, L, C, p, rung_fn, prem, pot0, first_valid, R):
     return equity, trades
 
 
-def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou):
-    """mult_bayes / mult_ou: lists of sigma-multipliers (deeper = larger). [k] == baseline."""
+def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou, tp_mode='blended',
+               w_bayes=None, w_ou=None):
+    """mult_bayes / mult_ou: lists of sigma-multipliers (deeper = larger). [k] == baseline.
+    tp_mode: 'blended' (sell at avg cost + premium) or 'first' (sell all at shallowest
+    rung's target, so deeper rungs book a larger margin).
+    w_bayes / w_ou: optional per-rung capital weights (sum to 1); default equal."""
     f = run_model(dates, O, H, L, C, p, collect=True).frames
     N = len(C)
 
@@ -73,9 +85,9 @@ def run_ladder(dates, O, H, L, C, p: Params, mult_bayes, mult_ou):
 
     first_ou = next((i for i in range(N) if f['OUf'][i] is not None), N)
     eqB, tB = _tranche(dates, O, H, L, C, p, bayes_rungs, p.premium,
-                       p.capital * p.bayes_pct, 1, len(mult_bayes))
+                       p.capital * p.bayes_pct, 1, len(mult_bayes), tp_mode, w_bayes)
     eqO, tO = _tranche(dates, O, H, L, C, p, ou_rungs, p.ou_prem,
-                       p.capital * (1 - p.bayes_pct), first_ou, len(mult_ou))
+                       p.capital * (1 - p.bayes_pct), first_ou, len(mult_ou), tp_mode, w_ou)
 
     eq = [eqB[i] + eqO[i] for i in range(N)]
     ann = (eq[-1] / p.capital) ** (1 / p.years) - 1
