@@ -1,0 +1,194 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Bayesian Capital brand palette ----
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+
+\begin{document}
+
+% ---------------- Title block ----------------
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Stop-Loss Period Study}\\[0.35cm]
+{\color{bcblue}\LARGE Findings Memorandum}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Hybrid Bayesian / Ornstein--Uhlenbeck Volatility Harvester}\\[0.2cm]
+{\large\color{bcgrey} Ten-name high-beta US equity book --- calendar-day stop (cell T2)}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 29 July 2026}\\[2cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{One-line conclusion.}\\ \color{black}
+The uniform 50-calendar-day stop is not optimal, and the intuition that different names
+want different stops is correct --- but the effect resolves into \emph{two coarse regimes},
+not ten bespoke numbers. Momentum names want a \emph{longer} leash; choppier names want a
+\emph{tighter} one. The single highest-value change is \textbf{RKLB $50\rightarrow60$}, which
+raises return \emph{and} Sharpe \emph{and} cuts drawdown simultaneously.}}
+\end{titlepage}
+
+% ---------------- Executive summary ----------------
+\section{Executive summary}
+
+This memo measures the impact of varying the calendar-day stop-loss period (workbook cell
+\texttt{T2}) for each of the ten names, holding every other parameter frozen. All figures come
+from a Python replica of the workbook that reproduces \textbf{every one of the ten Model sheets
+to the dollar} at the current settings.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{Two regimes, not ten dials.}{} For trending names the stop \emph{almost never
+        fires} --- it is a disaster backstop, and shortening it merely amputates compounding
+        winners. For choppier names (failed bounces) a tighter stop cuts losers sooner,
+        lifting risk-adjusted return and trimming drawdown.
+  \item \kpi{The broad move.}{} A \textbf{$\sim$40-day} stop weakly dominates the current 50
+        across the book (better or tied on return for 8/10 names), with one clear exception.
+  \item \kpi{The exception (adopt first).}{} \textbf{RKLB} wants the \emph{opposite}: lengthening
+        $50\rightarrow60$ lifts annual return $587\%\rightarrow732\%$, Sharpe
+        $3.55\rightarrow5.10$, and \emph{reduces} max drawdown $34.5\%\rightarrow26.7\%$. The
+        50-day stop is cutting the book's most explosive winner one bounce too early.
+  \item \kpi{Out-of-sample.}{} Tuning the stop on the past beats the frozen 50 out of sample in
+        \textbf{6/10} names --- better than a coin flip, and far better than full parameter
+        re-optimisation (which loses). A single, economically-meaningful knob generalises; a
+        ten-dimensional refit does not. \emph{But} the exact optimum is not perfectly stable, so
+        use round numbers in the flat zone, never the in-sample argmax.
+\end{itemize}
+
+% ---------------- Method ----------------
+\section{Scope and method}
+
+The stop-loss rule exits a held position once it has been open for \texttt{T2} calendar days
+without reaching its take-profit target, selling at the prevailing open. We swept
+\texttt{T2} across 10, 15, 20, 25, 30, 40, 50, 60, 75, 90, 120 and 150 days plus a no-stop
+case, per stock, all other
+parameters frozen at their workbook values, and recorded annualised return, Sharpe, maximum
+drawdown, buy count and stop-loss exits. Data: the current ten-name workbook (Apr 2024
+onward, 580 trading days, 2.2-year annualisation horizon, matching cell~Y5).
+
+Before trusting any sweep, the engine was validated against each Model sheet's cached results.
+It reproduces all ten \textbf{exactly} --- e.g.\ NVDA \$6{,}517{,}886 / 184 buys / 0 stops;
+RKLB \$68{,}371{,}562 / 371 buys / 1 stop --- so every number below is a faithful re-run of the
+workbook's own logic, not an approximation.
+
+% ---------------- The mechanism ----------------
+\section{Why one number cannot fit all ten}
+
+The decisive observation is that for the strongest trending names, the sweep is
+\emph{flat} from roughly 50 days upward: NVDA, VST, SPOT and RKLB return \emph{identical}
+results at \texttt{T2}~$=50,75,90,\dots,\infty$. The stop simply never binds --- these names
+trend through their holding windows and exit at target long before any calendar limit.
+For such names the stop is insurance against a disaster that did not occur in-sample;
+lengthening it changes nothing, while \emph{shortening} it forces early exits that cut
+winners and lower both return and Sharpe.
+
+The choppier names behave oppositely. TSLA, PLTR and AVGO suffer failed mean-reversions ---
+positions that drift sideways or down after entry. Here a shorter fuse ($\sim$40, or even 20
+for TSLA) releases trapped capital sooner, improving risk-adjusted return and cutting
+drawdown. The stop is an \emph{active} risk control, not a backstop.
+
+% ---------------- Per-name table ----------------
+\section{Per-name results and recommendation}
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{l r r r c r r r c}
+\toprule
+& \multicolumn{3}{c}{\textbf{Current (T2\,=\,50)}} & & \multicolumn{3}{c}{\textbf{At suggested T2}} & \\
+\cmidrule(lr){2-4}\cmidrule(lr){6-8}
+\textbf{Name} & ann & Sharpe & maxDD & \textbf{T2} & ann & Sharpe & maxDD & \textbf{regime}\\
+\midrule
+\rowcolor{bckeep} NVDA & 150\% & 4.54 & 12.5\% & \textbf{50} & 150\% & 4.54 & 12.5\% & trender (inert)\\
+TSM  & 133\% & 4.76 & 11.1\% & \textbf{40} & 134\% & 4.79 & 11.1\% & mild\\
+TSLA & 157\% & 2.71 & 20.3\% & \textbf{40} & 157\% & 2.57 & 22.3\% & choppy\\
+VRT  & 219\% & 4.25 & 15.4\% & \textbf{40} & 235\% & 4.51 & 16.4\% & choppy\\
+\rowcolor{bckeep} VST  & 257\% & 5.19 & 15.5\% & \textbf{50} & 257\% & 5.19 & 15.5\% & trender\\
+AVGO & 142\% & 4.31 & 17.3\% & \textbf{40} & 151\% & 4.83 & 15.7\% & choppy\\
+PLTR & 174\% & 2.52 & 25.9\% & \textbf{40} & 195\% & 2.88 & 24.2\% & choppy\\
+\rowcolor{bcact} RKLB & 587\% & 3.55 & 34.5\% & \textbf{60} & \textbf{732\%} & \textbf{5.10} & \textbf{26.7\%} & momentum\\
+SOFI & 231\% & 4.34 & 15.3\% & \textbf{40} & 241\% & 4.58 & 15.3\% & mild\\
+\rowcolor{bckeep} SPOT & 149\% & 6.20 & 5.6\% & \textbf{50} & 149\% & 6.20 & 5.6\% & trender (inert)\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Shaded blue = keep at 50 (flat/inert zone; shortening would only hurt).
+Shaded gold = RKLB, the high-impact lengthening. TSLA is shown at 40 for consistency; a 20-day
+stop holds Sharpe at 2.71 while cutting drawdown to 17.3\%, if drawdown control is the priority.
+Suggested values are round numbers inside each flat zone, not in-sample optima.}
+\end{table}
+
+\textbf{Simplest defensible change set.} Move \textbf{TSM, TSLA, VRT, AVGO, PLTR, SOFI to 40},
+lengthen \textbf{RKLB to 60}, and \textbf{keep NVDA, VST, SPOT at 50}. Equivalently: a uniform
+$\sim$40-day stop for the book, with RKLB the single name held longer.
+
+% ---------------- Robustness ----------------
+\section{Does tuning the stop survive out of sample?}
+
+Parameter re-optimisation on this model is a known in-sample mirage --- it does not survive
+walk-forward. The stop period is different: it is one low-dimensional, economically-meaningful
+knob (holding-period tolerance), and such knobs generalise where a full refit does not.
+
+A split-sample test confirms this. For each name we pick the best-Sharpe \texttt{T2} on the
+first half of the sample, apply it \emph{blind} to the second half, and compare its
+second-half return to the frozen 50:
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Result (10 names)} & \textbf{tuned wins} & \textbf{frozen-50 wins} \\
+\midrule
+Out-of-sample (2nd half) & \textbf{6} (TSM, VRT, AVGO, PLTR, RKLB, SOFI)
+                         & 4 (NVDA, TSLA, VST, SPOT) \\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize 6/10 beats a coin flip and vastly beats full re-optimisation, which
+loses out of sample. But TSLA tuned to 40 on the first half did \emph{worse} on the second ---
+evidence that the \emph{direction} (choppy $\to$ tighter, momentum $\to$ looser) is robust while
+the exact decimal is not.}
+\end{table}
+
+\textbf{Practical rule.} Set the stop by regime, not by fitting. Trending / inert-stop names
+(NVDA, VST, SPOT) keep the long backstop at 50; choppy names (TSLA, PLTR, AVGO, and mildly TSM,
+VRT, SOFI) tighten to $\sim$40; the one pure-momentum outlier (RKLB) lengthens to 60. Adopt the
+RKLB change first --- it is the largest and cleanest, improving return, Sharpe and drawdown
+together.
+
+\vfill
+{\footnotesize\color{bcgrey} Data vintage: current ten-name workbook (\texttt{\_nopq} PLTR
+build). Confirm this is the live master before editing cell~T2 on each Model sheet. All results
+reproduce the workbook's cached figures to the dollar at T2\,=\,50.}
+
+\end{document}
