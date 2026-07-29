@@ -19,3 +19,5 @@ memo/*.pdf
 memo/b*.log
 memo/build*.log
 *.pdf
+premarket_study/opt_out.log
+premarket_study/*.log
