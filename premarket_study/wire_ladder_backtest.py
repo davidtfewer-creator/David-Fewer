@@ -18,8 +18,13 @@ R0, R1 = 8, 867                     # data block rows (init row 8, extends to 86
 # laddered-state columns (name -> absolute column index), contiguous from 60
 NAMES = ['FRESH','F0','PR1','PR2','PR3','B1','B2','B3','FIL1','FIL2','FIL3','DSH',
          'SHMID','FUNDMID','ANCM','TGT','STOP','EXIT','SALE','SH','FUND','F1','F2','F3',
-         'ANC','BD','NB','INT','EQ']
+         'ANC','BD','NB','INT','EQ','SH1','SH2','SH3']
 COL = {n: get_column_letter(60 + i) for i, n in enumerate(NAMES)}
+# readable headers for the visible ladder columns (others get their code name)
+HEADERS = {'PR1':'Rung1 bid','PR2':'Rung2 bid','PR3':'Rung3 bid','SH1':'Rung1 shares',
+           'SH2':'Rung2 shares','SH3':'Rung3 shares','SH':'Bayes shares','FUND':'Bayes cash',
+           'EQ':'Bayes equity','TGT':'Target','NB':'Rungs filled','SALE':'Sale px',
+           'B1':'Rung1 $','B2':'Rung2 $','B3':'Rung3 $'}
 CFG = get_column_letter(60 + len(NAMES) + 1)          # config label column
 CFV = get_column_letter(60 + len(NAMES) + 2)          # config value column
 c2, c3 = f'${CFV}$2', f'${CFV}$3'                      # m2, m3
@@ -37,13 +42,16 @@ def wire(ws):
         cell.fill = PatternFill('solid', fgColor='FFD9E1F2')
     # ---- headers ----
     for n in NAMES:
-        ws[f'{L[n]}7'] = n
+        ws[f'{L[n]}7'] = HEADERS.get(n, n)
         ws[f'{L[n]}7'].font = Font(name='Arial', size=8, bold=True)
+    ws[f'{L["PR1"]}6'] = 'LADDER — Bayes 3 rungs (bid, $ budget, shares per rung)'
+    ws[f'{L["PR1"]}6'].font = Font(name='Arial', size=9, bold=True, color='FF0B1F3A')
     # ---- init row 8 ----
     z = {n: 0 for n in NAMES}
     ws[f'{L["FUND"]}8'] = '=$P$2*$V$2'
     ws[f'{L["EQ"]}8'] = f'={L["FUND"]}8'
-    for n in ['SH','F1','F2','F3','B1','B2','B3','ANC','NB','INT','STOP','EXIT','FRESH']:
+    for n in ['SH','F1','F2','F3','B1','B2','B3','ANC','NB','INT','STOP','EXIT','FRESH',
+              'SH1','SH2','SH3']:
         ws[f'{L[n]}8'] = 0
     ws[f'{L["BD"]}8'] = ''
     ws[f'{L["SALE"]}8'] = ''
@@ -104,18 +112,36 @@ def wire(ws):
         f('NB', r, f'=IF({blank},0,{L["FIL1"]}{r}+{L["FIL2"]}{r}+{L["FIL3"]}{r})')
         f('INT', r, f'=IF({blank},0,{L["FUND"]}{p}*$R$2*{AN}/365)')
         f('EQ', r, f'=IF({blank},{L["FUND"]}{r},{L["FUND"]}{r}+{L["SH"]}{r}*{E})')
+        # per-rung shares (visible ladder detail): shares bought at each rung today
+        f('SH1', r, f'=IF({blank},0,{L["FIL1"]}{r}*{L["B1"]}{r}/({L["PR1"]}{r}+$N$2))')
+        f('SH2', r, f'=IF({blank},0,{L["FIL2"]}{r}*{L["B2"]}{r}/({L["PR2"]}{r}+$N$2))')
+        f('SH3', r, f'=IF({blank},0,{L["FIL3"]}{r}*{L["B3"]}{r}/({L["PR3"]}{r}+$N$2))')
 
     # ---- repoint summary cells to laddered columns ----
     Ff, Nb, In, Eq, Ex, Sa, Tg = (L['FUND'], L['NB'], L['INT'], L['EQ'], L['EXIT'], L['SALE'], L['TGT'])
-    ws['Y4'] = f'={Ff}867+AF867-$P$2'
-    ws['Y5'] = f'=IFERROR((({Ff}867+AF867)/$P$2)^(1/2.2)-1,"")'
+    # terminal profit/return use marked-to-market EQUITY at the LAST DATA ROW (not fund on the
+    # blank terminal row): LOOKUP grabs the last row with a real Open. Bayes equity = EQ column,
+    # OU equity = BD column (both are cash + shares*close on data rows).
+    bayes_eq = f'LOOKUP(2,1/($B$8:$B$867<>""),{Eq}$8:{Eq}$867)'
+    ou_eq = 'LOOKUP(2,1/($B$8:$B$867<>""),$BD$8:$BD$867)'
+    ws['Y4'] = f'={bayes_eq}+{ou_eq}-$P$2'
+    ws['Y5'] = f'=IFERROR((({bayes_eq}+{ou_eq})/$P$2)^(1/2.2)-1,"")'
     ws['AA4'] = f'=SUM({Nb}8:{Nb}867)+SUM(AG8:AG867)'
     ws['AA5'] = f'=SUM({In}8:{In}867)+SUM(AS8:AS867)'
     ws['AC4'] = (f'=SUMPRODUCT(({Ex}8:{Ex}867=1)*({Sa}8:{Sa}867<{Tg}8:{Tg}867))'
                  '+SUMPRODUCT((AK8:AK867=1)*(AJ8:AJ867<AI8:AI867))')
-    # Bayes equity column (charts) -> laddered equity
+    # ---- repoint the FAMILIAR Bayes columns to the laddered values (so the main sheet area
+    # shows the ladder, not the orphaned single-bid formulas) ----
     for r in range(R0, R1 + 1):
-        ws[f'BC{r}'] = f'={Eq}{r}'
+        ws[f'BC{r}'] = f'={Eq}{r}'                      # T1 equity chart -> laddered equity
+        ws[f'X{r}'] = f'={L["PR1"]}{r}'                 # Buy price -> rung1 bid
+        ws[f'Y{r}'] = f'={L["FUND"]}{r}'                # Fund -> laddered cash
+        ws[f'Z{r}'] = f'={L["NB"]}{r}'                  # Buy fl -> rungs filled today
+        ws[f'AA{r}'] = f'={L["SH"]}{r}'                 # Shares -> laddered total shares
+        ws[f'AB{r}'] = f'={L["TGT"]}{r}'                # Target -> laddered target
+        ws[f'AC{r}'] = f'={L["SALE"]}{r}'               # Act.sale -> laddered sale
+        ws[f'AD{r}'] = f'={L["EXIT"]}{r}'               # Sell fl -> laddered exit
+        ws[f'AE{r}'] = f'=IF({L["SH"]}{r}>0,1,0)'       # Hold fl -> holding laddered position
 
 
 if __name__ == '__main__':

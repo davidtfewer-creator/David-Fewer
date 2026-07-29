@@ -10,11 +10,11 @@ STOCKS = ['NVDA','TSM','TSLA','VRT','VST','AVGO','PLTR','RKLB','SOFI','SPOT']
 LAD_START = 60
 NAMES = ['FRESH','F0','PR1','PR2','PR3','B1','B2','B3','FIL1','FIL2','FIL3','DSH','SHMID',
          'FUNDMID','ANCM','TGT','STOP','EXIT','SALE','SH','FUND','F1','F2','F3','ANC','BD',
-         'NB','INT','EQ']
+         'NB','INT','EQ','SH1','SH2','SH3']
 COL = {n: get_column_letter(LAD_START + i) for i, n in enumerate(NAMES)}
 EVAL_ORDER = ['FRESH','F0','PR1','PR2','PR3','B1','B2','B3','FIL1','FIL2','FIL3','DSH','SHMID',
               'FUNDMID','ANCM','TGT','BD','STOP','EXIT','SALE','SH','FUND','F1','F2','F3','ANC',
-              'NB','INT','EQ']
+              'NB','INT','EQ','SH1','SH2','SH3']
 LAD_COLS = set(COL.values()); EPOCH = datetime.date(1899, 12, 30)
 CFG_VAL_COL = get_column_letter(LAD_START + len(NAMES) + 2)
 
@@ -96,16 +96,18 @@ def eval_sheet(sheet):
         for n in EVAL_ORDER:
             e = fc.get((n, r))
             if e is not None: grid[f'{COL[n]}{r}'] = eval(e, ns)
-    fund = grid[f'{COL["FUND"]}867']
-    buys = sum(grid.get(f'{COL["NB"]}{i}', 0) or 0 for i in range(9, 868))
-    return fund, buys
+    buys = sum(grid.get(f'{COL["NB"]}{i}', 0) or 0 for i in range(9, 868))   # Bayes rung-fills
+    # Bayes terminal marked-to-market equity at the last data row (what Y4/Y5 LOOKUP grabs)
+    last = max(r for r in range(8, 868) if cache.get(f'B{r}') is not None)
+    bayes_eq = grid.get(f'{COL["EQ"]}{last}', 0) or 0
+    return buys, bayes_eq
 
 
 import json
 from multi_stock import params_for
 _PJ = json.load(open('params_all.json'))
 
-def engine_result(sheet):
+def engine_full(sheet):
     q = srcdo['Query']; s = sheet.split()[1]; i = STOCKS.index(s)
     dts, O, H, L, C = [], [], [], [], []
     for row in q.iter_rows(min_row=2, values_only=True):
@@ -113,16 +115,20 @@ def engine_result(sheet):
         if d is None or not isinstance(o, (int, float)) or o <= 0: continue
         dts.append(d); O.append(o); H.append(row[2+4*i]); L.append(row[3+4*i]); C.append(row[4+4*i])
     p = params_for(s, _PJ)                                   # each stock's own parameters
-    r = run_ladder(dts, O, H, L, C, p, [p.k, 1.3*p.k, 1.7*p.k], [p.ou_buf_k], 'first', [0.80, 0.15, 0.05], None)
-    return r['bayes_fund'][-1], r['bayes_trades']
+    return run_ladder(dts, O, H, L, C, p, [p.k, 1.3*p.k, 1.7*p.k], [p.ou_buf_k], 'first', [0.80, 0.15, 0.05], None)
 
 
 if __name__ == '__main__':
-    print(f'{"stock":6s}{"formula fund":>16s}{"engine fund":>16s}{"f buys":>8s}{"e buys":>8s}   ok')
+    print(f'{"stock":6s}{"Bayes buys f/e":>16s}{"Bayes equity f":>16s}{"Bayes equity e":>16s}   ok')
     allok = True
     for s in STOCKS:
         sheet = f'Model {s}'
-        ff, fb = eval_sheet(sheet); ef, eb = engine_result(sheet)
-        ok = abs(ff - ef) < 1e-3 and fb == eb; allok = allok and ok
-        print(f'{s:6s}{ff:>16.2f}{ef:>16.2f}{fb:>8d}{eb:>8d}   {"OK" if ok else "MISMATCH"}')
-    print('\nRESULT:', 'ALL TEN VERIFIED — formulas reproduce the engine' if allok else 'MISMATCHES PRESENT')
+        fb, feq = eval_sheet(sheet)
+        r = engine_full(sheet)
+        eeq = r['eqB'][-1]
+        ok = fb == r['bayes_trades'] and abs(feq - eeq) < 1e-2
+        allok = allok and ok
+        print(f'{s:6s}{str(fb)+"/"+str(r["bayes_trades"]):>16s}{feq:>16,.2f}{eeq:>16,.2f}   '
+              f'{"OK" if ok else "MISMATCH"}')
+    print('\nRESULT:', 'ALL TEN VERIFIED — laddered Bayes buys + terminal equity match the engine'
+          if allok else 'MISMATCHES PRESENT')
