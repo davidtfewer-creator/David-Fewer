@@ -1,0 +1,243 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Bayesian Capital brand palette ----
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+
+\begin{document}
+
+% ---------------- Title block ----------------
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Bayes / OU Capital Split}\\[0.35cm]
+{\color{bcblue}\LARGE Findings Memorandum}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Hybrid Bayesian / Ornstein--Uhlenbeck Volatility Harvester}\\[0.2cm]
+{\large\color{bcgrey} What the OU sleeve protects, and the per-stock efficiency-optimal split}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 30 July 2026}\\[2cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{One-line conclusion.}\\ \color{black}
+The OU sleeve is a \emph{decorrelated volatility and drawdown dampener}, not an inverse hedge
+and not crash protection. By the efficiency (Sharpe) metric the optimal split is
+\emph{OU-heavy}, not Bayes-heavy --- but largely because OU sits in cash $\sim$91\% of the
+time. The durable, regime-robust actions are per-name: \textbf{RKLB $\to$ OU-only} and
+\textbf{AVGO $\to$ Bayes-heavy}; most other names lean OU.}}
+\end{titlepage}
+
+% ---------------- Executive summary ----------------
+\section{Executive summary}
+
+We asked two linked questions: \emph{when does the OU sleeve actually protect the book}, and
+\emph{given Bayes earns far more, is there a case to hold most capital in Bayes?} All figures
+are from the Python replica of the ten-name workbook, validated to reproduce every Model
+sheet's cached results to the dollar.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{OU is a dampener, not a hedge.}{} The sleeves are only $\sim$0.24 daily-correlated,
+        and OU carries roughly \emph{half} the standalone drawdown of Bayes. It smooths the
+        equity curve in normal and choppy conditions. It does \emph{not} rise when Bayes falls
+        (it is up on only $\sim$24\% of down-Bayes days), and it co-moves with Bayes in a
+        correlated sector crash --- the one time you might want protection.
+  \item \kpi{Tilting to Bayes is a return-for-risk trade.}{} Book return rises monotonically
+        with the Bayes weight ($344\%\!\to\!394\%$), but Sharpe collapses ($9.7\!\to\!2.6$) and
+        max drawdown doubles ($5\%\!\to\!42\%$). There is no free lunch in the split.
+  \item \kpi{Efficiency wants OU, with a catch.}{} The Sharpe-optimal split is $\sim$10--20\%
+        Bayes for most names --- \emph{opposite} to a Bayes tilt. But OU's high Sharpe reflects
+        that it is deployed only $\sim$9\% of days (Bayes $\sim$34\%); at an OU-heavy weight most
+        capital simply sits in cash earning interest.
+  \item \kpi{The two firm per-name calls.}{} \textbf{RKLB} should be OU-only (OU: 569\% at a 9\%
+        drawdown vs Bayes: 604\% at a 50\% drawdown). \textbf{AVGO} should be Bayes-heavy --- the
+        one name whose OU sleeve draws down \emph{more} than its Bayes sleeve.
+\end{itemize}
+
+% ---------------- Standalone ----------------
+\section{When does the OU sleeve protect us?}
+
+Run each sleeve standalone on the full name capital (frozen parameters):
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{l rrr c rrr c c}
+\toprule
+& \multicolumn{3}{c}{\textbf{Bayes}} & & \multicolumn{3}{c}{\textbf{OU}} & \textbf{daily} & \textbf{OU up on}\\
+\cmidrule(lr){2-4}\cmidrule(lr){6-8}
+\textbf{Name} & ann & Sh & maxDD & & ann & Sh & maxDD & \textbf{corr} & \textbf{Bayes-down day}\\
+\midrule
+NVDA & 203\% & 3.64 & 20.5\% & & 78\%  & 3.81 & 7.6\%  & 0.08 & 21\%\\
+TSM  & 186\% & 3.93 & 21.1\% & & 59\%  & 5.65 & 3.4\%  & 0.21 & 17\%\\
+TSLA & 163\% & 2.13 & 26.5\% & & 122\% & 2.97 & 18.1\% & 0.25 & 27\%\\
+VRT  & 279\% & 3.52 & 29.1\% & & 96\%  & 3.66 & 13.6\% & 0.31 & 11\%\\
+VST  & 312\% & 4.00 & 22.9\% & & 190\% & 5.40 & 11.4\% & 0.15 & 32\%\\
+AVGO & 152\% & 3.68 & 14.5\% & & 132\% & 2.96 & 21.2\% & 0.15 & 14\%\\
+PLTR & 189\% & 2.07 & 39.5\% & & 159\% & 3.79 & 20.3\% & 0.33 & 33\%\\
+RKLB & 604\% & 2.46 & 49.9\% & & 569\% & 7.90 & 9.3\%  & 0.16 & 37\%\\
+SOFI & 275\% & 3.51 & 22.8\% & & 179\% & 5.38 & 9.0\%  & 0.42 & 17\%\\
+SPOT & 176\% & 4.70 & 9.4\%  & & 118\% & 7.79 & 5.0\%  & 0.32 & 31\%\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Bayes wins raw return everywhere; OU wins Sharpe in 8/10 and roughly
+halves drawdown. Correlation is low (0.08--0.42), but OU rises on only 11--37\% of the days
+Bayes falls --- it diversifies, it does not counter.}
+\end{table}
+
+\textbf{The answer.} OU protects through \emph{low correlation and low volatility}: it holds
+the book's Sharpe up and its drawdown down day-to-day, and it earns respectable returns at a
+fraction of the risk. It does \emph{not} protect against a correlated event --- in the
+December~2025 AI-sector drawdown the OU and Bayes sleeves stopped out together (see the
+stop-loss study). OU is insurance against ordinary volatility and against the sideways/bear
+regime this bull-market sample never tested --- not against a factor crash.
+
+% ---------------- Split sweep ----------------
+\section{Is there a case to hold most capital in Bayes?}
+
+Sweeping the book-wide Bayes weight (allocation-weighted over the included names) lays the
+trade-off bare:
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{c rrr l}
+\toprule
+\textbf{Bayes \%} & \textbf{book ann} & \textbf{Sharpe} & \textbf{maxDD} & \\
+\midrule
+0\%   & 344\% & 9.66 & 5.2\%  & all OU\\
+25\%  & 357\% & 5.49 & 17.3\% & \\
+50\%  & 370\% & 3.68 & 28.4\% & Model sheets\\
+\rowcolor{bckeep} 60\%  & 375\% & 3.33 & 31.8\% & current book (flat mode)\\
+70\%  & 380\% & 3.07 & 34.8\% & \\
+80\%  & 385\% & 2.87 & 37.4\% & \\
+100\% & 394\% & 2.59 & 41.7\% & all Bayes\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Every step toward Bayes buys a little more return and a lot more risk.
+100\% Bayes adds $\sim$19pp of return over the current 60\% but lifts max drawdown to 42\% and
+delivers the book's worst Sharpe. A Bayes tilt is defensible only as a deliberate
+return-seeking choice, and $\sim$65--70\% is the ceiling we would suggest.}
+\end{table}
+
+% ---------------- Per-stock optimal ----------------
+\section{Per-stock efficiency-optimal split}
+
+Because the sleeves are only $\sim$0.24 correlated, a \emph{blend} can beat either pure sleeve
+on risk-adjusted terms. Gridding the split 0--100\% per name gives an interior optimum. We
+report the Sharpe-max blend (pure efficiency) and the Calmar-max blend (return $\div$ drawdown,
+which tolerates more Bayes), alongside each sleeve's capital deployment.
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l cc c cc}
+\toprule
+& \multicolumn{2}{c}{\textbf{\% days deployed}} & & \textbf{Sharpe-opt} & \textbf{Calmar-opt}\\
+\cmidrule(lr){2-3}\cmidrule(lr){5-6}
+\textbf{Name} & Bayes & OU & & \textbf{Bayes \%} & \textbf{Bayes \%}\\
+\midrule
+NVDA & 28\% & 8\%  & & 20\% & 20\%\\
+TSM  & 40\% & 1\%  & & 10\% & 10\%\\
+TSLA & 49\% & 18\% & & 15\% & 25\%\\
+VRT  & 27\% & 4\%  & & 20\% & 45\%\\
+VST  & 26\% & 8\%  & & 15\% & 15\%\\
+\rowcolor{bcact} AVGO & 21\% & 22\% & & 55\% & 100\%\\
+PLTR & 55\% & 15\% & & 5\%  & 25\%\\
+\rowcolor{bcact} RKLB & 43\% & 6\%  & & 0\%  & 0\%\\
+SOFI & 35\% & 10\% & & 10\% & 5\%\\
+SPOT & 15\% & 2\%  & & 10\% & 55\%\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Both criteria are OU-leaning for almost every name. Gold rows are the
+two exceptions that hold under either criterion: RKLB (OU-only) and AVGO (Bayes-heavy).
+Bayes\,\% is the fraction of the name's capital in the Bayes tranche; OU\,\% is the remainder.}
+\end{table}
+
+\textbf{The catch.} OU is deployed only $\sim$9\% of days on average (TSM: 1\%), versus Bayes at
+$\sim$34\%. Its high Sharpe is substantially a low-volatility, mostly-in-cash artifact. So
+``Sharpe-optimal $=$ 80\% OU'' means parking most capital in a sleeve that trades a handful of
+times a year. Efficiency and capital-utilisation pull in opposite directions; the split is a
+choice of objective, not a single right number.
+
+\subsection{Book-level effect}
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{l rrr}
+\toprule
+\textbf{Split policy} & \textbf{book ann} & \textbf{Sharpe} & \textbf{maxDD}\\
+\midrule
+Flat 50\% (Model sheets) & 370\% & 3.68 & 28.4\%\\
+Flat 60\% (current book) & 375\% & 3.33 & 31.8\%\\
+Per-stock Sharpe-opt     & 355\% & 6.23 & 14.4\%\\
+Per-stock Calmar-opt     & 351\% & 9.83 & 4.6\%\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Per-stock tilting gives up only $\sim$5--6\% of return versus the flat
+60\% while roughly halving drawdown. \emph{The absolute Sharpe/drawdown magnitudes here are
+in-sample, bull-regime artifacts and are not forward-achievable --- trust the ranking across
+policies, not the levels.}}
+\end{table}
+
+% ---------------- Implementation ----------------
+\section{Recommendation and implementation}
+
+Populate the Allocation sheet's \textbf{split mode~2} (per-stock Bayes\,\%) with one of the two
+columns above, by objective:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{Efficiency first (recommended):}{} use the \textbf{Sharpe-opt} column ---
+        NVDA~20, TSM~10, TSLA~15, VRT~20, VST~15, AVGO~55, PLTR~5, RKLB~0, SOFI~10, SPOT~10.
+  \item \kpi{Return-aware:}{} use the \textbf{Calmar-opt} column if you want capital working
+        harder and can accept more drawdown --- the differences are VRT~45, TSLA~25, PLTR~25,
+        AVGO~100, SPOT~55; the rest unchanged.
+\end{itemize}
+
+Regardless of column, make the two firm calls first: \textbf{RKLB $\to$ 0\% Bayes (OU-only)} and
+\textbf{AVGO $\to$ Bayes-heavy}. They are the largest, most robust corrections to the uniform
+50/50 and hold under both criteria.
+
+\textbf{Caveats.} (1) All figures are in-sample over a strong bull regime for these names; the
+book-level Sharpe/drawdown levels are inflated and only the cross-name ranking is trustworthy.
+(2) The split, like the stop period, is a single low-dimensional knob --- use the round numbers
+above, not razor-edge argmaxima. (3) A Bayes tilt is a bet that the trending regime persists; in
+a sideways or bear market the OU-lean would look better still.
+
+\vfill
+{\footnotesize\color{bcgrey} Data vintage: current ten-name workbook (\texttt{\_nopq} PLTR
+build), Apr 2024 onward, 2.2-year horizon. Engine reproduces every Model sheet's cached results
+to the dollar. Split values are fractions of each name's own capital; the remainder goes to OU.}
+
+\end{document}
