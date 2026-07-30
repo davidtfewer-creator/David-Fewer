@@ -58,8 +58,9 @@
 The OU sleeve is a \emph{decorrelated volatility and drawdown dampener}, not an inverse hedge
 and not crash protection. By the efficiency (Sharpe) metric the optimal split is
 \emph{OU-heavy}, not Bayes-heavy --- but largely because OU sits in cash $\sim$91\% of the
-time. The durable, regime-robust actions are per-name: \textbf{RKLB $\to$ OU-only} and
-\textbf{AVGO $\to$ Bayes-heavy}; most other names lean OU.}}
+time. The durable, regime-robust actions are per-name: \textbf{RKLB $\to$ OU-dominant} and
+\textbf{AVGO $\to$ Bayes-heavy}, each keeping a 5\% floor on the minor sleeve so the full trade
+count is preserved; most other names lean OU.}}
 \end{titlepage}
 
 % ---------------- Metrics primer ----------------
@@ -120,9 +121,14 @@ sheet's cached results to the dollar.
         Bayes for most names --- \emph{opposite} to a Bayes tilt. But OU's high Sharpe reflects
         that it is deployed only $\sim$9\% of days (Bayes $\sim$34\%); at an OU-heavy weight most
         capital simply sits in cash earning interest.
-  \item \kpi{The two firm per-name calls.}{} \textbf{RKLB} should be OU-only (OU: 569\% at a 9\%
-        drawdown vs Bayes: 604\% at a 50\% drawdown). \textbf{AVGO} should be Bayes-heavy --- the
-        one name whose OU sleeve draws down \emph{more} than its Bayes sleeve.
+  \item \kpi{The two firm per-name calls.}{} \textbf{RKLB} should be OU-dominant (OU: 569\% at a
+        9\% drawdown vs Bayes: 604\% at a 50\%) and \textbf{AVGO} Bayes-heavy --- the one name whose
+        OU sleeve draws down \emph{more} than its Bayes sleeve. Keeping a 5\% floor on the minor
+        sleeve in each preserves their full trade count at essentially no cost (\S6).
+  \item \kpi{Trade count barely constrains the choice.}{} The number of buys is \emph{flat across
+        every interior split} --- the split changes trade \emph{size}, not \emph{count} --- and
+        falls only if a sleeve is zeroed. So the split can be set on Sharpe/Calmar alone, provided
+        both sleeves stay funded.
 \end{itemize}
 
 % ---------------- Standalone ----------------
@@ -218,8 +224,9 @@ SPOT & 15\% & 2\%  & & 10\% & 55\%\\
 \bottomrule
 \end{tabular}
 \caption*{\footnotesize Both criteria are OU-leaning for almost every name. Gold rows are the
-two exceptions that hold under either criterion: RKLB (OU-only) and AVGO (Bayes-heavy).
-Bayes\,\% is the fraction of the name's capital in the Bayes tranche; OU\,\% is the remainder.}
+two exceptions: RKLB (OU-dominant) and AVGO (Bayes-heavy). These raw optima sit at the corners
+(0\%/100\%); to preserve trade count we floor the minor sleeve at 5\% (\S6). Bayes\,\% is the
+fraction of the name's capital in the Bayes tranche; OU\,\% is the remainder.}
 \end{table}
 
 \textbf{The catch.} OU is deployed only $\sim$9\% of days on average (TSM: 1\%), versus Bayes at
@@ -248,6 +255,54 @@ in-sample, bull-regime artifacts and are not forward-achievable --- trust the ra
 policies, not the levels.}}
 \end{table}
 
+% ---------------- Trade count ----------------
+\section{Trade count and the split}
+
+A track record is only as trustworthy as the number of independent trades behind it, so the
+split must respect the buy count. The result is convenient: \textbf{the number of buys is flat
+across every interior split and falls only at the corners.}
+
+The reason is mechanical. A funded tranche places its bids and fills on price triggers that do
+not depend on how much capital it holds; the split changes each trade's \emph{size}, not
+\emph{whether} it happens. A 10/90 split therefore trades exactly as often as a 50/50 --- only
+\emph{zeroing} a sleeve removes its trades:
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{l ccccc}
+\toprule
+\textbf{Bayes \%} & 0\% & 10\% & 50\% & 90\% & 100\%\\
+\midrule
+NVDA total buys & 47 & 184 & 184 & 184 & 137\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Representative: identical buy count at 10/50/90\%; only the all-OU and
+all-Bayes corners drop trades (losing the Bayes or the OU buys respectively).}
+\end{table}
+
+Two consequences. First, the split may be set purely on Sharpe/Calmar without sacrificing trade
+count, as long as both sleeves stay funded. Second, the only recommendations that cost trades
+are the two corner calls --- and both are rescued almost for free by a small floor:
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l cc c cc}
+\toprule
+& \multicolumn{2}{c}{\textbf{corner}} & & \multicolumn{2}{c}{\textbf{5\% floor}}\\
+\cmidrule(lr){2-3}\cmidrule(lr){5-6}
+\textbf{Name} & split & buys / Sh / DD & & split & buys / Sh / DD\\
+\midrule
+RKLB & 0\% Bayes   & 183 / 7.90 / 9.3\%  & & 5\% Bayes  & \textbf{371} / 7.85 / 9.7\%\\
+AVGO & 100\% Bayes & 142 / 3.68 / 14.5\% & & 90\% Bayes & \textbf{263} / 3.86 / 15.0\%\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize A 5\% floor on the minor sleeve restores the full trade count at
+negligible cost --- RKLB's Sharpe and drawdown barely move; AVGO's Sharpe actually improves.}
+\end{table}
+
+\textbf{Rule: never run a corner --- floor both sleeves at 5\%.} This keeps every name's full
+buy count while leaving the interior Sharpe/Calmar choice untouched.
+
 % ---------------- Implementation ----------------
 \section{Recommendation and implementation}
 
@@ -255,16 +310,18 @@ Populate the Allocation sheet's \textbf{split mode~2} (per-stock Bayes\,\%) with
 columns above, by objective:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
-  \item \kpi{Efficiency first (recommended):}{} use the \textbf{Sharpe-opt} column ---
-        NVDA~20, TSM~10, TSLA~15, VRT~20, VST~15, AVGO~55, PLTR~5, RKLB~0, SOFI~10, SPOT~10.
-  \item \kpi{Return-aware:}{} use the \textbf{Calmar-opt} column if you want capital working
-        harder and can accept more drawdown --- the differences are VRT~45, TSLA~25, PLTR~25,
-        AVGO~100, SPOT~55; the rest unchanged.
+  \item \kpi{Efficiency first (recommended):}{} the \textbf{Sharpe-opt} column, floored ---
+        NVDA~20, TSM~10, TSLA~15, VRT~20, VST~15, AVGO~55, PLTR~5, RKLB~\textbf{5}, SOFI~10,
+        SPOT~10.
+  \item \kpi{Return-aware:}{} the \textbf{Calmar-opt} column, floored, if you want capital
+        working harder and can accept more drawdown --- differences are VRT~45, TSLA~25, PLTR~25,
+        AVGO~\textbf{90}, SPOT~55, RKLB~\textbf{5}; the rest unchanged.
 \end{itemize}
 
-Regardless of column, make the two firm calls first: \textbf{RKLB $\to$ 0\% Bayes (OU-only)} and
-\textbf{AVGO $\to$ Bayes-heavy}. They are the largest, most robust corrections to the uniform
-50/50 and hold under both criteria.
+Both columns apply the 5\% floor of \S6 (RKLB~5 not 0; AVGO~90 not 100), so the full trade count
+is retained. Make the two firm calls first: \textbf{RKLB $\to$ OU-dominant (5\% Bayes)} and
+\textbf{AVGO $\to$ Bayes-heavy (90\%)}. They are the largest, most robust corrections to the
+uniform 50/50 and hold under both criteria.
 
 \textbf{Caveats.} (1) All figures are in-sample over a strong bull regime for these names; the
 book-level Sharpe/drawdown levels are inflated and only the cross-name ranking is trustworthy.
