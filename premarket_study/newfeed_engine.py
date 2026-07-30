@@ -7,7 +7,7 @@ scale-invariant; %s reported).
 """
 import math, statistics, datetime
 from engine import Params, run_model
-from optimise_candidates import base_vec, make_params, optimise, evaluate, seg_return
+from optimise_candidates import mp as make_params, optimise, segret as seg_return
 from newfeed import load, NEW, NEW_TK
 
 
