@@ -1,0 +1,241 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+\definecolor{bcbad}{RGB}{247,230,230}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Diversifier Candidates}\\[0.35cm]
+{\color{bcblue}\LARGE Suitability Assessment}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Hybrid Bayesian / Ornstein--Uhlenbeck Volatility Harvester}\\[0.2cm]
+{\large\color{bcgrey} OXY \enskip DVN \enskip FSLR \enskip COIN \enskip MSTR \enskip HOOD
+ \enskip RBLX \enskip MRNA \enskip ARM \enskip SHOP}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 30 July 2026}\\[2cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{One-line conclusion.}\\ \color{black}
+Assessed as decorrelating additions to the AI-heavy book. The genuine diversifiers that also
+survive out of sample are \textbf{MRNA, OXY, DVN and FSLR}. \textbf{SHOP} and \textbf{ARM} add
+return but little decorrelation; \textbf{COIN} is high-octane, size down. \textbf{Reject MSTR
+and HOOD} --- their large in-sample returns collapse to \emph{losses} on unseen data.}}
+\end{titlepage}
+
+% ================= metrics + OOS primer =================
+\section{How to read these numbers, and what ``out-of-sample'' means}
+
+Return alone is misleading, so each name is judged on several measures. \emph{Annual return}
+is the annualised growth; \emph{Sharpe} is return per unit of volatility (higher $=$ smoother);
+\emph{max drawdown} is the worst peak-to-trough equity fall; \emph{Bayes--OU correlation} is the
+daily-return correlation between the two sleeves (we want it \emph{low}); \emph{correlation to
+the book} is the daily-return correlation to the existing ten names (again, \emph{low} is the
+point of the exercise).
+
+\subsection{Out-of-sample testing --- the decisive check}
+
+These candidates arrived with \emph{no} fitted parameters, so we had to fit them. That creates a
+trap: an optimiser handed a stretch of history will always find parameters that look brilliant
+\emph{on that history}, because it fits the noise as well as the signal. Those in-sample numbers
+flatter every strategy --- even a worthless one --- so they cannot tell you whether an edge is
+real. Only performance on data the parameters \emph{never saw} can.
+
+\textbf{The mechanics (a train/test holdout).}
+\begin{enumerate}[leftmargin=1.6em,itemsep=1pt]
+  \item \textbf{Split the timeline.} Fit on the first 60\% of the history; hold out the last 40\%.
+  \item \textbf{Fit on train only.} The optimiser sees nothing past the split point.
+  \item \textbf{Freeze} the parameters --- no further tuning.
+  \item \textbf{Run them forward} on the untouched test window and measure the return there.
+        That figure is genuinely out-of-sample: it mimics trading frozen rules into an unknown
+        future.
+  \item \textbf{Judge on the test window.} If it holds up, the edge is structural. If it
+        collapses, the in-sample number was a mirage.
+\end{enumerate}
+
+\textbf{Why it is the whole ballgame.} Across this entire engagement, re-optimised parameters
+looked superb in-sample and then \emph{lost} out of sample; the frozen parameters always won.
+The holdout is the only honest arbiter, and --- as \S5 shows --- it is exactly what separates the
+genuine candidates here from the two that merely \emph{look} spectacular.
+
+% ================= scope =================
+\section{Scope, data and caveats}
+
+Ten names were supplied as a raw OHLC feed (Apr~2024--Jul~2026, $\sim$584 trading days). Each
+was fitted with a robust differential-evolution search (perturbation-averaged objective plus a
+minimum-trade floor) and run through the validated engine at \$6M per name; percentage metrics
+are scale-invariant.
+
+\textbf{Three requested columns could not be produced from this file.} The feed carries
+\emph{OHLC only} --- no volume, so \textbf{average \$ turnover} (volume $\times$ price) cannot be
+computed; and \textbf{market cap} and \textbf{P/E} are fundamental data, not derivable from
+prices. Supply a volume column and the market-cap / P-E figures (or shares-outstanding and EPS)
+and those three fields drop straight in.
+
+\textbf{One methodological note.} Because these parameters are freshly fitted (unlike the earlier
+CCL/MU/CVNA/LLY candidates, which arrived pre-fitted), the full-sample metrics are an
+\emph{in-sample ceiling}. The out-of-sample holdout (\S5) is the figure to trust.
+
+% ================= volatility + diversification =================
+\section{Volatility and diversification}
+
+All ten clear the high-volatility bar. The decisive screen is the right-hand column --- how
+correlated each name is to the existing book, since the entire purpose is to dilute the AI/semis
+factor that currently dominates it.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r c c}
+\toprule
+\textbf{Name} & \textbf{Sector} & \textbf{Ann vol} & \textbf{Buy-hold DD} & \textbf{corr $\to$ book} & \textbf{corr $\to$ AI-core}\\
+\midrule
+\rowcolor{bckeep} OXY  & Energy (E\&P)          & 33\% & 48\% & \textbf{0.14} & 0.15\\
+\rowcolor{bckeep} DVN  & Energy (E\&P)          & 36\% & 51\% & \textbf{0.21} & 0.21\\
+\rowcolor{bckeep} MRNA & Health care (biotech)  & 67\% & 87\% & \textbf{0.27} & 0.22\\
+\rowcolor{bckeep} FSLR & Clean energy (solar)   & 59\% & 60\% & 0.32 & 0.33\\
+RBLX & Comms / gaming         & 55\% & 71\% & 0.41 & 0.35\\
+MSTR & Crypto (BTC treasury)  & 87\% & 83\% & 0.50 & 0.41\\
+SHOP & Consumer internet      & 58\% & 47\% & 0.52 & 0.45\\
+COIN & Financials (crypto ex.)& 77\% & 66\% & 0.57 & 0.48\\
+ARM  & Semiconductors         & 71\% & 54\% & 0.61 & \textbf{0.63}\\
+HOOD & Financials (brokerage) & 71\% & 57\% & 0.65 & 0.55\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Blue rows are the genuine decorrelators (energy, biotech, solar). ARM is
+the opposite of a diversifier --- at 0.63 to the AI-core it is simply another semiconductor bet.
+HOOD/COIN move with risk-on/crypto beta. ``Ann vol'' is annualised realised volatility (a
+high-beta proxy; no index was supplied for a literal beta).}
+\end{table}
+
+% ================= model fit + OOS =================
+\section{Model fit and the out-of-sample holdout}
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l r r r r c c c c}
+\toprule
+& \multicolumn{5}{c}{\textbf{Full-sample fit (in-sample ceiling)}} & \multicolumn{2}{c}{\textbf{60/40 holdout}} & \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-8}
+\textbf{Name} & ann & Sh & maxDD & /yr & B--OU & train & \textbf{test (OOS)} & \textbf{verdict}\\
+\midrule
+\rowcolor{bckeep} MRNA & 128\% & 2.20 & 28\% & 84  & 0.17 & 62\%  & \textbf{+103\%} & holds\\
+\rowcolor{bckeep} OXY  & 48\%  & 2.11 & 10\% & 59  & 0.20 & 27\%  & \textbf{+39\%}  & holds\\
+\rowcolor{bckeep} DVN  & 63\%  & 3.48 & 10\% & 125 & 0.20 & 31\%  & \textbf{+13\%}  & holds (modest)\\
+\rowcolor{bckeep} FSLR & 94\%  & 1.80 & 24\% & 78  & 0.33 & 117\% & \textbf{+29\%}  & holds\\
+SHOP & 107\% & 1.85 & 34\% & 55  & 0.37 & 142\% & +89\% & holds\\
+ARM  & 161\% & 2.67 & 22\% & 106 & 0.26 & 173\% & +80\% & holds\\
+COIN & 255\% & 3.06 & 41\% & 52  & $-$0.07 & 296\% & +30\% & holds (big fade)\\
+RBLX & 140\% & 2.18 & 37\% & 63  & 0.85 & 192\% & +31\% & holds (weak hedge)\\
+\rowcolor{bcbad} HOOD & 194\% & 2.57 & 27\% & 74  & 0.35 & 367\% & \textbf{$-$6\%}  & \textbf{FAILS}\\
+\rowcolor{bcbad} MSTR & 97\%  & 1.28 & 43\% & 84  & 0.09 & 360\% & \textbf{$-$61\%} & \textbf{FAILS}\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Sorted by suitability. Full-sample columns are the in-sample ceiling;
+\textbf{the test column is the honest number}. Blue rows are the recommended diversifiers; red
+rows fail out of sample. ``B--OU'' is the internal Bayes--OU hedge correlation (lower is better;
+COIN's $-0.07$ is the best we have seen). ``/yr'' is trades per year.}
+\end{table}
+
+% ================= overfitting lesson =================
+\section{The overfitting lesson --- why the holdout earned its keep}
+
+The two names with the \emph{highest} in-sample fits are the two that fail:
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r}
+\toprule
+\textbf{Name} & \textbf{train (fit)} & \textbf{test (OOS)} & \textbf{swing}\\
+\midrule
+HOOD & +367\% & $-$6\%  & collapse\\
+MSTR & +360\% & $-$61\% & collapse\\
+\midrule
+MRNA & +62\%  & +103\% & \emph{improves}\\
+OXY  & +27\%  & +39\%  & \emph{improves}\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize The optimiser found the most in-sample ``juice'' in HOOD and MSTR ---
+and it was noise. On unseen data both turn negative. The genuine edges (MRNA, OXY) hold or even
+strengthen out of sample.}
+\end{table}
+
+On the full-sample view HOOD looked like a strong add (194\%, Sharpe 2.57). The holdout reveals
+its fitted parameters do not generalise: run forward on unseen data they lose money. Without the
+out-of-sample test we would have added a name that does not work --- which is precisely why the
+test is non-negotiable. MSTR is the same story, more extreme; its behaviour as a levered
+Bitcoin proxy (violent gaps) breaks the limit-fill and mean-reversion assumptions the model
+relies on.
+
+% ================= recommendation =================
+\section{Recommendation}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{Add --- genuine diversifiers, survive OOS:}{} \textbf{MRNA} (biotech; strongest
+        OOS, decorrelated, good internal hedge), \textbf{OXY} (energy; lowest drawdown, best
+        decorrelation, OOS $>$ train --- the ballast name), \textbf{FSLR} (solar; decorrelated,
+        holds OOS), \textbf{DVN} (energy; superb Sharpe and drawdown, decorrelated, though its
+        honest OOS return is modest).
+  \item \kpi{Add for return, not decorrelation:}{} \textbf{SHOP} and \textbf{ARM} hold up
+        strongly out of sample, but they correlate more with the book (ARM \emph{is} a
+        semiconductor name). Take them if you want return, not to dilute the factor.
+  \item \kpi{Size down / monitor:}{} \textbf{COIN} --- highest return and a uniquely negative
+        internal hedge ($-0.07$), but a 41\% drawdown and a large in-sample-to-OOS fade; half a
+        tranche at most. \textbf{RBLX} holds OOS but has effectively no internal hedge (0.85).
+  \item \kpi{Reject:}{} \textbf{HOOD} and \textbf{MSTR} --- both fail the out-of-sample test.
+\end{itemize}
+
+\textbf{Best fit for the stated goal} (diluting the AI concentration): \textbf{MRNA, OXY, FSLR,
+DVN} --- biotech, energy and solar, all decorrelated from the book and all surviving the holdout.
+
+\textbf{Caveats.} (1) Fitted parameters are freshly optimised; treat full-sample figures as a
+ceiling and the OOS column as the trustworthy number. (2) All history sits in a strong bull
+regime; a 60/40 holdout is one split, not a multi-fold walk-forward --- a fuller walk-forward on
+the shortlist is the natural next step before committing capital. (3) Market cap, P/E and \$
+turnover await a volume column and fundamentals.
+
+\vfill
+{\footnotesize\color{bcgrey} Data: \texttt{Hybrid10\_Feed\_new} (OHLC only), Apr~2024--Jul~2026,
+\$6M per name. Parameters fitted by robust differential evolution; out-of-sample holdout fits on
+the first 60\% and scores the last 40\%. Correlations are daily close-to-close returns against
+the existing ten-name book.}
+
+\end{document}
