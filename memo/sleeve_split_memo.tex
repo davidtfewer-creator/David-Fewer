@@ -62,6 +62,43 @@ time. The durable, regime-robust actions are per-name: \textbf{RKLB $\to$ OU-onl
 \textbf{AVGO $\to$ Bayes-heavy}; most other names lean OU.}}
 \end{titlepage}
 
+% ---------------- Metrics primer ----------------
+\section{How to read these numbers}
+
+This memo judges each choice on three measures rather than on return alone. Return by itself
+is misleading: a strategy can post a large number simply by taking large risk, and two books
+with the same return can be worlds apart in how punishing they are to hold. The three
+measures below separate \emph{how much} you earn from \emph{how much risk and pain} it costs.
+
+\textbf{Sharpe ratio --- return per unit of volatility.} The Sharpe ratio divides a strategy's
+average return by the variability (standard deviation) of those returns, scaled to an annual
+figure. It answers: \emph{for every unit of ``bumpiness'' in the equity curve, how much return
+am I paid?} A higher Sharpe means a smoother ride for the same return, or more return for the
+same wobble. It is the standard yardstick for comparing strategies on a like-for-like,
+risk-adjusted basis --- here, comparing the Bayes and OU sleeves and each capital split. Its
+one blind spot: it penalises \emph{all} variability, including large \emph{upside} moves, and it
+assumes risk is well described by day-to-day volatility.
+
+\textbf{Maximum drawdown --- the worst peak-to-trough fall.} The maximum drawdown is the
+largest drop from a previous high-water mark to a subsequent low, measured on the equity
+curve. It is the loss you would actually have lived through at the worst moment --- the number
+that determines whether you can stay invested, meet margin, and avoid capitulating at the
+bottom. Where Sharpe treats up-moves and down-moves symmetrically, drawdown captures
+\emph{downside path risk} directly: the depth of the hole. Two strategies can share a Sharpe
+yet have very different drawdowns, which is why we always report it alongside.
+
+\textbf{Calmar ratio --- return per unit of worst-case loss.} The Calmar ratio divides the
+annualised return by the maximum drawdown. It answers: \emph{how much return do I earn for
+each unit of worst-case pain?} Unlike Sharpe, it ignores harmless upside volatility and
+penalises only the depth of the drawdown, so it suits a return-seeking book that cares about
+surviving the worst loss rather than smoothing every daily wiggle. A Calmar of 3, for example,
+means the strategy earned three times its deepest drawdown in annual return.
+
+\textbf{Why all three.} Each metric is incomplete on its own --- return ignores risk, Sharpe
+over-penalises good volatility, drawdown ignores return. Read together they triangulate the
+real question: \emph{is the extra return worth the extra pain?} Optimising to any single number
+invites a distorted answer, which is exactly the trap this memo is trying to avoid.
+
 % ---------------- Executive summary ----------------
 \section{Executive summary}
 
