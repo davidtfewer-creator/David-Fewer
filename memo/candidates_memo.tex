@@ -1,0 +1,235 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Bayesian Capital brand palette ----
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+
+\begin{document}
+
+% ---------------- Title block ----------------
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Four New Candidate Names}\\[0.35cm]
+{\color{bcblue}\LARGE Suitability Assessment}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Hybrid Bayesian / Ornstein--Uhlenbeck Volatility Harvester}\\[0.2cm]
+{\large\color{bcgrey} CCL \quad MU \quad CVNA \quad LLY}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 30 July 2026}\\[2cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{One-line conclusion.}\\ \color{black}
+All four names are suitable for the book. Ranked by profile quality:
+\textbf{CCL $\approx$ MU $>$ CVNA (size down) $>$ LLY (diversifier)}. Their existing workbook
+parameters already sit at the robust optimum --- \emph{do not re-optimise}. One housekeeping
+flag: the CVNA workbook's displayed profit is stale and understates it by more than half.}}
+\end{titlepage}
+
+% ---------------- Executive summary ----------------
+\section{Executive summary}
+
+Four single-name models were submitted for assessment as additions to the ten-name book:
+\textbf{CCL} (Carnival), \textbf{MU} (Micron), \textbf{CVNA} (Carvana) and \textbf{LLY} (Eli
+Lilly). Each arrived with per-stock fitted parameters. We validated the engine against each
+workbook, measured full-sample and out-of-sample performance, stress-tested the parameters, and
+assessed portfolio fit.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{All four clear the bar.}{} Every name is profitable, robust to parameter
+        perturbation, and --- most importantly --- keeps working \emph{out of sample} on unseen
+        data with no refitting.
+  \item \kpi{Do not re-optimise.}{} A robust differential-evolution search reproduced CCL's and
+        CVNA's parameters almost exactly and nudged LLY/MU only marginally in-sample; in the
+        walk-forward the \emph{frozen} parameters beat the refitted ones. The supplied parameters
+        are already at the durable optimum.
+  \item \kpi{Rank and sizing.}{} \textbf{CCL} (Sharpe 3.18, 18\% drawdown, best hedge) and
+        \textbf{MU} are the cleanest adds. \textbf{CVNA} has the highest return (216\%) but the
+        deepest drawdown (39\%) and weakest hedge --- include it \emph{sized down}. \textbf{LLY}
+        is the lowest-return name but a genuine cross-sector diversifier.
+  \item \kpi{Housekeeping (CVNA).}{} The CVNA workbook shows \$28.25M / 121\% --- computed with
+        \emph{older} parameters and never recalculated. At the parameters currently in its cells
+        it does \textbf{\$69.5M / 216\%}. Force a full recalc to refresh it.
+\end{itemize}
+
+% ---------------- Method ----------------
+\section{Scope and method}
+
+Each candidate is the single-name ``2~Tranche StopLoss 50d'' model: a Kalman local-linear-trend
+Bayes tranche and an AR(1) Ornstein--Uhlenbeck tranche, \$3M per tranche (\$6M per name),
+50-calendar-day stop, 2.2-year horizon (Apr~2024--Jun~2026, $\sim$560 trading days). All figures
+come from the Python replica of the model.
+
+\textbf{Validation.} The engine reproduces the cached workbook results of CCL, MU and LLY
+\emph{to the dollar} (e.g.\ CCL \$24{,}838{,}341, 193 buys, 1 stop). CVNA was the one apparent
+mismatch --- traced to a \emph{stale cache}: its saved cells were computed with older parameters
+and never recalculated. Run on the parameters actually in its cells, the engine is internally
+consistent and reproduces the intended \$69.5M / 216\%.
+
+\textbf{Metrics.} \emph{Annual return} is the 2.2-year annualised growth on the \$6M. \emph{Sharpe}
+is return per unit of volatility (higher $=$ smoother ride). \emph{Max drawdown} is the worst
+peak-to-trough equity fall (what you live through at the low). \emph{Bayes--OU correlation} is
+the daily-return correlation between the two sleeves --- we want it \emph{low} (an effective
+internal hedge). \emph{Robustness retention} re-runs the model with each parameter shifted
+$\pm3\%$ and reports how much of the annual return survives ($1.00 =$ unmoved).
+
+% ---------------- Scorecard ----------------
+\clearpage
+\section{Suitability scorecard}
+
+The full-sample picture, engine-verified on the \$6M per name:
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{l r r r r r c c c}
+\toprule
+\textbf{Name} & \textbf{ann} & \textbf{Sharpe} & \textbf{maxDD} & \textbf{trades} & \textbf{/yr}
+ & \textbf{stops} & \textbf{B--OU corr} & \textbf{robust (worst/mean)}\\
+\midrule
+\rowcolor{bckeep} CCL  & 110\% & \textbf{3.18} & \textbf{17.6\%} & 193 & 86  & 1 & \textbf{0.47} & 0.98 / 1.00\\
+\rowcolor{bckeep} MU   & 130\% & 2.34 & 34.1\% & 159 & 71  & 3 & 0.63 & 0.98 / 0.99\\
+CVNA & \textbf{216\%} & 2.65 & \textbf{38.6\%} & 233 & 105 & 3 & 0.77 & 0.98 / 1.00\\
+LLY  & 52\%  & 1.79 & 18.6\% & 131 & 59  & 7 & 0.72 & 0.99 / 1.00\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Blue rows are the two cleanest adds. CVNA leads on return but on the two
+risk columns (drawdown, hedge correlation) it is the weakest. LLY is the lowest-return, most
+stopped-out name. All four are highly robust to parameter perturbation.}
+\end{table}
+
+% ---------------- OOS ----------------
+\section{Out-of-sample persistence}
+
+The decisive suitability test is whether the edge survives on data the parameters never saw. We
+ran an expanding-window walk-forward and scored each name's \emph{frozen} parameters on three
+unseen $\sim$4.5-month tail slices:
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l ccc c c}
+\toprule
+\textbf{Name} & \textbf{slice 1} & \textbf{slice 2} & \textbf{slice 3} & & \textbf{re-opt beats frozen?}\\
+\midrule
+CCL  & +31\% & +31\% & +71\%  & & no (frozen wins)\\
+MU   & +21\% & +65\% & +68\%  & & tie (rounding)\\
+CVNA & +64\% & +130\% & +92\% & & no (frozen wins)\\
+LLY  & +12\% & +18\% & +42\%  & & no (frozen wins)\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Raw return on each unseen slice, frozen parameters. Every name stays
+profitable out of sample. Re-optimising the parameters on the training window does \emph{not}
+beat the frozen set on the unseen slice --- the familiar in-sample mirage. Full-sample refits
+gained essentially nothing (CCL/CVNA $0$pp, LLY $+3$pp, MU $+9$pp in-sample only).}
+\end{table}
+
+% ---------------- Per-name ----------------
+\section{Per-name notes}
+
+\textbf{CCL --- Carnival (Consumer Discretionary; cruise \& leisure).} The cleanest profile of
+the four: highest Sharpe (3.18), lowest drawdown (17.6\%), a single stop in 2.2 years, and the
+\emph{best-behaved internal hedge} (0.47 --- the Bayes and OU sleeves genuinely offset). This is
+the template add.
+
+\textbf{MU --- Micron (Information Technology; memory semiconductors).} Strong all round: 130\%
+return, healthy trade count, clean out-of-sample persistence. Its optimiser drifted a little more
+than the others (a flatter parameter surface), but the supplied parameters are fine and beat the
+refit out of sample.
+
+\textbf{CVNA --- Carvana (Consumer Discretionary; online auto retail).} The highest return by a
+wide margin, but it is earned through \textbf{39\% drawdowns} and a \textbf{weak internal hedge}
+(0.77 --- the OU sleeve moves largely \emph{with} Bayes, so the name is effectively one large
+high-beta bet). Include it, but at a \textbf{reduced allocation} so its volatility does not
+dominate the book.
+
+\textbf{LLY --- Eli Lilly (Health Care; pharmaceuticals).} The lowest standalone return (52\%)
+and the most stops (7), but it is the only \emph{non-cyclical, non-high-beta} name of the four.
+Its value is \textbf{book-level decorrelation}, not raw return --- keep it as a diversifier, not
+a workhorse.
+
+% ---------------- Portfolio fit ----------------
+\section{Portfolio fit}
+
+Adding all four brings three sectors, but not four:
+
+\begin{table}[h]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Name} & \textbf{Sector} & \textbf{Role}\\
+\midrule
+CCL  & Consumer Discretionary (cruise/travel)   & core add\\
+CVNA & Consumer Discretionary (online auto)      & high-octane, size down\\
+MU   & Information Technology (semis/memory)     & core add\\
+LLY  & Health Care (pharma)                      & diversifier\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CCL and CVNA share a sector \emph{and} a high-beta, cyclical character, so adding both at full
+weight concentrates the book in consumer discretionary --- another reason to size CVNA down. MU
+(semiconductors) and especially LLY (pharma) are the genuine diversifiers relative to the
+existing high-beta technology and consumer names, and to each other. LLY's low standalone return
+is the price of that decorrelation, and worth paying for a book otherwise loaded on a single
+risk factor.
+
+% ---------------- Recommendation ----------------
+\section{Recommendation}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{Add all four}{} in priority order \textbf{CCL $\approx$ MU} (full weight),
+        \textbf{CVNA} (reduced --- e.g.\ half a normal tranche, on drawdown grounds),
+        \textbf{LLY} (diversifier weight).
+  \item \kpi{Keep the supplied parameters.}{} They are at the robust, out-of-sample optimum;
+        re-optimisation is an in-sample mirage on this model.
+  \item \kpi{Refresh CVNA.}{} Force a full recalculation of the CVNA workbook so its displayed
+        figures reflect the parameters actually in its cells (\$28.25M~$\to$~\$69.5M).
+\end{itemize}
+
+\textbf{Caveats.} (1) All figures are in-sample over a strong bull regime for these names; treat
+absolute magnitudes (especially CVNA's short-slice annualised numbers) as flattering and rely on
+the cross-name ranking. (2) The two CCL files submitted were byte-identical and treated as one.
+(3) Sizing suggestions are illustrative --- final weights follow the Allocation sheet's
+risk-adjusted, liquidity-capped logic.
+
+\vfill
+{\footnotesize\color{bcgrey} Data: candidate single-name workbooks (\texttt{Daily\_trading\_
+Bayesian\_\&\_OU\_tranche\_LIVE}), Apr~2024--Jun~2026, \$6M per name, 2.2-year horizon. Engine
+reproduces CCL/MU/LLY cached results to the dollar; CVNA reconciles once recalculated.}
+
+\end{document}
