@@ -79,8 +79,8 @@ with open('/home/user/David-Fewer/premarket_study/HybridFeed.m') as f:
         r += 1
 
 # ---- workbook defined names the query reads ----
-wb.define_name('Config',  "=Config!$A$1:$B$3")
-wb.define_name('Tickers', f"=Tickers!$A$1:$A${1+len(TICKERS)}")
+wb.define_name('FeedConfig',  "=Config!$A$1:$B$3")
+wb.define_name('FeedTickers', f"=Tickers!$A$1:$A${1+len(TICKERS)}")
 
 wb.close()
 print('saved', OUT)

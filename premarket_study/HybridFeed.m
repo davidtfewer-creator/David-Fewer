@@ -3,19 +3,19 @@
 // Pulls daily OHLC for ten tickers from the Massive aggregates API and builds
 // the Date | <TK>_O/_H/_L/_C table, keeping only dates common to all ten.
 //
-// Reads three inputs FROM THE WORKBOOK (no secrets in this code):
-//   * table "Config"  : columns  Setting | Value   (rows: ApiKey, StartDate)
-//   * table "Tickers" : column   Ticker            (ten rows, in column order)
+// Reads inputs FROM THE WORKBOOK (no secrets in this code) via defined names:
+//   * FeedConfig  -> range Config!A1:B3   columns  Setting | Value  (ApiKey, StartDate)
+//   * FeedTickers -> range Tickers!A1:A11 column   Ticker           (ten rows, in order)
 // Paste into: Data > Get Data > Launch Power Query Editor > New Query >
 //             Blank Query > Advanced Editor  (replace all).  Name it Hybrid10Feed.
 // ============================================================================
 let
     // Config / Tickers are workbook DEFINED NAMES (ranges), so promote the first row to headers.
-    Cfg     = Table.PromoteHeaders(Excel.CurrentWorkbook(){[Name="Config"]}[Content], [PromoteAllScalars=true]),
+    Cfg     = Table.PromoteHeaders(Excel.CurrentWorkbook(){[Name="FeedConfig"]}[Content], [PromoteAllScalars=true]),
     KEY     = Text.From(Cfg{[Setting="ApiKey"]}[Value]),
     START   = Text.From(Cfg{[Setting="StartDate"]}[Value]),
     TO      = DateTime.ToText(DateTimeZone.RemoveZone(DateTimeZone.UtcNow()), "yyyy-MM-dd"),
-    TkTable = Table.PromoteHeaders(Excel.CurrentWorkbook(){[Name="Tickers"]}[Content], [PromoteAllScalars=true]),
+    TkTable = Table.PromoteHeaders(Excel.CurrentWorkbook(){[Name="FeedTickers"]}[Content], [PromoteAllScalars=true]),
     Tickers = Table.Column(TkTable, "Ticker"),
 
     // one ticker -> table [ Date, TK_O, TK_H, TK_L, TK_C ]
