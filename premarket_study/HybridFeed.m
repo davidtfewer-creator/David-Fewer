@@ -10,11 +10,13 @@
 //             Blank Query > Advanced Editor  (replace all).  Name it Hybrid10Feed.
 // ============================================================================
 let
-    Cfg     = Excel.CurrentWorkbook(){[Name="Config"]}[Content],
+    // Config / Tickers are workbook DEFINED NAMES (ranges), so promote the first row to headers.
+    Cfg     = Table.PromoteHeaders(Excel.CurrentWorkbook(){[Name="Config"]}[Content], [PromoteAllScalars=true]),
     KEY     = Text.From(Cfg{[Setting="ApiKey"]}[Value]),
     START   = Text.From(Cfg{[Setting="StartDate"]}[Value]),
     TO      = DateTime.ToText(DateTimeZone.RemoveZone(DateTimeZone.UtcNow()), "yyyy-MM-dd"),
-    Tickers = Table.Column(Excel.CurrentWorkbook(){[Name="Tickers"]}[Content], "Ticker"),
+    TkTable = Table.PromoteHeaders(Excel.CurrentWorkbook(){[Name="Tickers"]}[Content], [PromoteAllScalars=true]),
+    Tickers = Table.Column(TkTable, "Ticker"),
 
     // one ticker -> table [ Date, TK_O, TK_H, TK_L, TK_C ]
     GetTicker = (tk as text) as table =>
