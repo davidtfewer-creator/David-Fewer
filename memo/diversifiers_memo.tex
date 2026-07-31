@@ -56,10 +56,12 @@
 {\color{bcgrey} 30 July 2026}\\[2cm]
 
 \fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{One-line conclusion.}\\ \color{black}
-Assessed as decorrelating additions to the AI-heavy book. The genuine diversifiers that also
-survive out of sample are \textbf{MRNA, OXY, DVN and FSLR}. \textbf{SHOP} and \textbf{ARM} add
-return but little decorrelation; \textbf{COIN} is high-octane, size down. \textbf{Reject MSTR
-and HOOD} --- their large in-sample returns collapse to \emph{losses} on unseen data.}}
+Assessed as decorrelating additions to the AI-heavy book. A five-fold walk-forward puts
+\textbf{DVN and OXY} first (energy; positive in \emph{every} unseen fold), then \textbf{MRNA}
+(biotech) and a modest \textbf{FSLR} (solar) --- all decorrelated from the book. \textbf{SHOP}
+and \textbf{ARM} add return but little decorrelation; \textbf{COIN} is high-octane, size down.
+\textbf{Reject MSTR and HOOD} --- their large in-sample returns collapse to \emph{losses} on
+unseen data.}}
 \end{titlepage}
 
 % ================= metrics + OOS primer =================
@@ -205,15 +207,55 @@ test is non-negotiable. MSTR is the same story, more extreme; its behaviour as a
 Bitcoin proxy (violent gaps) breaks the limit-fill and mean-reversion assumptions the model
 relies on.
 
+% ================= fuller walk-forward =================
+\section{Fuller walk-forward on the shortlist}
+
+The 60/40 holdout is a single split, so we hardened the four diversifiers with a five-fold
+expanding walk-forward: each fold \emph{re-optimises} on its train window only, freezes, and
+scores the next unseen $\sim$10\% slice. Five independent out-of-sample windows per name.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l l c r r}
+\toprule
+\textbf{Name} & \textbf{fold OOS returns (5 unseen slices)} & \textbf{pos.\ folds} & \textbf{stitched OOS} & \textbf{ann.}\\
+\midrule
+\rowcolor{bckeep} DVN  & $+3 / +7 / +18 / +23 / +29$   & \textbf{5/5} & \textbf{+105\%} & 86\%\\
+\rowcolor{bckeep} OXY  & $+13 / +5 / +8 / +15 / +9$    & \textbf{5/5} & +60\%  & 50\%\\
+MRNA & $-10 / +13 / +35 / +33 / -1$  & 3/5 & +83\%  & 69\%\\
+FSLR & $+14 / +22 / +3 / +22 / -21$  & 4/5 & +37\%  & 31\%\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Return (\%) on each unseen slice, parameters re-fitted per fold on
+train only. ``Stitched OOS'' compounds the five slices ($\sim$1.2y of purely out-of-sample
+trading). Blue rows survive \emph{every} fold.}
+\end{table}
+
+Three things the multi-fold view adds over the single split:
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \kpi{DVN is promoted to the top.}{} The 60/40 split had shown DVN at a modest $+13\%$
+        --- an artifact of which window was held out. Across five windows it is the
+        \emph{strongest and most improving}: every fold positive, returns rising $+3\%\to+29\%$
+        as trade counts climb ($7\to52$ buys/fold), stitched $+105\%$.
+  \item \kpi{OXY is the most consistent.}{} 5/5 positive with the lowest fold-to-fold spread
+        ($+5\%$ to $+15\%$) --- the dependable ballast its low-drawdown profile implied.
+  \item \kpi{MRNA and FSLR are real but choppier.}{} MRNA earns its $+83\%$ from three big
+        middle folds with two flat/negative ends; FSLR's most-recent fold is $-21\%$, a sign its
+        edge is fading in the latest data.
+\end{itemize}
+
 % ================= recommendation =================
 \section{Recommendation}
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
-  \item \kpi{Add --- genuine diversifiers, survive OOS:}{} \textbf{MRNA} (biotech; strongest
-        OOS, decorrelated, good internal hedge), \textbf{OXY} (energy; lowest drawdown, best
-        decorrelation, OOS $>$ train --- the ballast name), \textbf{FSLR} (solar; decorrelated,
-        holds OOS), \textbf{DVN} (energy; superb Sharpe and drawdown, decorrelated, though its
-        honest OOS return is modest).
+  \item \kpi{Add first --- survive every walk-forward fold:}{} \textbf{DVN} (energy; 5/5 folds,
+        strongest and improving, superb Sharpe and low drawdown) and \textbf{OXY} (energy; 5/5
+        folds, the most consistent, lowest drawdown --- the ballast name). Both decorrelated from
+        the book; these are the highest-confidence adds.
+  \item \kpi{Add, choppier:}{} \textbf{MRNA} (biotech; strong $+83\%$ stitched OOS but from three
+        big folds with two flat ends --- real edge, lumpier ride) and \textbf{FSLR} (solar;
+        decorrelated, 4/5 folds, but a $-21\%$ most-recent fold flags a fading edge --- the
+        marginal name, size modestly).
   \item \kpi{Add for return, not decorrelation:}{} \textbf{SHOP} and \textbf{ARM} hold up
         strongly out of sample, but they correlate more with the book (ARM \emph{is} a
         semiconductor name). Take them if you want return, not to dilute the factor.
@@ -223,14 +265,15 @@ relies on.
   \item \kpi{Reject:}{} \textbf{HOOD} and \textbf{MSTR} --- both fail the out-of-sample test.
 \end{itemize}
 
-\textbf{Best fit for the stated goal} (diluting the AI concentration): \textbf{MRNA, OXY, FSLR,
-DVN} --- biotech, energy and solar, all decorrelated from the book and all surviving the holdout.
+\textbf{Best fit for the stated goal} (diluting the AI concentration): lead with \textbf{DVN and
+OXY} (energy; clean 5/5 walk-forwards), then \textbf{MRNA} (biotech) and a modest \textbf{FSLR}
+(solar) --- all decorrelated from the book.
 
 \textbf{Caveats.} (1) Fitted parameters are freshly optimised; treat full-sample figures as a
-ceiling and the OOS column as the trustworthy number. (2) All history sits in a strong bull
-regime; a 60/40 holdout is one split, not a multi-fold walk-forward --- a fuller walk-forward on
-the shortlist is the natural next step before committing capital. (3) Market cap, P/E and \$
-turnover await a volume column and fundamentals.
+ceiling and the out-of-sample columns as the trustworthy numbers. (2) All history sits in a
+strong bull regime --- even a five-fold walk-forward cannot test a sustained bear market, which
+these names have not seen. (3) Market cap, P/E and \$ turnover await a volume column and
+fundamentals.
 
 \vfill
 {\footnotesize\color{bcgrey} Data: \texttt{Hybrid10\_Feed\_new} (OHLC only), Apr~2024--Jul~2026,
