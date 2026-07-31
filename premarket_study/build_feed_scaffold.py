@@ -18,7 +18,7 @@ wb = openpyxl.Workbook()
 # ---- Config sheet: table "Config" (Setting | Value) ----
 cfg = wb.active; cfg.title = 'Config'
 cfg['A1'] = 'Setting'; cfg['B1'] = 'Value'
-cfg['A2'] = 'ApiKey';    cfg['B2'] = ''            # <-- user pastes key here; left blank on purpose
+cfg['A2'] = 'ApiKey'                               # B2 left genuinely empty (user pastes key)
 cfg['A3'] = 'StartDate'; cfg['B3'] = '2024-04-01'
 for c in ('A1','B1'): cfg[c].font = HDR
 cfg['B2'].fill = GOLD; cfg['B3'].fill = BLUE
@@ -82,11 +82,14 @@ lines = [
 ]
 r = 1
 for text, bold in lines:
-    c = rm.cell(r, 1, text)
-    if bold: c.font = Font(name='Arial', size=11, bold=True, color='0B1F3A')
+    if text:                                       # skip empty spacer rows (no empty-string cells)
+        c = rm.cell(r, 1, text)
+        if bold: c.font = Font(name='Arial', size=11, bold=True, color='0B1F3A')
     r += 1
 with open('/home/user/David-Fewer/premarket_study/HybridFeed.m') as f:
     for code_line in f.read().splitlines():
+        if code_line == '':                        # blank M lines -> leave row empty, no cell
+            r += 1; continue
         cc = rm.cell(r, 1, code_line)
         cc.font = Font(name='Consolas', size=9)
         r += 1
