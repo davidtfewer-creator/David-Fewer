@@ -49,7 +49,8 @@ def robust(s, vec, t, floor):
 
 def optimise(s, t, floor):
     neg = lambda v: -robust(s, v, t, floor)
-    res = differential_evolution(neg, BOUNDS, x0=bvec(t), init='sobol', seed=42, maxiter=10,
+    x0 = [min(max(v, BOUNDS[i][0]), BOUNDS[i][1]) for i, v in enumerate(bvec(t))]  # clamp seed
+    res = differential_evolution(neg, BOUNDS, x0=x0, init='sobol', seed=42, maxiter=10,
                                  popsize=8, mutation=(0.5,1.0), recombination=0.7, tol=1e-3,
                                  polish=False, disp=False, updating='immediate', workers=1)
     return list(res.x)
