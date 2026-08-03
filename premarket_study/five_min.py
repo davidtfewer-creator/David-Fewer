@@ -20,6 +20,8 @@ FILES = {
     'VRT':  f'{BASE}/976bd5af-VRT_5min_Apr2024Jun2026.xlsx',
     'TSM':  f'{BASE}/bbf336cd-TSM_5min_Apr2024Jun2026.xlsx',
     'VST':  f'{BASE}/ec3a3432-VST_5min_Apr2024Jun2026.xlsx',
+    'TSLA': f'{BASE}/a4901f5a-TSLA_5min_Apr2024Aug2026.xlsx',
+    'PLTR': f'{BASE}/16152814-PLTR_5min_Apr2024Aug2026.xlsx',
 }
 CACHE = '/home/user/David-Fewer/premarket_study/five_min_index.pkl'
 RTH_START = datetime.time(9, 30)
