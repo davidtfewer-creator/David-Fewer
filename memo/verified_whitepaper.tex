@@ -1,0 +1,379 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath,amssymb}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Bayesian Capital brand palette ----
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+\definecolor{bcbad}{RGB}{247,230,230}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+
+\begin{document}
+
+% ================= title =================
+\begin{titlepage}
+\vspace*{1.1cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Execution-Verified Performance}\\[0.3cm]
+{\color{bcnavy}\Huge\bfseries of the Hybrid Harvester}\\[0.35cm]
+{\color{bcblue}\LARGE White Paper}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Intraday validation of same-day round trips, restated returns,}\\[0.15cm]
+{\large\color{bcgrey} capital allocation, and a register of rejected hypotheses}\\[1.1cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 3 August 2026}\\[1.6cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{Abstract.}\\ \color{black}
+The daily-bar backtest of the hybrid Bayesian~/~Ornstein--Uhlenbeck harvester cannot determine
+whether an intraday low preceded the corresponding high, and therefore resolves every same-day
+round trip in the strategy's favour. Using minute and five-minute data for all ten names we
+find that only $57\%$ of such trades were actually achievable. Restating the book on verified
+fills reduces the mean annualised return from $\sim\!220\%$ to $\sim\!45\%$. The edge is real
+and substantial; its magnitude was overstated roughly fivefold. Seven attempts to improve the
+model were tested out of sample: six failed. The single validated change is a tilt of capital
+toward the Bayes sleeve.}}
+\end{titlepage}
+
+% ================= 1 =================
+\section{Introduction and scope}
+
+The harvester allocates capital across ten high-beta US equities through two decorrelated
+sleeves: a Bayesian sleeve driven by a Kalman local-linear-trend filter, and a mean-reverting
+sleeve driven by an Ornstein--Uhlenbeck (OU) process. Both place resting limit bids below a
+model-derived fair value and exit at a fixed take-profit premium or a calendar stop.
+
+All performance figures to date derive from a daily-bar backtest. This paper asks whether those
+figures are attainable, using intraday data to test the one assumption daily bars cannot
+verify. It then restates the book's expected performance, re-examines capital allocation on the
+corrected basis, and records the hypotheses tested and rejected.
+
+All computations use a Python replica of the workbook validated to reproduce every cached
+\texttt{Model} sheet \emph{to the dollar}; the replica is the reference implementation
+throughout.
+
+% ================= 2 =================
+\section{Model specification}
+
+Let $O_t,H_t,L_t,C_t$ denote the daily open, high, low and close, and $F_t=H_t-L_t$ the range.
+
+\subsection{Bayes sleeve: local linear trend}
+
+The latent level $\ell_t$ and slope $b_t$ follow
+\begin{equation}
+\ell_t = \ell_{t-1} + b_{t-1} + \eta_t, \qquad
+b_t = b_{t-1} + \zeta_t, \qquad
+C_t = \ell_t + \varepsilon_t,
+\end{equation}
+with process and observation variances scaled by the realised range,
+\begin{equation}
+\operatorname{Var}(\eta_t)=(\phi_L F_t)^2,\qquad
+\operatorname{Var}(\zeta_t)=(\psi F_t)^2,\qquad
+\operatorname{Var}(\varepsilon_t)=(\lambda F_t)^2 .
+\end{equation}
+The Kalman recursion yields the one-step prediction and its uncertainty
+\begin{equation}
+\hat{\mu}_t = \ell_{t-1}+b_{t-1}, \qquad
+\sigma_t = \sqrt{P^{11}_t+2P^{12}_t+P^{22}_t+(\phi_L F_t)^2+(\lambda F_t)^2}.
+\end{equation}
+
+\subsection{OU sleeve: windowed mean reversion}
+
+Over a trailing window $W$ the sleeve estimates the mean $\bar{C}$, the AR(1) coefficient
+$\rho$ (clipped to $[0,0.99]$) and the dispersion $s$, giving the forecast
+\begin{equation}
+\hat{\mu}^{\,\mathrm{OU}}_t = \bar{C}_t + \rho_t\left(C_{t-1}-\bar{C}_t\right).
+\end{equation}
+
+\subsection{Orders}
+
+Each sleeve submits a bid capped by the open and by a fraction of the running peak $G_{t-1}$,
+\begin{equation}
+\beta_t=\min\!\Big(\hat{\mu}_t-k\,\sigma_t,\;\; O_t,\;\; G_{t-1}(1-c)\Big),
+\label{eq:bid}
+\end{equation}
+and, once filled, rests a sell at the take-profit
+\begin{equation}
+\tau_t = \beta_t + \pi\,C_{t-1},
+\label{eq:target}
+\end{equation}
+where $k$ is the bid buffer in standard deviations, $c$ the peak cap and $\pi$ the premium. A
+position unrealised after $S$ calendar days is closed at the open (the stop).
+
+% ================= 3 =================
+\section{The fill-ordering problem}
+
+A daily bar records $\{O_t,H_t,L_t,C_t\}$ but \emph{not the order in which $L_t$ and $H_t$
+occurred}. The backtest books a same-day round trip whenever
+\begin{equation}
+L_t \le \beta_t \quad\text{and}\quad H_t \ge \tau_t ,
+\label{eq:sameday}
+\end{equation}
+which presumes the low preceded the high. If the high in fact came first, the position could
+not have been bought and sold that session: the trade is fictitious.
+
+Condition~\eqref{eq:sameday} is not a minor edge case. Across the book it accounts for
+\textbf{74\%} of Bayes trades and \textbf{90\%} of OU trades. Because returns compound, an
+error concentrated in the fastest-recycling trades propagates multiplicatively.
+
+Two sub-cases are decidable from daily data alone. A fill \emph{at the open}
+($\beta_t \ge O_t$, i.e.\ the open was the binding cap in~\eqref{eq:bid}) is unambiguous: the
+open is the session's first price, so any subsequent high necessarily follows the fill. A fill
+on an intraday dip ($\beta_t<O_t$) is undecidable. Only $\sim\!15\%$ of same-day trades were
+at-open fills, so daily bars alone leave the question overwhelmingly open.
+
+% ================= 4 =================
+\section{Verification methodology}
+
+Let $\{(h_j,l_j)\}_{j=1}^{m}$ be the intraday bars of session $t$ in chronological order.
+Define the first filling bar
+\begin{equation}
+j^{\ast} = \min\{\, j : l_j \le \beta_t \,\},
+\end{equation}
+and accept the same-day exit if and only if the target is reached at or after that bar,
+\begin{equation}
+\textsc{Real}(t) \iff \exists\, j \ge j^{\ast} \ \text{such that}\ h_j \ge \tau_t .
+\label{eq:verify}
+\end{equation}
+Operationally this is evaluated with a suffix maximum $M_j=\max_{i\ge j} h_i$, so
+$\textsc{Real}(t)\iff M_{j^\ast}\ge\tau_t$, at $O(m)$ preprocessing per session.
+
+\subsection{Resolution adequacy}
+
+Within a single bar the ordering of $l_j$ and $h_j$ remains unknown, so
+predicate~\eqref{eq:verify} is optimistic at coarse resolution. Downsampling the NVDA
+one-minute series establishes the tolerance:
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Bar resolution} & \textbf{Annualised} & \textbf{Trades} & \textbf{Sharpe}\\
+\midrule
+1-minute (reference) & 36\% & 95 & 1.03\\
+\rowcolor{bckeep} 5-minute & 36\% & 95 & 1.03\\
+15-minute & 53\% & 111 & 1.55\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Five-minute bars reproduce the one-minute result \emph{exactly}: with a
+premium of $\pi\!\approx\!1.7\%$ the target is essentially never reached within five minutes of
+the fill. Fifteen-minute bars inflate the result materially. Five-minute data is therefore
+sufficient and was used for the remaining nine names.}
+\end{table}
+
+\subsection{Coverage}
+
+Regular-hours bars only ($09{:}30$--$16{:}00$~ET); pre- and post-market bars are excluded as
+the strategy trades the session. Coverage exceeds $94\%$ of sample sessions for every name.
+Uncovered sessions fall back to the at-open rule, which is conservative.
+
+% ================= 5 =================
+\section{Results: fill rates and restated returns}
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Name} & \textbf{Fill rate} & \textbf{Backtest} & \textbf{Verified} & \textbf{Retained}\\
+\midrule
+\rowcolor{bckeep} RKLB & 69\% & 587\% & \textbf{113\%} & 0.19\\
+PLTR & 64\% & 174\% & 43\% & 0.25\\
+SPOT & 62\% & 149\% & 32\% & 0.21\\
+TSM  & 59\% & 133\% & 53\% & 0.40\\
+VRT  & 58\% & 219\% & 51\% & 0.23\\
+VST  & 56\% & 257\% & 55\% & 0.21\\
+TSLA & 54\% & 157\% & 18\% & 0.11\\
+AVGO & 52\% & 143\% & 31\% & 0.22\\
+NVDA & 50\% & 150\% & 36\% & 0.24\\
+\rowcolor{bcbad} SOFI & 46\% & 231\% & 19\% & 0.08\\
+\midrule
+\textbf{Mean} & \textbf{57\%} & \textbf{$\sim$220\%} & \textbf{$\sim$45\%} & \textbf{0.21}\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Fill rate is the proportion of same-day round trips satisfying
+\eqref{eq:verify}. ``Retained'' is verified return divided by backtested return. Trade counts
+fall by approximately $40\%$ on the verified basis.}
+\end{table}
+
+Three observations follow. First, the fill rate is \emph{tightly clustered} ($46\%$--$69\%$),
+indicating a stable structural property rather than an idiosyncrasy of any one name. Second,
+retention is uniformly poor ($0.08$--$0.40$): because compounding is multiplicative, losing
+$43\%$ of the fastest-recycling trades costs far more than $43\%$ of the return. Third, the
+ordering of names is broadly preserved --- RKLB remains the strongest by a wide margin --- so
+relative judgements made on the old basis largely survive even though absolute levels do not.
+
+\textbf{The strategy is sound; the backtest was measuring a version of it that fills better than
+the market does.} A verified $\sim\!45\%$ annualised remains a strong result.
+
+% ================= 6 =================
+\section{Capital allocation between sleeves}
+
+The sleeves are weakly correlated (mean daily correlation $\approx0.24$), so the split is a
+genuine allocation decision. Earlier analysis on the \emph{unverified} basis favoured an
+OU-heavy book. That conclusion inverts under verification, for a mechanical reason: the OU
+sleeve depended on same-day round trips for $90\%$ of its trades against $74\%$ for Bayes, and
+is therefore penalised disproportionately when fictitious fills are removed.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c r r r r}
+\toprule
+\textbf{Bayes share} & \textbf{Verified return} & \textbf{Sharpe} & \textbf{Max drawdown} & \textbf{Trades/yr}\\
+\midrule
+0\%   & 30\% & 0.64 & 39\% & unchanged\\
+\rowcolor{bckeep} 50\% (current) & 45\% & 0.92 & 40\% & unchanged\\
+70\%  & 50\% & 0.97 & 41\% & unchanged\\
+\rowcolor{bcact} 80\%  & 53\% & 0.99 & 42\% & unchanged\\
+100\% & 58\% & 1.02 & 43\% & reduced\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Return and Sharpe both increase monotonically in the Bayes share for
+only $\sim\!3$pp of additional drawdown. Trade count is invariant across interior splits --- the
+split scales trade \emph{size}, not \emph{frequency} --- but falls at the corners, where one
+sleeve is unfunded. A $5\%$ floor on the minor sleeve preserves the full count.}
+\end{table}
+
+\subsection{Out-of-sample validation}
+
+Three expanding folds per name, with the share chosen on the training window only and scored on
+the unseen slice against the incumbent $50/50$:
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lc}
+\toprule
+Folds won by the tilted allocation & \textbf{20 / 30}\\
+Mean out-of-sample advantage & \textbf{$+1.9$pp}\\
+Share selected on training data & $0.95$ in \textbf{30 of 30} folds\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Perfect selection stability --- every training window on every name chose
+the same share --- against roughly $p\approx0.05$ significance on the win rate. The in-sample
+advantage of $+12$pp compresses to $+1.9$pp out of sample.}
+\end{table}
+
+Two qualifications matter. The validation supports a \emph{uniform} tilt, not the per-name
+differentiation suggested by the full-sample fit: training windows selected a Bayes-heavy share
+even for RKLB and TSLA, whose apparent OU preference is visible only with late data in view.
+And the realised advantage is modest. A share of $70\text{--}80\%$ is therefore recommended
+rather than the fitted $95\%$: the curve is flat across that range, and retaining a material OU
+sleeve preserves decorrelation against regimes absent from this sample.
+
+% ================= 7 =================
+\section{Register of rejected hypotheses}
+
+Each hypothesis below produced a favourable in-sample result and was then tested on data unseen
+during fitting. Six of seven did not survive.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{p{5.1cm} p{4.4cm} c}
+\toprule
+\textbf{Hypothesis} & \textbf{Out-of-sample outcome} & \textbf{Verdict}\\
+\midrule
+Pre-market VWAP or actual open as the entry signal &
+$-8$ to $-15$pp average; beats baseline for $0$--$2$ of $10$ names & \textcolor{bcbad}{\textbf{\color{red}Rejected}}\\
+Re-optimising parameters for candidate names &
+Frozen parameters win; refits gain $0$--$9$pp in-sample only & {\color{red}\textbf{Rejected}}\\
+Wide premia fitted with same-day exits forbidden &
+Premia $\sim\!5\times$ wider in-sample; underperforms on verified fills & {\color{red}\textbf{Rejected}}\\
+Re-optimisation against verified fills (Bayes floor) &
+$1/3$ folds; fitted values unstable across folds & {\color{red}\textbf{Rejected}}\\
+Close-conditional premium (widen after a strong close) &
+$14/24$ folds ($58\%$), $+2.7$pp; parameter pinned to the grid edge & {\color{red}\textbf{Rejected}}\\
+Weekly cycle with forced week-end exit &
+$6/18$ folds, mean $-10$pp against the frozen daily model & {\color{red}\textbf{Rejected}}\\
+\rowcolor{bckeep} Tilt of capital toward the Bayes sleeve &
+$20/30$ folds, $+1.9$pp, selection stable in $30/30$ & \textbf{Adopted}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Why the failures share a shape}
+
+Every rejected hypothesis was a \emph{search}: an optimiser was asked to locate better values
+within the existing machinery, and reliably located noise. Two diagnostics anticipated failure
+in each case, and are recommended as standing tests:
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt]
+  \item \kpi{Parameter instability.}{} Fitted values that swing widely between folds --- the
+        weekly model's premium ranged $0.06$ to $0.20$ on a single name --- indicate the
+        optimiser is fitting each window's noise. The adopted allocation, by contrast, was
+        selected identically in all thirty folds.
+  \item \kpi{Boundary seeking.}{} An optimum that migrates to the edge of its search range and
+        does not turn over is not an optimum. This occurred in the wide-premium, close-conditional
+        and weekly experiments.
+\end{enumerate}
+
+A separate finding deserves note as \emph{partially} supported: the calendar stop-loss period
+is not well set at a uniform $50$ days. Regime-appropriate values (tighter for choppy names,
+longer for momentum names such as RKLB) beat the uniform setting in $6$ of $10$ names out of
+sample --- better than chance, but the \emph{direction} generalises while the specific value
+does not. Round numbers by regime are defensible; fitted optima are not.
+
+% ================= 8 =================
+\section{Conclusions and recommendations}
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=3pt]
+  \item \kpi{Restate expected performance.}{} Plan against $\sim\!45\%$ annualised and
+        approximately $40\%$ fewer trades than the daily backtest reports. The prior figure of
+        $\sim\!220\%$ is not attainable, being contingent on same-day fills that occur roughly
+        $57\%$ of the time.
+  \item \kpi{Adopt a moderate Bayes tilt.}{} Move the allocation to $70\text{--}80\%$ Bayes,
+        uniformly, with a $5\%$ floor on the minor sleeve. Expected benefit $\sim\!+2$pp
+        annualised at no cost to trade frequency.
+  \item \kpi{Leave all other parameters unchanged.}{} Six independent attempts to improve them
+        failed out of sample. The edge is structural, not parametric.
+  \item \kpi{Adopt the verified basis as standard.}{} Any future candidate name or model change
+        should be evaluated on intraday-verified fills. Five-minute resolution is sufficient;
+        fifteen-minute is not.
+  \item \kpi{Re-rank prior candidate studies.}{} Assessments of new names (CCL, MU, CVNA, LLY
+        and the diversifier set) were conducted on the unverified basis. Since fill rates vary
+        between $46\%$ and $69\%$, their relative ordering may shift once restated.
+\end{enumerate}
+
+\textbf{Principal caveat.} The sample spans April 2024 to mid-2026, a sustained bull regime for
+high-beta US equities. No conclusion here is tested against a sideways or declining market.
+This is the primary reason to retain a material OU sleeve despite its weaker verified
+performance: its value is decorrelation in regimes the data does not contain.
+
+\vfill
+{\footnotesize\color{bcgrey} Data: daily OHLC April 2024--July 2026 for ten names; one-minute
+bars for NVDA and five-minute bars for the remaining nine, regular hours. The Python replica
+reproduces every cached workbook sheet to the dollar. All out-of-sample results use expanding
+walk-forward with parameters selected on training windows only.}
+
+\end{document}
