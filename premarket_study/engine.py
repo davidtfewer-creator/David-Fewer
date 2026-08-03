@@ -169,10 +169,19 @@ def run_model(dates, O, H, L, C, p: Params,
             AB[i] = (bp + C[i - 1] * prem) if Z[i] == 1 else (AB[i - 1] if AE[i - 1] == 1 else 0.0)
             # stop-loss condition
             held = AE[i - 1] == 1 and AV[i - 1] is not None and (dates[i] - AV[i - 1]).days >= p.stop_days
-            # sell flag. target exit allowed for positions held from a prior day, and (only
-            # when same_day_exit) for a position bought today. Forbidding the same-day case is
-            # the conservative bound: with daily bars we cannot confirm the peak followed the dip.
-            tgt_ok = (AE[i - 1] == 1) or (Z[i] == 1 and same_day_exit)
+            # sell flag. target exit allowed for positions held from a prior day, and for a
+            # position bought today per same_day_exit:
+            #   True     -> allow (optimistic; assumes the peak followed the dip)
+            #   False    -> forbid (conservative floor)
+            #   'at_open'-> allow only if the buy filled AT the open (bp>=O): the open is the
+            #               first price, so any later high provably came after the buy -> the
+            #               same-day exit is legitimate, not an assumption. Intraday-dip buys
+            #               (bp<O) stay forbidden (genuinely ambiguous without minute data).
+            if same_day_exit == 'at_open':
+                sd_ok = (Z[i] == 1 and bp is not None and bp >= O[i] - 1e-9)
+            else:
+                sd_ok = (Z[i] == 1 and same_day_exit)
+            tgt_ok = (AE[i - 1] == 1) or sd_ok
             AD[i] = 1 if ((tgt_ok and H[i] >= AB[i]) or held) else 0
             # actual sale price
             if AD[i] == 1:
