@@ -55,7 +55,8 @@ class Result:
 
 def run_model(dates, O, H, L, C, p: Params,
               bayes_signal=None, ou_anchor=None, open_cap=None,
-              bayes_gain=0.0, collect=False, same_day_exit=True) -> Result:
+              bayes_gain=0.0, collect=False, same_day_exit=True,
+              cc_up=None, cc_down=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -144,7 +145,14 @@ def run_model(dates, O, H, L, C, p: Params,
             AO[i] = 1
     AN = [1] + [(dates[i] - dates[i - 1]).days for i in range(1, N)]
 
-    def run_tranche(buy_price, prem, init_fund, interest_start=1):
+    def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None):
+        # cc_up / cc_down: close-conditional premium. On the fill day the target is the usual
+        # bid + prevclose*prem. At that day's CLOSE we observe where the stock finished relative
+        # to the fill and amend the resting sell for the following days: multiply the premium by
+        # cc_up if it closed above the fill, cc_down if at/below. No lookahead -- the close is
+        # known before the amendment takes effect. None/None reproduces the fixed-premium model.
+        cc = cc_up is not None and cc_down is not None
+        buy_px = None; prem_amt = None; adjusted = True
         # interest_start: first row index that accrues interest. In the workbook the
         # Bayes fund is initialised at row 8 (accrues from row 9 -> i=1) while the OU
         # fund is initialised one row later at row 9 (AR9=0, accrues from row 10 -> i=2).
@@ -166,7 +174,20 @@ def run_model(dates, O, H, L, C, p: Params,
             # buy flag: not holding & low reached the bid
             Z[i] = 1 if (AE[i - 1] == 0 and bp is not None and L[i] <= bp) else 0
             AA[i] = (Y[i] / (bp + p.comm)) if Z[i] == 1 else (AA[i - 1] if AE[i - 1] == 1 else 0.0)
-            AB[i] = (bp + C[i - 1] * prem) if Z[i] == 1 else (AB[i - 1] if AE[i - 1] == 1 else 0.0)
+            if Z[i] == 1:
+                buy_px = bp; prem_amt = C[i - 1] * prem
+                AB[i] = bp + prem_amt
+                adjusted = not cc                      # pending amendment at tonight's close
+            elif AE[i - 1] == 1:
+                if not adjusted:
+                    # first session after the fill: C[i-1] is the fill day's close
+                    mult = cc_up if C[i - 1] > buy_px else cc_down
+                    AB[i] = buy_px + prem_amt * mult
+                    adjusted = True
+                else:
+                    AB[i] = AB[i - 1]
+            else:
+                AB[i] = 0.0
             # stop-loss condition
             held = AE[i - 1] == 1 and AV[i - 1] is not None and (dates[i] - AV[i - 1]).days >= p.stop_days
             # sell flag. target exit allowed for positions held from a prior day, and for a
@@ -202,8 +223,10 @@ def run_model(dates, O, H, L, C, p: Params,
         return dict(Y=Y, AA=AA, AB=AB, AC=AC, AD=AD, AE=AE, Z=Z, AV=AV, stops=stops,
                     interest=sum(AQ), AP=AP, AQ=AQ, AO=AO, AN=AN)
 
-    t1 = run_tranche(X,  p.premium, p.capital * p.bayes_pct,        interest_start=1)
-    t2 = run_tranche(AM, p.ou_prem, p.capital * (1 - p.bayes_pct),  interest_start=2)
+    t1 = run_tranche(X,  p.premium, p.capital * p.bayes_pct,        interest_start=1,
+                     cc_up=cc_up, cc_down=cc_down)
+    t2 = run_tranche(AM, p.ou_prem, p.capital * (1 - p.bayes_pct),  interest_start=2,
+                     cc_up=cc_up, cc_down=cc_down)
 
     fY = t1['Y'][-1]; fAF = t2['Y'][-1]
     terminal = fY + fAF
