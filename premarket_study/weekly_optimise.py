@@ -15,10 +15,12 @@ from five_min import make_checker as fm_checker, FILES as FM_FILES
 from minute_engine import make_checker as nvda_checker
 
 data, params, cached = load_book()
-TARGETS = ['NVDA', 'SOFI', 'AVGO', 'SPOT']
+TARGETS = ['NVDA', 'SOFI', 'AVGO', 'SPOT', 'TSLA', 'PLTR']
 
+# build checkers only for the names actually requested (each parses a large workbook)
+_REQ = [a for a in sys.argv[1:] if a in TARGETS] or TARGETS
 CHK = {}
-for s in TARGETS:
+for s in _REQ:
     dts, O, H, L, C = data[s]
     CHK[s] = (nvda_checker(dts, O)[0] if s == 'NVDA' else fm_checker(s, dts, O)[0])
 
