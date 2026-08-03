@@ -1,0 +1,252 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.45em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\newcommand{\kpi}[2]{\textbf{#1}\,{\footnotesize\color{bcgrey}#2}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Book Implementation}\\[0.25cm]
+{\color{bcnavy}\Huge\bfseries Specification}\\[0.35cm]
+{\color{bcblue}\LARGE Deployment Configuration}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Hybrid Bayesian / Ornstein--Uhlenbeck Volatility Harvester}\\[0.2cm]
+{\large\color{bcgrey} Eleven names --- parameters, stops, and allocation-sheet settings}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 3 August 2026}\\[1.8cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{Purpose.}\\ \color{black}
+The operative configuration for live deployment. All model parameters are unchanged from the
+current workbooks: nine attempts to improve them were tested out of sample and rejected. The
+two adopted changes are allocation decisions --- equal weighting across names and a tilt toward
+the Bayes sleeve. Expected performance on the execution-verified basis is
+\textbf{$\sim\!49\%$ annualised}, not the $\sim\!220\%$ the daily backtest reports.}}
+\end{titlepage}
+
+% ================= 1 =================
+\section{The book}
+
+Eleven names: the existing ten plus \textbf{MU}, which verifies at $52\%$ against a $45\%$
+floor --- second only to RKLB, and with an unusually low dependence on unverifiable fills.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l r r r c}
+\toprule
+\textbf{Name} & \textbf{Sector} & \textbf{Verified ann.} & \textbf{Fill rate} & \textbf{Trades/yr} & \textbf{Weight}\\
+\midrule
+RKLB & Aerospace           & 113\% & 69\% & 96  & 9.09\%\\
+\rowcolor{bckeep} MU & Semiconductors (memory) & 52\% & 48\% & 49 & 9.09\%\\
+VST  & Utilities (power)   & 55\%  & 56\% & 68  & 9.09\%\\
+TSM  & Semiconductors      & 53\%  & 59\% & 65  & 9.09\%\\
+VRT  & Datacentre infra.   & 51\%  & 58\% & 54  & 9.09\%\\
+PLTR & Software            & 43\%  & 64\% & 68  & 9.09\%\\
+NVDA & Semiconductors      & 36\%  & 50\% & 41  & 9.09\%\\
+SPOT & Media               & 32\%  & 62\% & 70  & 9.09\%\\
+AVGO & Semiconductors      & 31\%  & 52\% & 66  & 9.09\%\\
+SOFI & Fintech             & 19\%  & 46\% & 48  & 9.09\%\\
+TSLA & Autos               & 18\%  & 54\% & 61  & 9.09\%\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Verified annualised return measured against intraday fills (one-minute
+for NVDA, five-minute elsewhere). Weight is $1/11$ for every name --- see \S3.}
+\end{table}
+
+\textbf{Concentration note.} Five of eleven names (NVDA, TSM, AVGO, MU, and arguably VRT and
+VST as datacentre infrastructure) load on a single AI/semiconductor factor. These names stopped
+out together in December~2025. MU deepens this exposure; it is added for return quality, not
+diversification.
+
+% ================= 2 =================
+\section{Model parameters --- unchanged}
+
+Enter exactly as below. These are the values already in each workbook; none should be re-fitted.
+
+\begin{table}[H]\centering\footnotesize
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l rrr rrr r rrr}
+\toprule
+& \multicolumn{6}{c}{\textbf{Bayes sleeve}} & \multicolumn{4}{c}{\textbf{OU sleeve}}\\
+\cmidrule(lr){2-7}\cmidrule(lr){8-11}
+\textbf{Name} & $\lambda$ & $\phi_L$ & $\psi$ & $k$ & premium & peak cap & $W$ & buffer $k$ & premium & cap\\
+& \tiny B2 & \tiny D2 & \tiny F2 & \tiny H2 & \tiny J2 & \tiny L2 & \tiny B3 & \tiny D3 & \tiny H3 & \tiny J3\\
+\midrule
+NVDA & 0.6045 & 0.3208 & 0.0074 & 1.1410 & 0.0173 & 0.0196 & 51  & 0.9073 & 0.0248 & 0.0562\\
+TSM  & 0.4620 & 0.2543 & 0.0650 & 1.0045 & 0.0157 & 0.0305 & 77  & 0.3992 & 0.0100 & 0.0209\\
+TSLA & 0.3687 & 0.3028 & 0.0906 & 1.2232 & 0.0247 & 0.0274 & 76  & 0.2211 & 0.0134 & 0.0507\\
+VRT  & 0.4207 & 0.4259 & 0.0817 & 1.1164 & 0.0217 & 0.0484 & 80  & 0.5679 & 0.0266 & 0.0595\\
+VST  & 0.3735 & 0.2643 & 0.0962 & 1.3857 & 0.0218 & 0.0137 & 122 & 0.2386 & 0.0145 & 0.0527\\
+AVGO & 0.1858 & 0.3159 & 0.0802 & 1.9440 & 0.0150 & 0.0410 & 111 & 0.1902 & 0.0165 & 0.0288\\
+PLTR & 0.2394 & 0.3473 & 0.0449 & 0.7229 & 0.0269 & 0.0512 & 53  & 0.3055 & 0.0154 & 0.0293\\
+RKLB & 0.3528 & 0.2374 & 0.1130 & 0.7123 & 0.0268 & 0.0080 & 85  & 0.2206 & 0.0221 & 0.0336\\
+SOFI & 0.3411 & 0.2034 & 0.0262 & 1.9760 & 0.0297 & 0.0315 & 169 & 0.1868 & 0.0220 & 0.0373\\
+SPOT & 0.6841 & 0.2892 & 0.0081 & 1.0947 & 0.0161 & 0.0373 & 61  & 0.3102 & 0.0090 & 0.0150\\
+\rowcolor{bckeep} MU & 0.6000 & 0.2636 & 0.0100 & 1.0548 & 0.0243 & 0.0380 & 91 & 0.3000 & 0.0250 & 0.0292\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Cell references are the \texttt{Model <NAME>} sheet coordinates. MU's
+parameters were verified stable: across $30$ perturbations of $\pm3\%$ and $\pm10\%$ the mean
+return equals the baseline exactly, confirming a plateau rather than a fitted peak.}
+\end{table}
+
+\subsection{Settings common to every name}
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Setting} & \textbf{Cell} & \textbf{Value}\\
+\midrule
+\rowcolor{bcact} Stop-loss (calendar days) & T2 & \textbf{50 --- uniform, all names}\\
+Commission (\$/share) & N2 & 0.005\\
+Idle-cash interest (p.a.) & R2 & 0.0314\\
+Bayes share of name capital & V2 & \textbf{0.75}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{On the stop.} A per-name stop was tested and rejected: chosen on training data only it
+wins $13$ of $30$ folds ($-1.8$pp), and the selected value scatters from $20$ to $150$ days.
+An earlier study reported $6/10$ names, but that used full-sample fitting on the unverified
+basis. \textbf{Keep $50$ days for every name.}
+
+% ================= 3 =================
+\section{Allocation sheet settings}
+
+\subsection{Weights --- equal, $9.09\%$ each}
+
+The existing return\,$\div$\,volatility rule should be retired. Tested out of sample it ranks
+\emph{last} of five schemes, because return leadership does not persist (rank correlation
+$+0.71$, $-0.09$, $-0.30$ across successive windows) while volatility does ($+0.45$). Equal
+weighting beats it by roughly $10$pp annually --- the single largest improvement identified.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Input} & \textbf{Cell} & \textbf{Set to}\\
+\midrule
+Total capital & B5 & unchanged\\
+Bayes fraction --- flat & B6 & \textbf{0.75}\\
+Volatility lookback & B7 & (no longer drives weights)\\
+\rowcolor{bcact} Floor: min weight per stock & B8 & \textbf{0.0909} \quad$(=1/11)$\\
+Split mode & B9 & \textbf{1} (flat)\\
+Include? --- all eleven names & C11:C21 & \textbf{1}\\
+Cap (max wt) --- all names & E11:E21 & \textbf{0.0909} or higher\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Setting the floor to $1/11$ forces every included name to at least $9.09\%$; with eleven names
+these sum to $100\%$, so all weights resolve to exactly $9.09\%$ regardless of the
+risk-adjusted calculation. If you prefer, hard-code the weights instead --- the effect is
+identical. \textbf{Use split mode~1}: per-name Bayes shares were tested and not supported, as
+training windows selected a Bayes-heavy share for every name including RKLB and TSLA.
+
+\subsection{Sleeve split --- $75\%$ Bayes}
+
+Validated out of sample: $20$ of $30$ folds, $+1.9$pp, with the share selected \emph{identically
+in all thirty folds}. The fitted optimum was $95\%$, but $70\text{--}80\%$ is recommended --- the
+curve is flat across that range and a material OU sleeve preserves decorrelation against regimes
+absent from a sustained bull sample. Never run a corner: a $5\%$ floor on the minor sleeve
+preserves the full trade count.
+
+% ================= 4 =================
+\section{Expected performance}
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r}
+\toprule
+\textbf{Basis} & \textbf{Annualised}\\
+\midrule
+Daily backtest as displayed & $\sim$220\%\\
+\midrule
+Verified fills, equal weight, $50/50$ sleeves & 45\%\\
+\rowcolor{bckeep} \textbf{Verified, equal weight, $75\%$ Bayes (this configuration)} & \textbf{$\sim$49\%}\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Roughly $43\%$ of the backtest's same-day round trips could not have
+been executed; mean true fill rate across the book is $57\%$. Expect approximately $40\%$ fewer
+trades than the sheet reports. Drawdowns of $35\text{--}45\%$ at book level are consistent with
+the sample.}
+\end{table}
+
+\textbf{Not adopted.} Pre-market-directed capital allocation (worth $\sim\!+2$pp) is deferred on
+complexity grounds. The signal itself is strong --- pre-market VWAP below the bid fills $97\%$ of
+the time against a $36\%$ base rate --- so it remains available if the operational overhead
+becomes acceptable. Leverage and capital pooling are likewise declined.
+
+% ================= 5 =================
+\section{Do not re-optimise}
+
+Nine changes were tested out of sample; seven failed. The failures share a shape: each asked an
+optimiser to find better parameter values, and each found noise. Two diagnostics identified them
+in advance and should be applied to any future proposal.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{p{6.4cm} p{6.4cm}}
+\toprule
+\textbf{Warning sign} & \textbf{Example}\\
+\midrule
+Fitted values unstable across folds & Weekly model's premium ranged $0.06$--$0.20$ on one name; the per-name stop scattered $20$--$150$ days\\
+Optimum migrating to the edge of its range & Wide-premium, close-conditional and weekly experiments all pinned to a boundary\\
+\midrule
+\textbf{Contrast: what survived} & Sleeve share selected identically in $30/30$ folds; equal weighting rests on a measured persistence property, not a fitted value\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rejected: pre-market VWAP or open as entry signal; candidate-name re-optimisation; wide premia
+under a no-same-day constraint; re-optimisation against verified fills; close-conditional
+premium; weekly cycle with forced week-end exit; per-name calendar stop; concentration into
+top-$K$ likely fillers; dropping trailing laggards.
+
+\vfill
+{\footnotesize\color{bcgrey} Basis: daily OHLC April~2024--August~2026; intraday verification
+from one-minute (NVDA) and five-minute (all others) bars, regular hours. All out-of-sample
+results use expanding walk-forward with parameters selected on training windows only. The
+Python replica reproduces every cached workbook sheet to the dollar.}
+
+\end{document}
