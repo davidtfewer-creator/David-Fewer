@@ -21,3 +21,4 @@ memo/build*.log
 *.pdf
 premarket_study/opt_out.log
 premarket_study/*.log
+*.pkl
