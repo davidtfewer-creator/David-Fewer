@@ -177,8 +177,11 @@ def run_model(dates, O, H, L, C, p: Params,
             #               first price, so any later high provably came after the buy -> the
             #               same-day exit is legitimate, not an assumption. Intraday-dip buys
             #               (bp<O) stay forbidden (genuinely ambiguous without minute data).
+            #   callable -> ask it (used for minute-data verified fills): f(i, bid, target)
             if same_day_exit == 'at_open':
                 sd_ok = (Z[i] == 1 and bp is not None and bp >= O[i] - 1e-9)
+            elif callable(same_day_exit):
+                sd_ok = (Z[i] == 1 and bp is not None and same_day_exit(i, bp, AB[i]))
             else:
                 sd_ok = (Z[i] == 1 and same_day_exit)
             tgt_ok = (AE[i - 1] == 1) or sd_ok
