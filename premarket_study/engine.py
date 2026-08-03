@@ -55,7 +55,7 @@ class Result:
 
 def run_model(dates, O, H, L, C, p: Params,
               bayes_signal=None, ou_anchor=None, open_cap=None,
-              bayes_gain=0.0, collect=False) -> Result:
+              bayes_gain=0.0, collect=False, same_day_exit=True) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -169,8 +169,11 @@ def run_model(dates, O, H, L, C, p: Params,
             AB[i] = (bp + C[i - 1] * prem) if Z[i] == 1 else (AB[i - 1] if AE[i - 1] == 1 else 0.0)
             # stop-loss condition
             held = AE[i - 1] == 1 and AV[i - 1] is not None and (dates[i] - AV[i - 1]).days >= p.stop_days
-            # sell flag
-            AD[i] = 1 if (((AE[i - 1] == 1 or Z[i] == 1) and H[i] >= AB[i]) or held) else 0
+            # sell flag. target exit allowed for positions held from a prior day, and (only
+            # when same_day_exit) for a position bought today. Forbidding the same-day case is
+            # the conservative bound: with daily bars we cannot confirm the peak followed the dip.
+            tgt_ok = (AE[i - 1] == 1) or (Z[i] == 1 and same_day_exit)
+            AD[i] = 1 if ((tgt_ok and H[i] >= AB[i]) or held) else 0
             # actual sale price
             if AD[i] == 1:
                 AC[i] = O[i] if (held and H[i] < AB[i]) else AB[i]
