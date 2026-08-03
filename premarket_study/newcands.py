@@ -13,6 +13,7 @@ FILES = {
     'LLY':  f'{BASE}/279271c2-Daily_trading_Bayesian__OU_tranche_LIVE_LLY.xlsx',
     'CVNA': f'{BASE}/bf72c12c-Daily_trading_Bayesian__OU_tranche_LIVE_CVNA.xlsx',
     'MU':   f'{BASE}/bd831b15-Daily_trading_Bayesian__OU_tranche_LIVE_MU.xlsx',
+    'HIMS': f'{BASE}/cd8fd24b-Daily_trading_Bayesian__OU_tranche_LIVE_HIMS.xlsx',
 }
 
 
