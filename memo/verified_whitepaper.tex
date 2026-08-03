@@ -55,7 +55,7 @@
 {\large\color{bcgrey} capital allocation, and a register of rejected hypotheses}\\[1.1cm]
 {\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
 {\color{bcgrey} Quantitative Research}\\[0.15cm]
-{\color{bcgrey} 3 August 2026}\\[1.6cm]
+{\color{bcgrey} 3 August 2026 --- Revision 2}\\[1.6cm]
 
 \fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{Abstract.}\\ \color{black}
 The daily-bar backtest of the hybrid Bayesian~/~Ornstein--Uhlenbeck harvester cannot determine
@@ -63,9 +63,10 @@ whether an intraday low preceded the corresponding high, and therefore resolves 
 round trip in the strategy's favour. Using minute and five-minute data for all ten names we
 find that only $57\%$ of such trades were actually achievable. Restating the book on verified
 fills reduces the mean annualised return from $\sim\!220\%$ to $\sim\!45\%$. The edge is real
-and substantial; its magnitude was overstated roughly fivefold. Seven attempts to improve the
-model were tested out of sample: six failed. The single validated change is a tilt of capital
-toward the Bayes sleeve.}}
+and substantial; its magnitude was overstated roughly fivefold. Nine changes were tested out of
+sample and seven failed. The two that survived are both allocation decisions resting on
+measured, persistent properties of the data: equal weighting across names, and a tilt of
+capital toward the Bayes sleeve. Every attempt to fit better parameter values failed.}}
 \end{titlepage}
 
 % ================= 1 =================
@@ -263,7 +264,11 @@ is therefore penalised disproportionately when fictitious fills are removed.
 \caption*{\footnotesize Return and Sharpe both increase monotonically in the Bayes share for
 only $\sim\!3$pp of additional drawdown. Trade count is invariant across interior splits --- the
 split scales trade \emph{size}, not \emph{frequency} --- but falls at the corners, where one
-sleeve is unfunded. A $5\%$ floor on the minor sleeve preserves the full count.}
+sleeve is unfunded. A $5\%$ floor on the minor sleeve preserves the full count.
+\textbf{These are in-sample figures and are ceilings, not forecasts}: the realised
+out-of-sample gain is $+1.9$pp (\S6.1), so the planning figure is $\sim\!47\%$, not the $53\%$
+or $58\%$ implied by the rows below. A per-name fitted split reaches $57\%$ in-sample but does
+not survive validation.}
 \end{table}
 
 \subsection{Out-of-sample validation}
@@ -293,6 +298,56 @@ rather than the fitted $95\%$: the curve is flat across that range, and retainin
 sleeve preserves decorrelation against regimes absent from this sample.
 
 % ================= 7 =================
+\section{Capital allocation across the book}
+
+Verified returns differ substantially between names ($18\%$ to $113\%$), which invites weighting
+by observed performance. That is sound only if performance persists. It does not.
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lc}
+\toprule
+\textbf{Rank correlation between adjacent windows} & \textbf{$\rho$}\\
+\midrule
+Return, window $1\rightarrow2$ & $+0.71$\\
+Return, window $2\rightarrow3$ & $-0.09$\\
+Return, window $3\rightarrow4$ & $-0.30$\\
+\midrule
+\rowcolor{bckeep} Volatility, first half $\rightarrow$ second half & $\mathbf{+0.45}$\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Return leadership does not persist and latterly reverses; volatility
+does persist. This is the classical asymmetry --- risk is forecastable, return is not --- and it
+determines which quantities may legitimately drive weights.}
+\end{table}
+
+Testing allocation schemes out of sample (weights formed on a training window, applied to the
+next unseen window) confirms the implication:
+
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Scheme} & \textbf{Fold 1} & \textbf{Fold 2} & \textbf{Fold 3} & \textbf{Mean}\\
+\midrule
+\rowcolor{bckeep} Equal weight & 62.2\% & 8.6\% & 12.1\% & \textbf{27.6\%}\\
+Inverse volatility & 53.6\% & 4.1\% & 15.3\% & 24.4\%\\
+Inverse drawdown & 53.2\% & 3.2\% & 13.9\% & 23.4\%\\
+Return weighted & 47.0\% & $-0.6\%$ & 7.2\% & 17.9\%\\
+\rowcolor{bcbad} Risk-adjusted (return\,$\div$\,volatility) & 45.1\% & $-1.6\%$ & 9.9\% & \textbf{17.8\%}\\
+\bottomrule
+\end{tabular}
+\caption*{\footnotesize Equal weighting dominates by roughly $10$pp annually. The
+return-over-volatility rule currently implemented in the allocation sheet ranks \emph{last},
+because it leans on the component that does not persist while correcting by the one that does.}
+\end{table}
+
+\textbf{Recommendation: weight the book equally}, or by inverse volatility if a risk tilt is
+required (second best, and it uses only the persistent quantity). Do not weight by return or by
+return over volatility. This is the largest single improvement identified in this work, and it
+requires no change to the model.
+
+% ================= 8 =================
 \section{Register of rejected hypotheses}
 
 Each hypothesis below produced a favourable in-sample result and was then tested on data unseen
@@ -316,11 +371,24 @@ Close-conditional premium (widen after a strong close) &
 $14/24$ folds ($58\%$), $+2.7$pp; parameter pinned to the grid edge & {\color{red}\textbf{Rejected}}\\
 Weekly cycle with forced week-end exit &
 $6/18$ folds, mean $-10$pp against the frozen daily model & {\color{red}\textbf{Rejected}}\\
+Per-name calendar stop in place of a uniform $50$ days &
+$13/30$ folds, mean $-1.8$pp; selected stop scatters from $20$ to $150$ days & {\color{red}\textbf{Rejected}}\\
 \rowcolor{bckeep} Tilt of capital toward the Bayes sleeve &
 $20/30$ folds, $+1.9$pp, selection stable in $30/30$ & \textbf{Adopted}\\
+\rowcolor{bckeep} Equal weighting across names &
+Best of five schemes out of sample, $+9.8$pp over the incumbent rule & \textbf{Adopted}\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+The stop-period result warrants a note, as an earlier study reported it more favourably. That
+study fitted stops on the full sample and scored them on the unverified basis, obtaining $6$ of
+$10$ names --- suggestive, and reported at the time as ``direction robust, magnitude not''. Under
+the stricter protocol here (verified fills; stop chosen on training data only) it fails
+outright, and the selected values contradict the earlier recommendation: that study proposed
+$\sim\!40$ days generally with $60$ for RKLB, whereas training windows here select $90$--$150$
+days for NVDA, TSM and VRT and $30$ days for RKLB. \textbf{The uniform $50$-day stop should be
+retained}, and the earlier per-name table is superseded.
 
 \subsection{Why the failures share a shape}
 
@@ -338,25 +406,32 @@ in each case, and are recommended as standing tests:
         and weekly experiments.
 \end{enumerate}
 
-A separate finding deserves note as \emph{partially} supported: the calendar stop-loss period
-is not well set at a uniform $50$ days. Regime-appropriate values (tighter for choppy names,
-longer for momentum names such as RKLB) beat the uniform setting in $6$ of $10$ names out of
-sample --- better than chance, but the \emph{direction} generalises while the specific value
-does not. Round numbers by regime are defensible; fitted optima are not.
+The two adopted changes share the opposite character. Neither fits a value: each follows from a
+\emph{measured, persistent} property of the data --- that OU depends more heavily than Bayes on
+unverifiable fills, and that return leadership does not persist while volatility does. Both were
+selected identically across folds. The distinction between fitting a parameter and exploiting a
+measured regularity is, on this evidence, what separates changes that survive from those that
+do not.
 
-% ================= 8 =================
+% ================= 9 =================
 \section{Conclusions and recommendations}
 
 \begin{enumerate}[leftmargin=1.5em,itemsep=3pt]
-  \item \kpi{Restate expected performance.}{} Plan against $\sim\!45\%$ annualised and
+  \item \kpi{Weight the book equally.}{} Replace the return-over-volatility rule with equal
+        weights (or inverse volatility if a risk tilt is wanted). Worth $\sim\!+10$pp annually
+        out of sample --- the largest improvement available, and it requires no model change.
+  \item \kpi{Restate expected performance.}{} Plan against $\sim\!45\%$ annualised at the
+        current sleeve split, rising to $\sim\!47\%$ once the validated tilt is applied, with
         approximately $40\%$ fewer trades than the daily backtest reports. The prior figure of
         $\sim\!220\%$ is not attainable, being contingent on same-day fills that occur roughly
-        $57\%$ of the time.
-  \item \kpi{Adopt a moderate Bayes tilt.}{} Move the allocation to $70\text{--}80\%$ Bayes,
-        uniformly, with a $5\%$ floor on the minor sleeve. Expected benefit $\sim\!+2$pp
-        annualised at no cost to trade frequency.
-  \item \kpi{Leave all other parameters unchanged.}{} Six independent attempts to improve them
-        failed out of sample. The edge is structural, not parametric.
+        $57\%$ of the time. In-sample split optima of $53\text{--}58\%$ are ceilings, not
+        forecasts.
+  \item \kpi{Adopt a moderate Bayes tilt.}{} Move the sleeve allocation to $70\text{--}80\%$
+        Bayes, uniformly, with a $5\%$ floor on the minor sleeve. Expected benefit
+        $\sim\!+2$pp annualised at no cost to trade frequency.
+  \item \kpi{Leave all model parameters unchanged, including the uniform $50$-day stop.}{}
+        Seven independent attempts to improve them failed out of sample. The edge is structural,
+        not parametric.
   \item \kpi{Adopt the verified basis as standard.}{} Any future candidate name or model change
         should be evaluated on intraday-verified fills. Five-minute resolution is sufficient;
         fifteen-minute is not.
