@@ -1,6 +1,6 @@
 """Walk-forward the WEEKLY model on verified fills: 3 expanding folds, refit per fold on train
 only, scored on the unseen slice against the DAILY model (verified) over the same slice."""
-import statistics
+import statistics, sys
 from scipy.optimize import differential_evolution
 from stop_sweep import load_book
 from engine import Params, run_model
@@ -9,7 +9,8 @@ from five_min import make_checker as fm
 from minute_engine import make_checker as nv
 
 data, params, cached = load_book()
-T = ['NVDA','SOFI','SPOT','AVGO']
+ALL = ['NVDA','SOFI','SPOT','AVGO','TSLA','PLTR']
+T = [a for a in sys.argv[1:] if a in ALL] or ALL
 CHK = {s: (nv(*(data[s][0], data[s][1]))[0] if s=='NVDA' else fm(s, data[s][0], data[s][1])[0]) for s in T}
 NM=['lam','phi_L','psi','k','premium','peak_cap','ou_buf_k','ou_prem','ou_cap','ou_W']
 B=[(0.2,1.6),(0.1,1.0),(0.001,0.1),(0.3,3.0),(0.005,0.20),(0.002,0.07),(0.1,2.5),(0.005,0.20),(0.005,0.12),(30,150)]
