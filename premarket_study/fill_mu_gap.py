@@ -17,6 +17,13 @@ SRC = '/root/.claude/uploads/2d71f10a-e19f-51b2-8457-2cd547c34dff/79803cea-Tradi
 FIVE = '/root/.claude/uploads/2d71f10a-e19f-51b2-8457-2cd547c34dff/94f1080f-MU_5min_Apr2024Aug2026.xlsx'
 OUT = '/home/user/David-Fewer/TradingExcel_5stock_MUfilled.xlsx'
 MU_COL = 18                                            # R = MU_O
+
+# Sessions present in the workbook but rebuilt anyway. 24 June 2026 was the last row of MU's
+# original source and reads as a session captured before the close: its low of 1031.00 against
+# 991.10 in the 5-minute bars is a 3.87% error, the largest in the 564-session comparison, where
+# the next worst is 3.20% and 99.6% fall inside 0.5%. That low feeds the all-time-high and OU
+# calculations, so it is replaced rather than left.
+REPAIR = {datetime.date(2026, 6, 24)}
 RTH0, RTH1 = datetime.time(9, 30), datetime.time(16, 0)
 
 
@@ -67,19 +74,25 @@ if __name__ == '__main__':
     if statistics.median(errs) > 0.005:
         sys.exit('aggregation does not reproduce the existing rows; refusing to write')
 
-    filled, absent = [], []
+    filled, repaired, absent = [], [], []
     for r in range(2, q.max_row + 1):
         d = to_date(q.cell(r, 1).value)
-        if isinstance(q.cell(r, MU_COL).value, (int, float)):
+        has = isinstance(q.cell(r, MU_COL).value, (int, float))
+        if has and d not in REPAIR:
             continue                                   # already has data, leave it alone
         if d not in five:
-            absent.append(d); continue
+            if not has: absent.append(d)
+            continue
+        before = [q.cell(r, MU_COL + j).value for j in range(4)] if has else None
         for j, v in enumerate(five[d]):
             q.cell(r, MU_COL + j).value = round(v, 4)
-        filled.append(d)
+        (repaired if has else filled).append((d, before, [round(v, 4) for v in five[d]])
+                                             if has else d)
 
     print(f'filled {len(filled)} sessions'
           + (f': {filled[0]} -> {filled[-1]}' if filled else ''))
+    for d, before, after in repaired:
+        print(f'repaired {d}: {before} -> {after}')
     if absent:
         print(f'still missing (no 5-minute coverage): {len(absent)} {absent[:5]}')
     n = sum(1 for r in range(2, q.max_row + 1)
@@ -88,7 +101,9 @@ if __name__ == '__main__':
 
     nt = wb['Notes']
     nt['B6'] = ('MU daily OHLC for 25 June to 28 July 2026 was rebuilt from the 5-minute bars '
-                '(regular hours, 09:30-16:00 ET). The aggregation reproduces the sessions held '
-                'from the original source to a median 0.015%.')
+                '(regular hours, 09:30-16:00 ET), and 24 June 2026 was replaced on the same '
+                'basis: its stored low of 1031.00 was a part-session value against 991.10 in '
+                'the bars. The aggregation reproduces every other stored session to a '
+                'median 0.015%.')
     wb.save(OUT)
     print('written', OUT)
