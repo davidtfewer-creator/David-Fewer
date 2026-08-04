@@ -336,15 +336,16 @@ def build():
     d = wb.create_sheet('Dashboard')
     d['A1'] = 'WEEKLY DASHBOARD — Monday pre-open levels'
     d['A1'].font = Font(bold=True, size=14, color=NAVY)
-    d['A2'] = ('Each Monday, for any name showing CASH: place a limit BUY at the "Limit buy" '
-               'level. If the stock opens below it the limit fills at the open, which is the '
-               'better price and is what the model assumes. Once filled at price P, set a GTC '
-               'SELL at P + the premium shown. For HOLDING: leave the existing GTC sell where it '
-               'is — the target does not move.')
+    d['A2'] = ('The bid is MIN(Monday open, ATH x (1 - cap)). Which of the two binds is shown in '
+               '"Binding". When it reads "open" the cap level sits ABOVE the market, so there is '
+               'no limit to place — buy at Monday\'s open. When it reads "cap" the stock is '
+               'within the cap of its high, so rest a limit at the cap level and it fills only '
+               'on a dip. Either way, once filled at price P set a GTC SELL at P + the premium. '
+               'For HOLDING: leave the existing sell alone, the target does not move.')
     d['A2'].alignment = Alignment(wrap_text=True)
-    d.merge_cells('A2:K2'); d.row_dimensions[2].height = 56
-    cols = ['Stock', 'Status', 'Limit buy', 'Premium ($)', 'Indicative target', 'Last close',
-            'Prev wk close', 'ATH', 'Shares held', 'Live target', 'Model equity']
+    d.merge_cells('A2:L2'); d.row_dimensions[2].height = 70
+    cols = ['Stock', 'Status', 'Last close', 'Off ATH', 'Cap level', 'Binding', 'ORDER TO PLACE',
+            'Premium ($)', 'Indicative target', 'Shares held', 'Live target', 'Model equity']
     for j, h in enumerate(cols, start=1):
         c = d.cell(4, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
         c.alignment = Alignment(horizontal='center', wrap_text=True)
@@ -354,19 +355,24 @@ def build():
         M = f"'Model {s_}'"
         d.cell(r, 1, s_).font = Font(bold=True)
         d.cell(r, 2, f'=IF(INDEX({M}!S:S,{last})=1,"HOLDING","CASH")')
-        d.cell(r, 3, f'=INDEX({M}!K:K,{last})*(1-{M}!$B$2)')
-        d.cell(r, 4, f'=INDEX({M}!J:J,{last})*{M}!$D$2')
-        d.cell(r, 5, f'=IF(B{r}="CASH",C{r}+D{r},"n/a — already holding")')
-        d.cell(r, 6, f'=INDEX({M}!E:E,{last})')
-        d.cell(r, 7, f'=INDEX({M}!J:J,{last})')
-        d.cell(r, 8, f'=INDEX({M}!K:K,{last})')
-        d.cell(r, 9, f'=IF(B{r}="HOLDING",INDEX({M}!Q:Q,{last}),0)')
-        d.cell(r, 10, f'=IF(B{r}="HOLDING",INDEX({M}!M:M,{last}),"")')
-        d.cell(r, 11, f'=INDEX({M}!T:T,{last})')
-        for c in (3, 4, 6, 7, 8, 10):
+        d.cell(r, 3, f'=INDEX({M}!E:E,{last})')
+        d.cell(r, 4, f'=1-C{r}/INDEX({M}!K:K,{last})')
+        d.cell(r, 5, f'=INDEX({M}!K:K,{last})*(1-{M}!$B$2)')
+        d.cell(r, 6, f'=IF(E{r}<C{r},"cap","open")')
+        d.cell(r, 7, f'=IF(B{r}="HOLDING","hold — leave the GTC sell at the live target",'
+                     f'IF(E{r}<C{r},"LIMIT BUY at "&TEXT(E{r},"0.00"),'
+                     f'"BUY AT OPEN — the cap level "&TEXT(E{r},"0.00")&" is above the market, '
+                     f'so Monday\'s open sets the bid"))')
+        d.cell(r, 8, f'=INDEX({M}!J:J,{last})*{M}!$D$2')
+        d.cell(r, 9, f'=IF(B{r}="HOLDING","",MIN(E{r},C{r})+H{r})')
+        d.cell(r, 10, f'=IF(B{r}="HOLDING",INDEX({M}!Q:Q,{last}),0)')
+        d.cell(r, 11, f'=IF(B{r}="HOLDING",INDEX({M}!M:M,{last}),"")')
+        d.cell(r, 12, f'=INDEX({M}!T:T,{last})')
+        for c in (3, 5, 8, 9, 11):
             d.cell(r, c).number_format = '0.00'
-        d.cell(r, 9).number_format = '#,##0.0'
-        d.cell(r, 11).number_format = '#,##0'
+        d.cell(r, 4).number_format = '0.0%'
+        d.cell(r, 10).number_format = '#,##0.0'
+        d.cell(r, 12).number_format = '#,##0'
     d['A8'] = 'MODEL SUMMARY (backtest on the loaded history)'
     d['A8'].font = Font(bold=True, color=NAVY)
     for j, h in enumerate(['Stock', 'Final equity', 'Total return', 'Annualised', 'Trades',
@@ -380,8 +386,8 @@ def build():
         d.cell(r, 4, f'={M}!F4'); d.cell(r, 5, f'={M}!H4'); d.cell(r, 6, f'={M}!J4')
         d.cell(r, 2).number_format = '#,##0'
         d.cell(r, 3).number_format = '0.0%'; d.cell(r, 4).number_format = '0.0%'
-    for col, w in (('A', 10), ('B', 12), ('C', 12), ('D', 12), ('E', 18), ('F', 11),
-                   ('G', 13), ('H', 11), ('I', 12), ('J', 12), ('K', 13)):
+    for col, w in (('A', 10), ('B', 11), ('C', 11), ('D', 9), ('E', 11), ('F', 9),
+                   ('G', 62), ('H', 12), ('I', 15), ('J', 12), ('K', 12), ('L', 13)):
         d.column_dimensions[col].width = w
 
     # ---------------- Active Trading ----------------
@@ -430,15 +436,18 @@ def build():
         at.cell(r, 3, f'=IF(COUNTIFS($B$42:$B$1041,$A{r},$C$42:$C$1041,$B{r},'
                       f'$M$42:$M$1041,"OPEN")>0,"HOLDING","CASH")')
         at.cell(r, 4, f'=$C${7+k}')
-        at.cell(r, 5, f'=IF($C{r}="CASH","BUY","SELL")')
-        at.cell(r, 6, f'=IF($C{r}="CASH",Dashboard!C{dr},"")')
-        at.cell(r, 7, f'=IF($C{r}="CASH",Dashboard!E{dr},'
+        at.cell(r, 5, f'=IF($C{r}="CASH",IF(Dashboard!F{dr}="cap","LIMIT BUY","BUY AT OPEN"),'
+                      f'"SELL")')
+        at.cell(r, 6, f'=IF($C{r}="CASH",MIN(Dashboard!E{dr},Dashboard!C{dr}),"")')
+        at.cell(r, 7, f'=IF($C{r}="CASH",Dashboard!I{dr},'
                       f'SUMIFS($I$42:$I$1041,$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))')
         at.cell(r, 8, f'=IF($C{r}="CASH",IFERROR(FLOOR($D{r}/($F{r}+$B$3),1),0),'
                       f'SUMIFS($F$42:$F$1041,$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))')
         at.cell(r, 9, f'=IF($C{r}="HOLDING","Held "&(TODAY()-SUMIFS($D$42:$D$1041,'
-                      f'$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))&"d — no stop on this model","")')
-        at.cell(r, 10, f'=Dashboard!F{dr}')
+                      f'$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))&"d — no price stop",'
+                      f'IF(Dashboard!F{dr}="open","cap level above the market: buy at the open",'
+                      f'"within the cap of the high: rest the limit, fills on a dip only"))')
+        at.cell(r, 10, f'=Dashboard!C{dr}')
         for c in (6, 7, 10):
             at.cell(r, c).number_format = '0.00'
         at.cell(r, 4).number_format = '#,##0'; at.cell(r, 8).number_format = '#,##0'
