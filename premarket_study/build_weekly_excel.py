@@ -48,7 +48,10 @@ def ath_start(stock):
     return mons[1]
 
 
-def mirror(stock, allow_same_day=True):
+MAXWK = 12                                    # maximum weeks a position may be held
+
+
+def mirror(stock, allow_same_day=True, maxwk=MAXWK):
     """Row-by-row evaluation of exactly the formulas written below."""
     dts, O, H, L, C = DATA[stock]
     cap, prem = SPEC[stock]['cap'], SPEC[stock]['prem']
@@ -57,8 +60,10 @@ def mirror(stock, allow_same_day=True):
     new = [i == 0 or ws_[i] != ws_[i-1] for i in range(n)]
     a0 = ath_start(stock)
     trade_from = a0 + datetime.timedelta(days=7)
+    wkend = [1 if (i == n-1 or ws_[i+1] != ws_[i]) else 0 for i in range(n)]
     ath = [0.0]*n; buy = [None]*n; tgt = [None]*n; armed = [0]*n
     fill = [0]*n; sell = [0]*n; sh = [0.0]*n; fund = [0.0]*n; hold = [0]*n; eq = [0.0]*n
+    wks = [0]*n; forced = [0]*n
     for i in range(n):
         pws = ws_[i] - datetime.timedelta(days=7)
         idx = [j for j in range(n) if ws_[j] == pws]
@@ -80,12 +85,20 @@ def mirror(stock, allow_same_day=True):
         if new[i]:
             armed[i] = 0 if (hp == 1 or tgt[i] is None or ws_[i] < trade_from) else 1
         else:
-            armed[i] = 0 if (i and (fill[i-1] or sell[i-1])) else (armed[i-1] if i else 0)
+            armed[i] = 0 if (i and (fill[i-1] or sell[i-1] or forced[i-1])) \
+                else (armed[i-1] if i else 0)
         fill[i] = 1 if (armed[i] == 1 and hp != 1 and buy[i] is not None
                         and L[i] <= buy[i]) else 0
         can = (hp == 1) or (fill[i] == 1 and allow_same_day)
         sell[i] = 1 if (tgt[i] is not None and can and H[i] >= tgt[i]) else 0
-        if fill[i] and sell[i]:
+        wks[i] = 1 if fill[i] else ((wks[i-1] + (1 if new[i] else 0)) if hp == 1 else 0)
+        forced[i] = 1 if (maxwk and wkend[i] and not sell[i]
+                          and (fill[i] or hp == 1) and wks[i] >= maxwk) else 0
+        if fill[i] and forced[i]:
+            sq = fp/(buy[i]+COMM); sh[i] = 0.0; fund[i] = sq*(C[i]-COMM); hold[i] = 0
+        elif forced[i]:
+            sh[i] = 0.0; fund[i] = sp*(C[i]-COMM); hold[i] = 0
+        elif fill[i] and sell[i]:
             s = fp/(buy[i]+COMM); sh[i] = 0.0; fund[i] = s*(tgt[i]-COMM); hold[i] = 0
         elif fill[i]:
             sh[i] = fp/(buy[i]+COMM); fund[i] = 0.0; hold[i] = 1
@@ -98,7 +111,8 @@ def mirror(stock, allow_same_day=True):
             hold[i] = hp
         eq[i] = sh[i]*C[i] if hold[i] == 1 else fund[i]
     yrs = (dts[-1]-dts[0]).days/365.25
-    return dict(final=eq[-1], ann=(eq[-1]/CAPITAL)**(1/yrs)-1, trades=sum(sell), n=n)
+    return dict(final=eq[-1], ann=(eq[-1]/CAPITAL)**(1/yrs)-1,
+                trades=sum(sell)+sum(forced), forced=sum(forced), n=n)
 
 
 def build():
@@ -144,7 +158,7 @@ def build():
     # ---------------- Models ----------------
     heads = ['Date', 'Open', 'High', 'Low', 'Close', 'WeekStart', 'New wk', 'Prev wk start',
              'Prev wk high', 'Prev wk close', 'ATH', 'Buy', 'Target', 'Armed', 'Fill', 'Sell',
-             'Shares', 'Fund', 'Hold', 'Equity']
+             'Shares', 'Fund', 'Hold', 'Equity', 'Wk end', 'Wks held', 'Forced']
     for s in ['NVDA', 'AVGO']:
         m = wb.create_sheet(f'Model {s}')
         cap, prem = SPEC[s]['cap'], SPEC[s]['prem']
@@ -157,7 +171,8 @@ def build():
                ('E2', 'Commission ($/sh)', 'F2', COMM, '0.0000'),
                ('G2', 'Capital', 'H2', CAPITAL, '#,##0'),
                ('I2', 'Interest (pa)', 'J2', INTEREST, '0.0000'),
-               ('K2', 'Same-day exit (1/0)', 'L2', 1, '0')]
+               ('K2', 'Same-day exit (1/0)', 'L2', 1, '0'),
+               ('M2', 'Max hold (weeks)', 'N2', 12, '0')]
         for lc, lab, vc, val, fmtn in pr_:
             m[lc] = lab; m[lc].font = Font(bold=True, color=BLUE)
             m[vc] = val; m[vc].fill = INP; m[vc].number_format = fmtn
@@ -167,7 +182,8 @@ def build():
         m['C4'] = 'Total return'; m['D4'] = f'=B4/$H$2-1'
         m['E4'] = 'Annualised'
         m['F4'] = f'=IFERROR((B4/$H$2)^(365.25/(A{last}-A{R0}))-1,"")'
-        m['G4'] = 'Trades'; m['H4'] = f'=SUM(P{R0}:P{last})'
+        m['G4'] = 'Trades'
+        m['H4'] = f'=SUM(P{R0}:P{last})+SUM(W{R0}:W{last})'
         m['I4'] = 'Weeks'; m['J4'] = f'=SUM(G{R0}:G{last})'
         for c in ('A4', 'C4', 'E4', 'G4', 'I4'):
             m[c].font = Font(bold=True, color=BLUE)
@@ -205,6 +221,9 @@ def build():
                 m.cell(r, 18, '=$H$2')
                 m.cell(r, 19, 0)
                 m.cell(r, 20, f'=R{r}')
+                m.cell(r, 21, f'=IF(B{r}="","",IF(OR(B{r+1}="",F{r+1}<>F{r}),1,0))')
+                m.cell(r, 22, 0)
+                m.cell(r, 23, 0)
                 continue
             m.cell(r, 11, f'=IF(B{r}="","",IF(AND(G{r}=1,I{r}<>""),MAX(K{p},I{r}),K{p}))')
             m.cell(r, 12, f'=IF(B{r}="","",IF(AND(G{r}=1,S{p}<>1),IF(J{r}="","",'
@@ -212,17 +231,23 @@ def build():
             m.cell(r, 13, f'=IF(B{r}="","",IF(AND(G{r}=1,S{p}<>1),IF(OR(J{r}="",L{r}=""),"",'
                           f'L{r}+J{r}*$D$2),M{p}))')
             m.cell(r, 14, f'=IF(B{r}="","",IF(G{r}=1,IF(OR(S{p}=1,M{r}=""),0,1),'
-                          f'IF(OR(O{p}=1,P{p}=1),0,N{p})))')
+                          f'IF(OR(O{p}=1,P{p}=1,W{p}=1),0,N{p})))')
             m.cell(r, 15, f'=IF(B{r}="","",IF(AND(N{r}=1,S{p}<>1,L{r}<>"",D{r}<=L{r}),1,0))')
             m.cell(r, 16, f'=IF(B{r}="","",IF(AND(M{r}<>"",C{r}>=M{r},'
                           f'OR(S{p}=1,AND(O{r}=1,$L$2=1))),1,0))')
-            m.cell(r, 17, f'=IF(B{r}="","",IF(AND(O{r}=1,P{r}=1),0,'
-                          f'IF(O{r}=1,R{p}/(L{r}+$F$2),IF(P{r}=1,0,Q{p}))))')
+            m.cell(r, 17, f'=IF(B{r}="","",IF(AND(O{r}=1,OR(P{r}=1,W{r}=1)),0,'
+                          f'IF(O{r}=1,R{p}/(L{r}+$F$2),IF(OR(P{r}=1,W{r}=1),0,Q{p}))))')
             m.cell(r, 18, f'=IF(B{r}="","",IF(AND(O{r}=1,P{r}=1),(R{p}/(L{r}+$F$2))*(M{r}-$F$2),'
+                          f'IF(AND(O{r}=1,W{r}=1),(R{p}/(L{r}+$F$2))*(E{r}-$F$2),'
                           f'IF(O{r}=1,0,IF(P{r}=1,Q{p}*(M{r}-$F$2),'
-                          f'IF(S{p}=1,R{p},R{p}*(1+$J$2*(A{r}-A{p})/365))))))')
-            m.cell(r, 19, f'=IF(B{r}="","",IF(P{r}=1,0,IF(O{r}=1,1,S{p})))')
+                          f'IF(W{r}=1,Q{p}*(E{r}-$F$2),'
+                          f'IF(S{p}=1,R{p},R{p}*(1+$J$2*(A{r}-A{p})/365))))))))')
+            m.cell(r, 19, f'=IF(B{r}="","",IF(OR(P{r}=1,W{r}=1),0,IF(O{r}=1,1,S{p})))')
             m.cell(r, 20, f'=IF(B{r}="","",IF(S{r}=1,Q{r}*E{r},R{r}))')
+            m.cell(r, 21, f'=IF(B{r}="","",IF(OR(B{r+1}="",F{r+1}<>F{r}),1,0))')
+            m.cell(r, 22, f'=IF(B{r}="","",IF(O{r}=1,1,IF(S{p}=1,IF(G{r}=1,V{p}+1,V{p}),0)))')
+            m.cell(r, 23, f'=IF(B{r}="","",IF(AND($N$2>0,U{r}=1,P{r}=0,OR(O{r}=1,S{p}=1),'
+                          f'V{r}>=$N$2),1,0))')
         for r in range(R0, last+1):
             m.cell(r, 1).number_format = 'dd/mm/yyyy'
             m.cell(r, 6).number_format = 'dd/mm/yyyy'
@@ -461,8 +486,14 @@ def build():
              'at the open, which is what the model assumes.'),
         ('', 'Target = fill price + previous week\'s close x premium. The target does NOT move '
              'while the position is held.'),
-        ('', 'If the target is not reached, carry the position and keep the same target. '
-             'Re-enter the Monday after a sale. There is no stop-loss.'),
+        ('', 'If the target is not reached, carry the position and keep the same target, up to '
+             'the maximum hold in Model!N2 (12 weeks). At that point sell at the week\'s close. '
+             'Re-enter the Monday after any sale. There is no price stop-loss -- the cap is on '
+             'time, not on loss.'),
+        ('', 'The 12-week cap costs nothing measurable over the tested half of the sample (NVDA '
+             'unchanged, AVGO +1pp) and fires 8 times in 2.3 years across the three weekly '
+             'names, but it bounds the worst case at 81 days against 118, 122 and 451 uncapped. '
+             'Set N2 to 0 to disable it.'),
         ('Parameters', ''),
         ('NVDA', 'cap 0.0935, premium 0.0293'),
         ('AVGO', 'cap 0.0800, premium 0.1000'),
@@ -527,20 +558,22 @@ if __name__ == '__main__':
     #   span        the research model annualises from the first TRADEABLE week; the sheet
     #               annualises over the whole loaded history, which is a week longer
     print('mirror of the sheet formulas against the validated model:\n')
-    TRADES = {('NVDA', True): 46, ('NVDA', False): 44,
-              ('AVGO', True): 15, ('AVGO', False): 15}
-    RESEARCH = {('NVDA', True): 82.0, ('NVDA', False): 77.5,
-                ('AVGO', True): 90.7, ('AVGO', False): 90.7}
+    # research figures at the 12-week cap, from max_hold_test.py
+    TRADES = {('NVDA', True): 51, ('NVDA', False): 49,
+              ('AVGO', True): 20, ('AVGO', False): 20}
+    RESEARCH = {('NVDA', True): 70.7, ('AVGO', True): 92.4}   # same-day=0 has no research figure
     ok = True
     for s in ('NVDA', 'AVGO'):
         for sd in (True, False):
             r = mirror(s, sd)
             t_ok = r['trades'] == TRADES[(s, sd)]
-            gap = r['ann']*100 - RESEARCH[(s, sd)]
+            ref = RESEARCH.get((s, sd))
+            gap = (r['ann']*100 - ref) if ref is not None else 0.0
             ok = ok and t_ok and abs(gap) < 2.5
-            print(f'  {s:5s} same-day={int(sd)}  sheet {r["ann"]*100:6.1f}%  '
-                  f'research {RESEARCH[(s,sd)]:5.1f}%  ({gap:+.1f}pp convention)  '
-                  f'trades {r["trades"]:3d} vs {TRADES[(s,sd)]:3d}  '
+            cmp_ = (f'research {ref:5.1f}%  ({gap:+.1f}pp convention)' if ref is not None
+                    else 'conservative basis, no research figure')
+            print(f'  {s:5s} same-day={int(sd)}  sheet {r["ann"]*100:6.1f}%  {cmp_}  '
+                  f'trades {r["trades"]:3d} vs {TRADES[(s,sd)]:3d} ({r["forced"]} forced)  '
                   f'{"OK" if t_ok else "TRADE MISMATCH"}')
     if not ok:
         raise SystemExit('\nmirror disagrees with the validated model; workbook not written')
