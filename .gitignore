@@ -22,3 +22,6 @@ memo/build*.log
 premarket_study/opt_out.log
 premarket_study/*.log
 *.pkl
+
+# intraday AM/PM session cache (derived from uploaded workbooks)
+premarket_study/halfweek_sessions.pkl
