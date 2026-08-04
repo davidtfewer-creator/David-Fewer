@@ -77,7 +77,8 @@ def mirror(stock, allow_same_day=True, maxwk=MAXWK):
         hp = hold[i-1] if i else 0
         fp = fund[i-1] if i else CAPITAL
         sp = sh[i-1] if i else 0.0
-        # running maximum of weekly highs over completed weeks from the second week onward
+        # running maximum of highs over earlier weeks, from the second week onward -- the
+        # validated model seeds its high there and ignores the first week
         hi = [H[j] for j in range(n) if a0 <= ws_[j] < ws_[i]]
         ath[i] = max(hi) if hi else 0.0
         if new[i] and hp != 1 and ws_[i] >= trade_from:
@@ -211,12 +212,16 @@ def build():
             m.cell(r, 7, '=IF(B{0}="","",1)'.format(r) if i == 0
                    else f'=IF(B{r}="","",IF(F{r}<>F{p},1,0))')
             m.cell(r, 8, f'=IF(B{r}="","",F{r}-7)')
-            m.cell(r, 9, f'=IF(B{r}="","",IFERROR(MAXIFS($C${R0}:$C${last},$F${R0}:$F${last},'
-                         f'H{r}),""))')
+            # SUMPRODUCT rather than MAXIFS: MAXIFS needs Excel 2019 or 365 and returns #NAME?
+            # on older builds, which an IFERROR would silently turn into a blank ATH.
+            m.cell(r, 9, f'=IF(B{r}="","",SUMPRODUCT(MAX(($F${R0}:$F${last}=H{r})'
+                         f'*$C${R0}:$C${last})))')
             m.cell(r, 10, f'=IF(B{r}="","",IFERROR(LOOKUP(2,1/($F${R0}:$F${last}=H{r}),'
                           f'$E${R0}:$E${last}),""))')
             if i == 0:
-                m.cell(r, 11, f'=IF(B{r}="","",E{r})')
+                m.cell(r, 11, f'=IF(B{r}="","",SUMPRODUCT(MAX(($F${R0}:$F${last}<F{r})'
+                              f'*($F${R0}:$F${last}>=MIN($F${R0}:$F${last})+7)'
+                              f'*$C${R0}:$C${last})))')
                 m.cell(r, 12, '')
                 m.cell(r, 13, '')
                 m.cell(r, 14, 0)
@@ -230,7 +235,11 @@ def build():
                 m.cell(r, 22, 0)
                 m.cell(r, 23, 0)
                 continue
-            m.cell(r, 11, f'=IF(B{r}="","",IF(AND(G{r}=1,I{r}<>""),MAX(K{p},I{r}),K{p}))')
+            # ATH computed directly rather than carried forward, so one bad cell cannot
+            # propagate down the whole column
+            m.cell(r, 11, f'=IF(B{r}="","",SUMPRODUCT(MAX(($F${R0}:$F${last}<F{r})'
+                          f'*($F${R0}:$F${last}>=MIN($F${R0}:$F${last})+7)'
+                          f'*$C${R0}:$C${last})))')
             m.cell(r, 12, f'=IF(B{r}="","",IF(AND(G{r}=1,S{p}<>1),IF(J{r}="","",'
                           f'MIN(B{r},K{r}*(1-$B$2))),L{p}))')
             m.cell(r, 13, f'=IF(B{r}="","",IF(AND(G{r}=1,S{p}<>1),IF(OR(J{r}="",L{r}=""),"",'
