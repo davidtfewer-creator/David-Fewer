@@ -53,7 +53,7 @@ class Result:
     frames: dict = field(default_factory=dict)  # optional per-row arrays for inspection
 
 
-def run_model(dates, O, H, L, C, p: Params,
+def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_signal=None, ou_anchor=None, open_cap=None,
               bayes_gain=0.0, collect=False, same_day_exit=True,
               cc_up=None, cc_down=None) -> Result:
@@ -133,7 +133,29 @@ def run_model(dates, O, H, L, C, p: Params,
         slope = num / den if den != 0 else 0.0
         OUar[i] = min(max(slope, 0.0), 0.99)    # MEDIAN(0, slope, 0.99)
         mean_w = OUmean[i]
-        OUsig[i] = math.sqrt(sum((v - mean_w) ** 2 for v in win) / Wn)  # STDEVP
+        if ou_sigma == 'level':
+            # deployed: dispersion of the price LEVEL about the window mean. On a trending name
+            # that measures the trend, not the innovation, so the buffer inflates precisely when
+            # the stock is running.
+            OUsig[i] = math.sqrt(sum((v - mean_w) ** 2 for v in win) / Wn)   # STDEVP
+        elif ou_sigma == 'resid':
+            # residual of the fitted AR(1): what the reversion model cannot explain
+            a = OUar[i]
+            e = [win[j] - (mean_w + a * (win[j-1] - mean_w)) for j in range(1, Wn)]
+            me = sum(e) / len(e)
+            OUsig[i] = math.sqrt(sum((v - me) ** 2 for v in e) / len(e))
+        elif ou_sigma == 'detrend':
+            # residual about a linear trend through the window, with the mean re-anchored to the
+            # fitted value at the window end rather than the arithmetic average
+            t = list(range(Wn)); mt = (Wn - 1) / 2.0
+            dn = sum((t[j] - mt) ** 2 for j in range(Wn))
+            b = sum((t[j] - mt) * (win[j] - mean_w) for j in range(Wn)) / dn if dn else 0.0
+            a0 = mean_w - b * mt
+            r = [win[j] - (a0 + b * t[j]) for j in range(Wn)]
+            OUsig[i] = math.sqrt(sum(v * v for v in r) / Wn)
+            OUmean[i] = a0 + b * (Wn - 1); mean_w = OUmean[i]
+        else:
+            raise ValueError(ou_sigma)
         anchor = C[i - 1] if ou_anchor is None else ou_anchor[i]
         OUf[i] = OUmean[i] + OUar[i] * (anchor - OUmean[i])
         AM[i] = min(OUf[i] - p.ou_buf_k * OUsig[i], oc(i), G[i - 1] * (1 - p.ou_cap))
