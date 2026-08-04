@@ -237,37 +237,94 @@ def build():
                        ('R', 12), ('T', 12)):
             m.column_dimensions[col].width = w
 
+    # ---------------- Allocation ----------------
+    al = wb.create_sheet('Allocation')
+    al['A1'] = ('PORTFOLIO ALLOCATION  —  weekly Monday tranche.  One tranche per name, so there '
+                'is no Bayes/OU split on this sheet.')
+    al['A1'].font = Font(bold=True, size=12, color=NAVY)
+    al['A2'] = ('Edit only the shaded cells. Include?=0 drops a name. Equal weighting is pinned '
+                'by setting the floor (B8) and every cap (E11:E12) to 0.50.')
+    al['A2'].alignment = Alignment(wrap_text=True); al.merge_cells('A2:M2')
+    al['A4'] = 'INPUTS'; al['A4'].font = Font(bold=True, color=BLUE)
+    for r, lab, val, fmtn in ((5, 'Total capital available ($)', 2_000_000, '#,##0'),
+                              (7, 'Volatility lookback (days)', 120, '0'),
+                              (8, 'Floor: min weight per stock', 0.50, '0.00')):
+        al.cell(r, 1, lab).font = Font(bold=True, color=NAVY)
+        c = al.cell(r, 2, val); c.fill = INP; c.number_format = fmtn; c.font = Font(bold=True)
+    heads = ['Stock', 'Include? (1/0)', 'Ann. return (assump.)', 'Avg daily range %',
+             'Cap (max wt)', 'Raw R/V', 'Base wt', 'Cap pass1', 'Norm1', 'Cap pass2',
+             'Final wt', '$ Stock', 'feed rows']
+    for j, h in enumerate(heads, start=1):
+        c = al.cell(10, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
+        c.alignment = Alignment(horizontal='center', wrap_text=True)
+    PLAN = {'NVDA': 0.58, 'AVGO': 0.60}
+    for k, s_ in enumerate(['NVDA', 'AVGO']):
+        r = 11 + k
+        al.cell(r, 1, s_).font = Font(bold=True)
+        al.cell(r, 2, 1).fill = INP
+        al.cell(r, 3, PLAN[s_]).fill = INP; al.cell(r, 3).number_format = '0.00'
+        al.cell(r, 4, f"=SUMPRODUCT((OFFSET('Feed {s_}'!$C$1,$M{r}-$B$7+1,0,$B$7,1)"
+                      f"-OFFSET('Feed {s_}'!$D$1,$M{r}-$B$7+1,0,$B$7,1))"
+                      f"/OFFSET('Feed {s_}'!$E$1,$M{r}-$B$7+1,0,$B$7,1))/$B$7")
+        al.cell(r, 5, 0.50).fill = INP; al.cell(r, 5).number_format = '0.00'
+        al.cell(r, 6, f'=B{r}*C{r}/D{r}')
+        al.cell(r, 7, f'=IF(SUM($F$11:$F$12)=0,0,F{r}/SUM($F$11:$F$12))')
+        al.cell(r, 8, f'=IF(B{r}=0,0,MIN(E{r},MAX($B$8,G{r})))')
+        al.cell(r, 9, f'=IF(SUM($H$11:$H$12)=0,0,H{r}/SUM($H$11:$H$12))')
+        al.cell(r, 10, f'=IF(B{r}=0,0,MIN(E{r},MAX($B$8,I{r})))')
+        al.cell(r, 11, f'=IF(SUM($J$11:$J$12)=0,0,J{r}/SUM($J$11:$J$12))')
+        al.cell(r, 12, f'=K{r}*$B$5')
+        al.cell(r, 13, f'=COUNTIF(\'Feed {s_}\'!$E$2:$E$2000,">0")')
+        al.cell(r, 4).number_format = '0.0000'; al.cell(r, 11).number_format = '0.00%'
+        al.cell(r, 12).number_format = '#,##0'
+    al.cell(13, 1, 'TOTAL').font = Font(bold=True, color=NAVY)
+    al.cell(13, 2, '=SUM(B11:B12)')
+    al.cell(13, 11, '=SUM(K11:K12)'); al.cell(13, 11).number_format = '0.00%'
+    al.cell(13, 12, '=SUM(L11:L12)'); al.cell(13, 12).number_format = '#,##0'
+    al['A15'] = ('MACHINE-READABLE OUTPUT  (stock x tranche dollar allocation — read by the IBKR '
+                 'script; excluded stocks show 0)')
+    al['A15'].font = Font(bold=True, color=NAVY)
+    for j, h in enumerate(['Stock', 'Tranche', '$ Allocation'], start=1):
+        c = al.cell(16, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
+    for k, s_ in enumerate(['NVDA', 'AVGO']):
+        r = 17 + k
+        al.cell(r, 1, s_); al.cell(r, 2, 'Weekly'); al.cell(r, 3, f'=L{11+k}')
+        al.cell(r, 3).number_format = '#,##0'
+    for col, w in (('A', 22), ('B', 13), ('C', 18), ('D', 15), ('E', 12), ('L', 13), ('M', 11)):
+        al.column_dimensions[col].width = w
+
     # ---------------- Dashboard ----------------
     d = wb.create_sheet('Dashboard')
     d['A1'] = 'WEEKLY DASHBOARD — Monday pre-open levels'
     d['A1'].font = Font(bold=True, size=14, color=NAVY)
-    d['A2'] = ('Each Monday, for any name showing CASH: place a limit BUY at the lesser of the '
-               'Monday opening price and the "ATH cap" level, then a GTC SELL at the buy price '
-               'plus the premium shown. For HOLDING: leave the existing GTC sell in place — the '
-               'target does not move.')
+    d['A2'] = ('Each Monday, for any name showing CASH: place a limit BUY at the "Limit buy" '
+               'level. If the stock opens below it the limit fills at the open, which is the '
+               'better price and is what the model assumes. Once filled at price P, set a GTC '
+               'SELL at P + the premium shown. For HOLDING: leave the existing GTC sell where it '
+               'is — the target does not move.')
     d['A2'].alignment = Alignment(wrap_text=True)
-    d.merge_cells('A2:H2'); d.row_dimensions[2].height = 42
-    cols = ['Stock', 'Status', 'Last close', 'Prev wk close', 'ATH', 'ATH cap level',
-            'Premium ($)', 'If filled, sell at', 'Shares held', 'Live target', 'Equity']
+    d.merge_cells('A2:K2'); d.row_dimensions[2].height = 56
+    cols = ['Stock', 'Status', 'Limit buy', 'Premium ($)', 'Indicative target', 'Last close',
+            'Prev wk close', 'ATH', 'Shares held', 'Live target', 'Model equity']
     for j, h in enumerate(cols, start=1):
         c = d.cell(4, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
         c.alignment = Alignment(horizontal='center', wrap_text=True)
     last = R0 + n - 1
-    for k, s in enumerate(['NVDA', 'AVGO']):
+    for k, s_ in enumerate(['NVDA', 'AVGO']):
         r = 5 + k
-        M = f"'Model {s}'"
-        d.cell(r, 1, s).font = Font(bold=True)
+        M = f"'Model {s_}'"
+        d.cell(r, 1, s_).font = Font(bold=True)
         d.cell(r, 2, f'=IF(INDEX({M}!S:S,{last})=1,"HOLDING","CASH")')
-        d.cell(r, 3, f'=INDEX({M}!E:E,{last})')
-        d.cell(r, 4, f'=INDEX({M}!J:J,{last})')
-        d.cell(r, 5, f'=INDEX({M}!K:K,{last})')
-        d.cell(r, 6, f'=E{r}*(1-{M}!$B$2)')
-        d.cell(r, 7, f'=D{r}*{M}!$D$2')
-        d.cell(r, 8, f'=IF(B{r}="CASH","buy + "&TEXT(G{r},"0.00"),"n/a — already holding")')
+        d.cell(r, 3, f'=INDEX({M}!K:K,{last})*(1-{M}!$B$2)')
+        d.cell(r, 4, f'=INDEX({M}!J:J,{last})*{M}!$D$2')
+        d.cell(r, 5, f'=IF(B{r}="CASH",C{r}+D{r},"n/a — already holding")')
+        d.cell(r, 6, f'=INDEX({M}!E:E,{last})')
+        d.cell(r, 7, f'=INDEX({M}!J:J,{last})')
+        d.cell(r, 8, f'=INDEX({M}!K:K,{last})')
         d.cell(r, 9, f'=IF(B{r}="HOLDING",INDEX({M}!Q:Q,{last}),0)')
         d.cell(r, 10, f'=IF(B{r}="HOLDING",INDEX({M}!M:M,{last}),"")')
         d.cell(r, 11, f'=INDEX({M}!T:T,{last})')
-        for c in (3, 4, 5, 6, 7, 10):
+        for c in (3, 4, 6, 7, 8, 10):
             d.cell(r, c).number_format = '0.00'
         d.cell(r, 9).number_format = '#,##0.0'
         d.cell(r, 11).number_format = '#,##0'
@@ -276,43 +333,121 @@ def build():
     for j, h in enumerate(['Stock', 'Final equity', 'Total return', 'Annualised', 'Trades',
                            'Weeks'], start=1):
         c = d.cell(9, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
-    for k, s in enumerate(['NVDA', 'AVGO']):
+    for k, s_ in enumerate(['NVDA', 'AVGO']):
         r = 10 + k
-        M = f"'Model {s}'"
-        d.cell(r, 1, s).font = Font(bold=True)
+        M = f"'Model {s_}'"
+        d.cell(r, 1, s_).font = Font(bold=True)
         d.cell(r, 2, f'={M}!B4'); d.cell(r, 3, f'={M}!D4')
-        d.cell(r, 4, f'={M}!F4'); d.cell(r, 5, f'={M}!H4')
-        d.cell(r, 6, f'={M}!J4')
+        d.cell(r, 4, f'={M}!F4'); d.cell(r, 5, f'={M}!H4'); d.cell(r, 6, f'={M}!J4')
         d.cell(r, 2).number_format = '#,##0'
         d.cell(r, 3).number_format = '0.0%'; d.cell(r, 4).number_format = '0.0%'
-    for col, w in (('A', 10), ('B', 14), ('C', 12), ('D', 14), ('E', 11), ('F', 14),
-                   ('G', 12), ('H', 20), ('I', 12), ('J', 12), ('K', 13)):
+    for col, w in (('A', 10), ('B', 12), ('C', 12), ('D', 12), ('E', 18), ('F', 11),
+                   ('G', 13), ('H', 11), ('I', 12), ('J', 12), ('K', 13)):
         d.column_dimensions[col].width = w
 
-    # ---------------- Blotter ----------------
-    b = wb.create_sheet('Blotter')
-    b['A1'] = 'TRADE LOG — type the actual fills; nothing here feeds the model'
-    b['A1'].font = Font(bold=True, size=12, color=NAVY)
-    for j, h in enumerate(['Stock', 'Buy date', 'Buy price', 'Shares', 'Cost', 'Sell date',
-                           'Sell price', 'Proceeds', 'P&L', 'Days held', 'Status'], start=1):
-        c = b.cell(3, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
-    for r in range(4, 84):
-        b.cell(r, 5, f'=IF(OR(C{r}="",D{r}=""),"",C{r}*D{r}+D{r}*0.005)')
-        b.cell(r, 8, f'=IF(OR(G{r}="",D{r}=""),"",G{r}*D{r}-D{r}*0.005)')
-        b.cell(r, 9, f'=IF(OR(H{r}="",E{r}=""),"",H{r}-E{r})')
-        b.cell(r, 10, f'=IF(OR(B{r}="",F{r}=""),"",F{r}-B{r})')
-        b.cell(r, 11, f'=IF(A{r}="","",IF(F{r}="","OPEN","CLOSED"))')
-        for c in (2, 6):
-            b.cell(r, c).number_format = 'dd/mm/yyyy'
-        for c in (3, 7):
-            b.cell(r, c).number_format = '0.00'
-        for c in (5, 8, 9):
-            b.cell(r, c).number_format = '#,##0'
-        for c in (1, 2, 3, 4, 6, 7):
-            b.cell(r, c).fill = INP
-    for col, w in (('A', 9), ('B', 12), ('C', 11), ('D', 10), ('E', 12), ('F', 12),
-                   ('G', 11), ('H', 12), ('I', 11), ('J', 11), ('K', 10)):
-        b.column_dimensions[col].width = w
+    # ---------------- Active Trading ----------------
+    at = wb.create_sheet('Active Trading')
+    at['A1'] = 'ACTIVE TRADING BLOTTER  —  weekly Monday tranche  (NVDA · AVGO)'
+    at['A1'].font = Font(bold=True, size=12, color=NAVY)
+    at['A2'] = ('Set Day-1 funds, read the orders, log each fill. You type only the shaded cells. '
+                'Nothing you type here feeds the model.')
+    at['A2'].alignment = Alignment(wrap_text=True); at.merge_cells('A2:J2')
+    at['A3'] = 'Buy fee /sh:'; at['B3'] = 0.005; at['B3'].fill = INP
+    at['D3'] = 'Sell fee /sh:'; at['E3'] = 0.0095; at['E3'].fill = INP
+    at['L4'] = 'Initial fund'; at['L5'] = '=Allocation!$B$5'
+    at['L5'].number_format = '#,##0'
+    at['A5'] = ('STOCK FUNDS  —  each name\'s Day-1 fund comes from the Allocation sheet; the '
+                '"now" column updates as logged trades close')
+    at['A5'].font = Font(bold=True, color=BLUE)
+    for j, h in enumerate(['Stock', 'Start fund', 'Fund (now)', 'P&L', 'Return', 'Premium',
+                           'Peak cap'], start=1):
+        c = at.cell(6, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
+    for k, s_ in enumerate(['NVDA', 'AVGO']):
+        r = 7 + k
+        M = f"'Model {s_}'"
+        at.cell(r, 1, s_).font = Font(bold=True)
+        at.cell(r, 2, f'=Allocation!L{11+k}')
+        at.cell(r, 3, f'=B{r}+SUMIFS($K$42:$K$1041,$B$42:$B$1041,$A{r})')
+        at.cell(r, 4, f'=C{r}-B{r}')
+        at.cell(r, 5, f'=IFERROR(C{r}/B{r}-1,"")')
+        at.cell(r, 6, f'={M}!$D$2'); at.cell(r, 7, f'={M}!$B$2')
+        for c in (2, 3, 4):
+            at.cell(r, c).number_format = '#,##0'
+        at.cell(r, 5).number_format = '0.0%'
+        at.cell(r, 6).number_format = '0.0000'; at.cell(r, 7).number_format = '0.0000'
+    at['A17'] = ('TODAY\'S ORDERS  —  on Monday, for any name showing CASH place a limit BUY at '
+                 '"Buy @" for "Shares" shares; once it fills set a GTC SELL at the fill price '
+                 'plus the premium. HOLDING: leave the existing GTC sell alone.')
+    at['A17'].font = Font(bold=True, color=BLUE)
+    at.merge_cells('A17:J17'); at['A17'].alignment = Alignment(wrap_text=True)
+    at.row_dimensions[17].height = 30
+    for j, h in enumerate(['Stock', 'Tranche', 'Status', 'Tranche fund', 'Action', 'Buy @',
+                           'Sell @', 'Shares', 'Note', 'Close price'], start=1):
+        c = at.cell(18, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
+    for k, s_ in enumerate(['NVDA', 'AVGO']):
+        r = 19 + k
+        dr = 5 + k
+        at.cell(r, 1, s_); at.cell(r, 2, 'Weekly')
+        at.cell(r, 3, f'=IF(COUNTIFS($B$42:$B$1041,$A{r},$C$42:$C$1041,$B{r},'
+                      f'$M$42:$M$1041,"OPEN")>0,"HOLDING","CASH")')
+        at.cell(r, 4, f'=$C${7+k}')
+        at.cell(r, 5, f'=IF($C{r}="CASH","BUY","SELL")')
+        at.cell(r, 6, f'=IF($C{r}="CASH",Dashboard!C{dr},"")')
+        at.cell(r, 7, f'=IF($C{r}="CASH",Dashboard!E{dr},'
+                      f'SUMIFS($I$42:$I$1041,$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))')
+        at.cell(r, 8, f'=IF($C{r}="CASH",IFERROR(FLOOR($D{r}/($F{r}+$B$3),1),0),'
+                      f'SUMIFS($F$42:$F$1041,$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))')
+        at.cell(r, 9, f'=IF($C{r}="HOLDING","Held "&(TODAY()-SUMIFS($D$42:$D$1041,'
+                      f'$B$42:$B$1041,$A{r},$M$42:$M$1041,"OPEN"))&"d — no stop on this model","")')
+        at.cell(r, 10, f'=Dashboard!F{dr}')
+        for c in (6, 7, 10):
+            at.cell(r, c).number_format = '0.00'
+        at.cell(r, 4).number_format = '#,##0'; at.cell(r, 8).number_format = '#,##0'
+    at['A40'] = ('TRADE LOG  —  type the shaded cells (Stock, Tranche, Buy date, Buy price, '
+                 'Shares, then Sell date & Sell price when it closes). Everything else '
+                 'auto-fills. Buy/Sell prices are your actual IBKR fills.')
+    at['A40'].font = Font(bold=True, color=BLUE)
+    at.merge_cells('A40:M40'); at['A40'].alignment = Alignment(wrap_text=True)
+    at['O40'] = 'WEEKLY REALISED P&L'; at['O40'].font = Font(bold=True, color=BLUE)
+    for j, h in enumerate(['#', 'Stock', 'Tranche', 'Buy date', 'Buy price', 'Shares',
+                           'Buy cost', 'Sell date', 'Sell price', 'Proceeds', 'Net P&L',
+                           'Week ending', 'Status'], start=1):
+        c = at.cell(41, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
+    for j, h in enumerate(['Week ending', 'Realised P&L', '# trades', 'Cumulative',
+                           'Total trades', 'Return'], start=15):
+        c = at.cell(41, j, h); c.font = Font(bold=True, color=NAVY); c.fill = HDR
+    for i in range(1000):
+        r = 42 + i
+        at.cell(r, 1, i+1)
+        at.cell(r, 7, f'=IF(OR($E{r}="",$F{r}=""),"",$F{r}*$E{r}+$F{r}*$B$3)')
+        at.cell(r, 10, f'=IF(OR($I{r}="",$F{r}=""),"",$F{r}*$I{r}-$F{r}*$E$3)')
+        at.cell(r, 11, f'=IF($J{r}="","",$J{r}-$G{r})')
+        at.cell(r, 12, f'=IF(OR($H{r}="",$M{r}<>"CLOSED"),"",$H{r}-WEEKDAY($H{r},2)+5)')
+        at.cell(r, 13, f'=IF($D{r}="","",IF($H{r}="","OPEN","CLOSED"))')
+        if i == 0:
+            at.cell(r, 15, '=IF(COUNT($L$42:$L$1041)=0,"",MIN($L$42:$L$1041))')
+        else:
+            at.cell(r, 15, f'=IF($O{r-1}="","",$O{r-1}+7)')
+        at.cell(r, 16, f'=IF($O{r}="","",SUMIFS($K$42:$K$1041,$L$42:$L$1041,$O{r}))')
+        at.cell(r, 17, f'=IF($O{r}="","",COUNTIFS($L$42:$L$1041,$O{r}))')
+        at.cell(r, 18, f'=IF($O{r}="","",SUM($P$42:$P{r}))')
+        at.cell(r, 19, f'=IF($O{r}="","",COUNTIFS($D$42:$D$1041,"<="&$O{r})'
+                       f'+COUNTIFS($H$42:$H$1041,"<="&$O{r}))')
+        at.cell(r, 20, f'=IF($O{r}="","",R{r}/$L$5)')
+        for c in (2, 3, 4, 5, 6, 8, 9):
+            at.cell(r, c).fill = INP
+        for c in (4, 8, 12, 15):
+            at.cell(r, c).number_format = 'dd/mm/yyyy'
+        for c in (5, 9):
+            at.cell(r, c).number_format = '0.00'
+        for c in (7, 10, 11, 16, 18):
+            at.cell(r, c).number_format = '#,##0'
+        at.cell(r, 20).number_format = '0.0%'
+    for col, w in (('A', 5), ('B', 9), ('C', 9), ('D', 12), ('E', 11), ('F', 10), ('G', 12),
+                   ('H', 12), ('I', 11), ('J', 12), ('K', 12), ('L', 12), ('M', 10),
+                   ('O', 12), ('P', 13), ('Q', 10), ('R', 13), ('S', 12), ('T', 9)):
+        at.column_dimensions[col].width = w
+    at.freeze_panes = 'A42'
 
     # ---------------- Notes ----------------
     nt = wb.create_sheet('Notes')
@@ -320,33 +455,42 @@ def build():
     nt['A1'].font = Font(bold=True, size=14, color=NAVY)
     lines = [
         ('The rule', ''),
-        ('', 'Each Monday, if the name is in cash: bid = MIN(Monday open, ATH × (1 − cap)), '
-             'where ATH is the running maximum of weekly highs through the previous week.'),
-        ('', 'Target = bid + previous week\'s closing price × premium. The target does NOT move '
+        ('', 'Each Monday, if the name is in cash: bid = MIN(Monday open, ATH x (1 - cap)), where '
+             'ATH is the running maximum of weekly highs through the previous week. In practice '
+             'place a limit buy at ATH x (1 - cap); if the stock opens below it the limit fills '
+             'at the open, which is what the model assumes.'),
+        ('', 'Target = fill price + previous week\'s close x premium. The target does NOT move '
              'while the position is held.'),
         ('', 'If the target is not reached, carry the position and keep the same target. '
              'Re-enter the Monday after a sale. There is no stop-loss.'),
         ('Parameters', ''),
         ('NVDA', 'cap 0.0935, premium 0.0293'),
         ('AVGO', 'cap 0.0800, premium 0.1000'),
-        ('', 'Both were validated out of sample. Re-fitting them lost 1 fold in 12 across the '
-             'research, so they are not to be re-optimised on new data without the same test.'),
+        ('', 'Validated out of sample. Re-fitting them lost 1 fold in 12 across the research, and '
+             'adding a Bayes or OU signal to the bid lost 0 of 3 folds on AVGO and was the worst '
+             'carry variant on NVDA. They are not to be re-optimised without the same tests.'),
+        ('Sheets', ''),
+        ('', 'Allocation, Active Trading and the Feed sheets follow the daily book\'s layout, so '
+             'the same IBKR named ranges apply: IBKR_AvailFunds, IBKR_BuyFee, IBKR_SellFee, '
+             'IBKR_Orders, IBKR_LogAnchor and IBKR_QueryAnchor. There is one tranche per name '
+             'here rather than two, so the orders block is two rows.'),
         ('Same-day exits', ''),
-        ('', 'Model!L2 switches whether a target reached on the fill day counts. Set to 1 it '
-             'reproduces the verified backtest (NVDA 82.0%, AVGO 90.7%); every same-day exit in '
-             'this sample was confirmed against minute or 5-minute bars.'),
-        ('', 'Set to 0 the sheet is conservative: NVDA reads 77.5%, AVGO is unchanged at 90.7% '
-             'having no same-day exits at all.'),
+        ('', 'Model!L2 switches whether a target reached on the fill day counts. At 1 it '
+             'reproduces the verified backtest; every same-day exit in this sample was confirmed '
+             'against minute or 5-minute bars. At 0 the sheet is conservative and NVDA reads '
+             '75.5% instead of 80.0%; AVGO is unchanged, having no same-day exits at all.'),
         ('What to expect', ''),
         ('', 'Planning figures are NVDA ~58% and AVGO ~60% annualised, not the backtest numbers. '
-             'The backtest sits on the peak of a narrow parameter ridge; the planning figures '
-             'are the median of the surrounding region, which is what to budget on.'),
-        ('', 'Roughly 20 trades a year on NVDA and 6-7 on AVGO. AVGO\'s median holding period is '
-             '20 days with a 95th percentile of 77; NVDA\'s are 4 and 224.'),
+             'The backtest sits on the peak of a narrow parameter ridge; the planning figures are '
+             'the median of the surrounding region, which is what to budget on.'),
+        ('', 'About 20 trades a year on NVDA and 6-7 on AVGO. Median holding is 4 days for NVDA '
+             'and 20 for AVGO, with 95th percentiles of 224 and 77 days.'),
+        ('', 'The sheet reads 1-2pp below the research figures by design: it accrues interest only '
+             'on days it is actually flat, and annualises over the whole loaded history. Both are '
+             'the more conservative choice.'),
         ('Updating', ''),
-        ('', 'Paste new daily OHLC into Query, keeping the columns in place. The Feed and Model '
-             'sheets extend automatically for as many rows as the Model covers.'),
-        ('', 'Press Ctrl+Alt+F9 after any change to force a full recalculation.'),
+        ('', 'Paste new daily OHLC into Query, keeping the columns in place. Feed and Model extend '
+             'automatically. Press Ctrl+Alt+F9 to force a full recalculation.'),
     ]
     r = 3
     for a, bx in lines:
@@ -354,12 +498,21 @@ def build():
             nt.cell(r, 1, a).font = Font(bold=True, size=12, color=BLUE); r += 1; continue
         if a: nt.cell(r, 1, a).font = Font(bold=True, color=NAVY)
         c = nt.cell(r, 2, bx); c.alignment = Alignment(wrap_text=True, vertical='top')
-        nt.row_dimensions[r].height = 30
+        nt.row_dimensions[r].height = 44
         r += 1
     nt.column_dimensions['A'].width = 16
     nt.column_dimensions['B'].width = 108
 
-    wb._sheets = [wb[x] for x in ['Notes', 'Dashboard', 'Blotter', 'Query',
+    from openpyxl.workbook.defined_name import DefinedName
+    for nm_, ref in (('IBKR_AvailFunds', "Allocation!$B$5"),
+                     ('IBKR_BuyFee', "'Active Trading'!$B$3"),
+                     ('IBKR_SellFee', "'Active Trading'!$E$3"),
+                     ('IBKR_Orders', "'Active Trading'!$A$18:$J$20"),
+                     ('IBKR_LogAnchor', "'Active Trading'!$A$41"),
+                     ('IBKR_QueryAnchor', "Query!$A$1")):
+        wb.defined_names[nm_] = DefinedName(nm_, attr_text=ref)
+
+    wb._sheets = [wb[x] for x in ['Notes', 'Allocation', 'Active Trading', 'Dashboard', 'Query',
                                   'Feed NVDA', 'Feed AVGO', 'Model NVDA', 'Model AVGO']]
     wb.save(OUT)
     return OUT
