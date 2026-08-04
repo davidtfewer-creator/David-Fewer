@@ -1,0 +1,549 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1.05in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath,amssymb}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bcbox}{RGB}{247,241,228}
+\definecolor{bcnew}{RGB}{232,240,234}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\color{bcgold}\normalsize\bfseries}{\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{1.5em}{0.5em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}%
+  \leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcnavy}\textsc{Bayesian Capital}}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Systematic Trading $\cdot$ White Paper}
+\fancyfoot[R]{\footnotesize\color{bcgrey}\thepage}
+
+\newtcolorbox{keybox}[1]{colback=bcbox,colframe=bcgold,boxrule=0.6pt,
+  title={\color{bcnavy}\bfseries #1},coltitle=bcnavy,fonttitle=\bfseries,
+  colbacktitle=bcbox,left=6pt,right=6pt,top=4pt,bottom=4pt}
+\newtcolorbox{fixbox}[1]{colback=bcnew,colframe=bcnavy,boxrule=0.6pt,
+  title={\color{white}\bfseries #1},coltitle=white,fonttitle=\bfseries,
+  colbacktitle=bcnavy,left=6pt,right=6pt,top=4pt,bottom=4pt}
+
+\setlength{\parskip}{0.45em}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{3.2cm}
+{\color{bcnavy}\fboxsep=22pt\colorbox{bcnavy}{\parbox{3.2cm}{\centering
+  {\color{bcgold}\fontsize{34}{34}\selectfont\bfseries BC}\\[6pt]
+  {\color{white}\footnotesize\textsc{Bayesian Capital}}}}}\\[2.4cm]
+{\color{bcgold}\rule{0.62\textwidth}{0.8pt}}\\[0.5cm]
+{\color{bcnavy}\LARGE\bfseries Volatility Harvesting with\\[2mm]
+Bayesian and Ornstein--Uhlenbeck Entries}\\[0.35cm]
+{\color{bcnavy}\large\bfseries Methodology, Evidence, and the Primacy of Allocation}\\[0.3cm]
+{\color{bcgrey}\itshape\small A tranched, premium-capture strategy built on a self-tuning Kalman\\
+dip-buyer and a slow mean-reverting hedge sleeve}\\[0.4cm]
+{\color{bcgold}\rule{0.62\textwidth}{0.8pt}}\\[2.6cm]
+{\color{bcnavy}\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey}Systematic Trading Research}\\[0.15cm]
+{\color{bcgrey}Revision 2 --- 4 August 2026}\\[0.5cm]
+{\color{bcgrey}\itshape\small White paper --- strictly confidential}
+\end{titlepage}
+
+\begin{center}\textbf{Abstract}\end{center}
+\begin{quote}\small
+We describe the two statistical engines behind our volatility-harvesting book and the evidence we
+have gathered on how to deploy them. The book buys short-term weakness and sells a fixed premium
+into the bounce; its edge is the repeated capture of that premium as prices oscillate. We drive
+entries with two deliberately different estimators. The first is a Bayesian local-linear-trend
+Kalman filter that infers a hidden ``fair value'' from noisy closes and bids a volatility-scaled
+discount beneath it; every weight in it is derived, not hand-set. The second is an
+Ornstein--Uhlenbeck (OU) mean-reverter that fades deviations from a slow long-run mean, and whose
+mistakes land on different days --- which is what makes it a genuine hedge rather than a second
+copy of the first. Finally, and most importantly, we found that \emph{how we allocate capital}
+--- across names, and across the two sleeves --- drives realised out-of-sample performance far
+more than the precise parameter values do: re-optimising parameters to recent data reliably
+improves the backtest and reliably fails out of sample. The durable edge is structural.
+
+\textbf{Revision 2} corrects one equation. The OU sleeve's uncertainty scale, previously the
+standard deviation of the closes about the window mean, measured the trend rather than the
+innovation and inflated the entry discount precisely when a name was trending. It is now the
+standard deviation of the fitted AR(1) residuals. This is a specification correction rather than
+a re-fit, and it is the only change to a signal that has survived our out-of-sample tests.
+Section~\ref{sec:sigma} sets out the error, the correction and its evidence.
+\end{quote}
+
+\tableofcontents
+\newpage
+
+\section{Setup and notation}
+
+Time is indexed by trading periods $t=1,2,\dots,T$. The live book runs on \emph{daily} bars; two
+names additionally run a weekly variant (\S\ref{sec:alloc}). The mathematics is period-agnostic,
+so we keep a generic period index. For each period we observe a bar and the sub-bars within it:
+\begin{itemize}[topsep=2pt,itemsep=1pt]
+\item period open $O_t$, close $C_t$, high $\bar H_t$, low $\bar L_t$;
+\item intra-period highs $h_{t,d}$ and lows $\ell_{t,d}$, so $\bar H_t=\max_d h_{t,d}$ and
+      $\bar L_t=\min_d \ell_{t,d}$.
+\end{itemize}
+Two derived quantities recur throughout:
+\begin{equation}
+\text{period range}\quad R_t=\bar H_t-\bar L_t,\qquad
+\text{running peak}\quad P_t=\max_{s\le t}\bar H_s .
+\end{equation}
+The range $R_t$ is the harvest fuel: it scales the model's noise terms, the entry discount, and
+--- as we show in \S\ref{sec:alloc} --- the capital each name earns. The shared entry parameters
+are the peak cap $c$ (maximum fraction below the all-time high at which we will bid), the sale
+premium $\pi$ (the fraction of the previous close we book on exit), and the discount $k$.
+
+\section{Execution and capital mechanics}
+
+Both engines produce a single object each period: a target buy price $B_t$, computed causally
+from data up to $t-1$. Execution and capital handling are then shared, so the two engines are
+directly comparable and freely blendable.
+
+\subsection{Fills and the premium exit}
+The reversion we harvest is fixed in advance as a premium above the entry, $S_t=B_t+\pi_t$ with
+$\pi_t=\pi C_{t-1}$. Using intra-period highs and lows,
+\begin{align}
+\text{buy fills in period }t &\iff \min_d \ell_{t,d}\le B_t,
+  & d_t^{\star}&=\min\{d:\ell_{t,d}\le B_t\},\\
+\text{sell fills at }S_t &\iff \max_d h_{t,d}\ge S_t
+  &&\text{(a same-period sale needs } d\ge d_t^{\star}).
+\end{align}
+We are filled only on a dip into the discounted bid, and we exit into the reversion at the
+premium; a filled-but-unsold position is carried, holding its target $S_t$ until the bounce
+arrives or a calendar stop-loss closes it.
+
+\subsection{Compounding and tranching}
+The deployed fund $\Phi_t$ buys $\Phi_t/B_t$ shares, so a completed round trip multiplies the
+fund by $S/B$. A tranche's terminal return multiple is therefore
+\begin{equation}
+M=\frac{\Phi_{\text{final}}}{\Phi_{\text{init}}}=\prod_i \frac{S_i}{B_i}.
+\end{equation}
+Splitting capital $K$ into $n$ equal, one-period-staggered tranches gives total profit
+\begin{equation}\label{eq:tranche}
+\Pi=\sum_{j=1}^{n}\frac{K}{n}\bigl(M_j-1\bigr)=K\bigl(\bar M-1\bigr),
+\qquad \bar M=\frac1n\sum_j M_j,
+\end{equation}
+so profit depends only on the \emph{average} multiple across start-periods. Idle cash earns
+interest at annual rate $r$: a cash period of $\Delta t$ days accrues
+$I_t=\Phi_t\,r\,\Delta t/365$, credited monthly. Equation~\eqref{eq:tranche} is the identity that
+lets us mix methods and names cleanly: the book's profit is a capital-weighted average of its
+tranches' multiples, which is precisely why allocation is a first-order decision.
+
+\section{The Bayesian entry}
+
+We treat fair value not as a formula to be guessed but as a quantity we are \emph{uncertain
+about} and hold a belief over --- a belief we update each period as a new close arrives. The
+mechanism is: nudge the estimate, weighted by how much we trust the new evidence.
+
+\subsection{Beliefs as Gaussians}
+We represent a belief about an unknown number by a Gaussian, captured by the mean $\mu$ and the
+variance $V$, with standard deviation $\sigma=\sqrt V$. We use Gaussians because they need only
+these two numbers and because combining two Gaussians yields another Gaussian --- so updating
+stays simple arithmetic.
+
+\subsection{Bayes' rule in precision form}
+For Gaussians, Bayes' rule is cleanest in \emph{precision} --- the inverse variance $1/V$.
+Combining evidence adds precision, and the updated mean is the precision-weighted average of the
+old mean and the new datum:
+\begin{equation}
+\frac{1}{V_{\text{post}}}=\frac{1}{V_{\text{prior}}}+\frac{1}{V_{\text{data}}},
+\qquad
+\mu_{\text{post}}=V_{\text{post}}\left(\frac{\mu_{\text{prior}}}{V_{\text{prior}}}
++\frac{\text{data}}{V_{\text{data}}}\right).
+\end{equation}
+If we believed fair value was $100\pm4$ and a close prints at $108$, also trusted to $\pm4$, the
+posterior is $104$ --- halfway, and more confident. Had the close been unreliable ($\sigma=8$),
+the same formula would move us only to $101.6$. This automatic ``trust the more reliable source
+more'' is the whole point.
+
+\subsection{The state-space model}
+We never observe fair value; we see noisy closes. So we posit a hidden level $m_t$:
+\begin{align}
+\text{(process)}\quad & m_t=m_{t-1}+\eta_t, & \eta_t &\sim\mathcal N(0,q_t),\\
+\text{(observation)}\quad & C_t=m_t+\varepsilon_t, & \varepsilon_t &\sim\mathcal N(0,r_t).
+\end{align}
+
+\subsection{The key modelling choice: noise scaled by range}
+The single most consequential decision is scaling both noises by the period's range $R_t$,
+because a turbulent period both prints a noisier close and gives the underlying value more room
+to move:
+\begin{equation}
+r_t=(\lambda R_t)^2 \quad\text{(observation noise)},\qquad
+q_t=(\varphi R_t)^2 \quad\text{(process noise)}.
+\end{equation}
+$\lambda$ is the fraction of a period's range that is mere noise ($\lambda\approx0.4$--$0.7$);
+$\varphi$ is how far fair value can genuinely drift ($\varphi\approx0.15$--$0.20$). Only the
+ratio $\varphi/\lambda$ truly matters: it sets the filter's reactivity, and a ratio near
+$0.3$--$0.4$ gives an estimate that neither lags badly nor jitters with every print.
+
+\subsection{The period update}
+With last period's belief $\mathcal N(\mu_{t-1},V_{t-1})$, each period runs predict-then-update:
+\begin{align}
+\text{Predict:}\quad & \mu_t^-=\mu_{t-1}, & V_t^-&=V_{t-1}+q_t,\\
+\text{Innovation:}\quad & e_t=C_t-\mu_t^-, & K_t&=\frac{V_t^-}{V_t^-+r_t}\in(0,1),\\
+\text{Update:}\quad & \mu_t=\mu_t^-+K_te_t, & V_t&=(1-K_t)V_t^-.
+\end{align}
+The gain is \emph{self-tuning}: in a calm period ($r_t$ small) $K_t\to1$ and we trust the close;
+in a wild one $K_t\to0$ and we lean on the prior. This single computed number replaces the
+hand-set weights of any fixed formula.
+
+\subsection{From belief to bid: the discount $k$}
+For the entry we need the uncertainty of \emph{next} period's price, whose variance has three
+independent, additive sources:
+\begin{equation}\label{eq:bayessig}
+\sigma_t=\sqrt{V_t+q_t+r_t}\qquad\text{(one-step predictive standard deviation)}.
+\end{equation}
+We bid $k$ of these standard deviations below fair value, floored at the open and the peak cap:
+\begin{equation}
+B_t^{\text{Bayes}}=\min\bigl(\mu_{t-1}-k\sigma_{t-1},\;O_t,\;(1-c)P_t\bigr).
+\end{equation}
+Because $\sigma$ widens in turbulent periods, the discount automatically deepens when the model
+is less sure --- a genuine credible interval, not a fixed offset. We run $k\approx0.5$--$1.0$.
+
+\subsection{Adding a trend: the local-linear-trend filter}
+A pure random walk forecasts ``next period = this period'', so in a sustained rise the fair value
+lags and the bid sits too low to fill. We repair this by letting the model also estimate a slope
+$b_t$ and project it forward --- mean reversion around a \emph{moving} anchor:
+\begin{equation}
+m_t=m_{t-1}+b_{t-1}+\eta_t^{(m)},\qquad b_t=b_{t-1}+\eta_t^{(b)},\qquad C_t=m_t+\varepsilon_t,
+\end{equation}
+with process noises $q^{(m)}=(\varphi_L R_t)^2$ and $q^{(b)}=(\psi R_t)^2$, where
+$\varphi_L\approx0.2$ and $\psi\approx0.05$ --- deliberately much smaller, because a trend is
+persistent and changes far more slowly than the level itself. Carrying the belief now means
+tracking a $2\times2$ variance matrix, and the bid sits below the forecast level pushed one
+period ahead by the estimated slope:
+\begin{equation}
+B_t^{\text{LLT}}=\min\bigl((\hat m_{t-1}+\hat b_{t-1})-k\sigma_{t-1},\;O_t,\;(1-c)P_t\bigr).
+\end{equation}
+The only change from the random-walk version is the extra term $+\hat b_{t-1}$: one quantity,
+learned online, that removes the lag. This is the Bayesian sleeve we run in production.
+
+\section{The Ornstein--Uhlenbeck hedge sleeve}
+
+We run a second entry rule whose explicit purpose is diversification. The mathematics is
+period-agnostic, so we keep the same notation.
+
+\subsection{Why a deliberately different signal}
+The Bayesian local-linear-trend filter, at heart, \emph{respects the trend}: it carries a slope
+and projects it forward, so in a sustained rise it lifts its bid to keep filling. Any second
+entry sharing that instinct would be right and wrong on the same days as the first --- its P\&L
+correlated, adding return without subtracting much risk. A genuine hedge needs a signal whose
+mistakes land on different days. The natural opposite of ``extrapolate the trend'' is ``fade the
+deviation'': estimate a slow long-run mean and bet that price is pulled back toward it.
+
+\subsection{The process: a price tethered to a moving mean}
+The continuous OU process is the simplest mean-reverting diffusion,
+\begin{equation}
+dX_t=\theta(\mu-X_t)\,dt+\sigma\,dW_t,
+\end{equation}
+where $\mu$ is the long-run mean, $\theta>0$ the speed of reversion, and $\sigma\,dW_t$ random
+buffeting. Sampled at a fixed step it is an exact AR(1) about the mean:
+\begin{equation}\label{eq:ar1}
+X_t-\mu=\phi\,(X_{t-1}-\mu)+\varepsilon_t,\qquad \phi=e^{-\theta\Delta t}\in(0,1).
+\end{equation}
+The persistence $\phi$ carries the whole story: $\phi\to1$ is a random walk, $\phi\to0$ snaps
+instantly back. Real prices sit between, and the estimator's job is to measure where.
+
+\subsection{Estimating the ingredients from a rolling window}
+Over a trailing window of $W$ trading days ending at $t-1$ we read from the closes
+$C_{t-W},\dots,C_{t-1}$:
+\begin{align}
+\text{window mean}\quad & \bar C_t=\frac1W\sum_{s=t-W}^{t-1}C_s,\\
+\text{persistence}\quad & \hat\phi_t=\operatorname{med}\{0,\hat\beta_t,0.99\},\qquad
+\hat\beta_t=\frac{\sum (C_s-\bar C)(C_{s-1}-\bar C)}{\sum (C_{s-1}-\bar C)^2}.
+\end{align}
+Here $\hat\beta_t$ is the ordinary-least-squares slope of each close on the previous close ---
+exactly the AR(1) coefficient. The clamp to $[0,0.99]$ is essential, not cosmetic: a raw estimate
+below $0$ would assert anti-persistence that makes the rule chase phantom bounces, while a value
+at or above $1$ asserts a non-stationary random walk in which the reversion signal is
+meaningless. Crucially, these come from a \emph{flat rolling window}, not from the Bayesian
+recursion --- a different estimator on a different memory is what makes the OU sleeve a new bet
+rather than a re-tuning of the Kalman filter.
+
+\subsection{The scale of the discount: residuals, not levels}\label{sec:sigma}
+
+The third ingredient is the uncertainty that scales the entry discount. Through Revision~1 we
+used the standard deviation of the closes about the window mean,
+\begin{equation}\label{eq:oldsig}
+s_t^{\text{(old)}}=\sqrt{\frac1W\sum_{s=t-W}^{t-1}\bigl(C_s-\bar C_t\bigr)^2 }
+\qquad\text{\color{bcgrey}(superseded)} .
+\end{equation}
+
+\begin{fixbox}{The error in the superseded scale}
+Equation~\eqref{eq:oldsig} measures the dispersion of the price \emph{level} about a flat mean.
+On a name with a sustained trend, most of that dispersion \emph{is} the trend. It is not the
+scale of the innovation $\varepsilon_t$ in \eqref{eq:ar1}, which is what a discount expressed in
+standard deviations is supposed to be measured in.
+
+The consequence runs the wrong way. The buffer $k\,s_t$ inflates precisely when a name is
+trending hardest, pushing the bid furthest below the market exactly when the sleeve should be
+working --- so fills are lost, and the fills that do occur are crashes rather than reversions.
+Measured on the live book, $s_t^{\text{(old)}}$ ran at $8.7\%$ of price on TSM and $14.1\%$ on
+VRT, against innovation scales of $2.7\%$ and $3.9\%$: roughly two-thirds of it was trend.
+\end{fixbox}
+
+The correct scale is the standard deviation of the residuals of the fitted AR(1) --- what the
+reversion model cannot explain. Writing $d_s=C_s-\bar C_t$ for the deviation from the window
+mean, the residuals and their scale are
+\begin{align}
+e_s &= d_s-\hat\phi_t\,d_{s-1}, &
+\bar e_t &= \frac{1}{W-1}\sum_{s=t-W+1}^{t-1} e_s, \\
+s_t &= \sqrt{\frac{1}{W-1}\sum_{s=t-W+1}^{t-1}\bigl(e_s-\bar e_t\bigr)^2}. \label{eq:newsig}
+\end{align}
+Both estimators use the same window, the same mean and the same persistence; only the residual
+is taken before the dispersion is measured. Note that $\bar e_t$ is linear in the two shifted
+window means, so no additional pass over the data is required.
+
+Because $s_t$ in \eqref{eq:newsig} is roughly a third of $s_t^{\text{(old)}}$, the buffer $k$ is
+not comparable across the two definitions and must be re-scaled; the fitted values rise from
+$\approx0.22$--$0.57$ to $\approx0.20$--$0.75$. This is a change of units, not a re-fit of the
+kind \S\ref{sec:noreopt} warns against, and we tested it as such.
+
+\subsection{The forecast and the bid}
+The one-step forecast starts at the window mean and adds back only the fraction of today's
+deviation that history says tends to persist:
+\begin{equation}
+f_t=\bar C_t+\hat\phi_t\,(C_{t-1}-\bar C_t),
+\end{equation}
+and the bid is formed exactly as for the Bayesian entry --- a $k$-sigma discount below the
+forecast, floored by the open and the peak cap:
+\begin{equation}
+B_t^{\text{OU}}=\min\bigl(f_t-k\,s_t,\;O_t,\;(1-c)P_{t-1}\bigr).
+\end{equation}
+Everything downstream is shared: the fill test, the premium exit, and the capital, commission,
+interest, stop-loss and tranching of the earlier sections. Only the location $f_t$ and its
+uncertainty $s_t$ are made differently.
+
+\subsection{Why it hedges: the two bids move in opposite directions}
+\begin{table}[H]\centering\small
+\begin{tabular}{lll}
+\toprule
+\textbf{After a\dots} & \textbf{LLT-Bayesian bid} & \textbf{OU bid}\\
+\midrule
+sharp rise & rises (projects the up-slope) & falls (price now above the mean)\\
+sharp fall & falls (projects the down-slope) & rises (price now below the mean)\\
+quiet drift & tracks the level closely & sits near the slow mean\\
+\bottomrule
+\end{tabular}
+\end{table}
+The trend filter chases; the mean-reverter fades. When a rally lifts the Bayesian bid into the
+market and it fills near a local top, the same rally has pushed the OU bid below price, so it
+steps aside; when a slide drags the Bayesian bid down to catch a falling knife, the OU bid is the
+one bidding for the washed-out bounce. This is precisely what drives the two sleeves' return
+correlation toward zero.
+
+\subsection{Calibration: the lookback $W$ is the hedge dial}
+With the exit, premium and peak cap fixed, the OU entry has two free numbers, the lookback $W$
+and the buffer $k$; they trade return against independence, and $W$ is the dominant lever. A
+short window ($W\approx12$) is a near-clone: a fast mean hugs the recent price, correlating
+$0.76$ with the Bayesian sleeve and \emph{lowering} the combined Sharpe. A long window
+($W\approx120$) is a true hedge: the return correlation collapses to $0.09$, effectively
+independent, which is the configuration that buys risk reduction.
+
+\subsection{Evidence for the corrected scale}\label{sec:sigmaev}
+
+The correction was tested exactly as any structural change is: the sleeve is scored on verified
+fills, marked to market, with the buffer $k$ re-fitted on the training window only and every
+other parameter held.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{OU sleeve alone} & \textbf{eq.\eqref{eq:oldsig}} & \textbf{eq.\eqref{eq:newsig}} &
+\textbf{$k$ old} & \textbf{$k$ new}\\
+\midrule
+RKLB & 171\% & \textbf{199\%} & 0.10 & 0.25\\
+MU   & 62\%  & \textbf{83\%}  & 0.20 & 0.75\\
+VRT  & 68\%  & 70\%           & 0.20 & 0.40\\
+TSM  & 32\%  & 34\%           & 0.05 & 0.20\\
+VST  & 54\%  & 54\%           & 0.10 & 0.65\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{keybox}{Out-of-sample verdict}
+Across three expanding folds on each of the five daily names, the corrected scale beat the
+superseded one in \textbf{10 of 15 folds}, mean $+14.7$pp. At the book's deployed $75\%$ Bayes
+share the effect is smaller, because the sleeve carries a quarter of the capital: the five-name
+mean rises from $64\%$ to $71\%$ from the equation alone, and to $77\%$ with the re-scaled
+buffers.
+
+\textbf{The qualification.} On the two names run on the weekly model, NVDA and AVGO, the
+correction \emph{fails} out of sample --- 2 of 6 folds, mean $-8.2$pp --- despite helping both in
+sample. Those are the most persistently trending names in the book, which is where the argument
+above predicts the largest gain. Pooled across all seven names the correction stands at
+\textbf{12 of 21 folds}, $+8.2$pp. We deploy it on the five names whose own evidence supports it
+and record that the mechanism is less clean than the reasoning suggests.
+\end{keybox}
+
+\section{Optimising the parameters}
+
+Each name carries ten free parameters,
+\begin{equation}
+\theta=(\underbrace{\lambda,\varphi_L,\psi,k,\pi,c}_{\text{Bayesian}},\;
+\underbrace{W,b_{\text{OU}},\pi_{\text{OU}},c_{\text{OU}}}_{\text{Ornstein--Uhlenbeck}})
+\in\Theta\subset\mathbb R^{10},
+\end{equation}
+confined to a box of economically sensible ranges. We fit them by maximising a backtest
+objective, and the choice of \emph{how} to search matters as much as \emph{what} we search for,
+because the objective surface is badly behaved.
+
+\subsection{The objectives}
+The first maximises annualised return subject to a minimum trade count,
+\begin{equation}
+\max_{\theta\in\Theta}\;R(\theta)=\Bigl(\frac{\Phi_T(\theta)}{\Phi_0}\Bigr)^{1/Y}-1
+\quad\text{s.t.}\quad n_b(\theta)\ge n_{\min},
+\end{equation}
+where the floor $n_{\min}$ keeps the strategy actively harvesting rather than degenerating to a
+handful of large trades. The second tunes the hedge for risk-adjusted return via the annualised
+Sharpe ratio of the combined book.
+
+\subsection{Robustness: optimise a ridge, not a spike}
+A raw point optimum of a backtest is almost always a fragile spike. We therefore optimise an
+\emph{averaged} objective over a small neighbourhood of $\theta$: with $P$ multiplicative
+perturbations $\rho^{(p)}$ drawn from $\mathcal U(0.97,1.03)$,
+\begin{equation}
+\tilde S(\theta)=\tfrac12 S(\theta)+\tfrac12\frac1P\sum_{p=1}^{P}
+S\bigl(\Pi_\Theta[\theta\odot\rho^{(p)}]\bigr).
+\end{equation}
+A knife-edge optimum, whose neighbours perform poorly, is penalised; a plateau is favoured. We
+have since made this explicit in reporting as well as in fitting: every planning figure we quote
+is the \emph{median of the parameter neighbourhood}, not the value at the fitted point, because
+the point is what a ridge fitted to one sample produces and the median is what survives the ridge
+moving.
+
+\subsection{Why a derivative-free global search}
+$R(\theta)$ and $S(\theta)$ are \textbf{piecewise constant}. A fill is the step indicator
+$Z_t=\mathbf 1\{L_t\le B_t(\theta)\}$; as $\theta$ moves, $Z_t$ stays flat until a bid crosses a
+day's low, at which point a trade appears or vanishes and cascades through the compounding. Hence
+$\nabla_\theta R(\theta)=0$ almost everywhere, with jumps on the fill boundaries. Gradients carry
+no information and quasi-Newton methods stall, so we use \textbf{differential evolution}: a
+population-based, derivative-free global optimiser, seeded by a Sobol sequence with the incumbent
+parameters injected as one member, so the search can never return something worse than the status
+quo. A fixed random seed makes every fit reproducible.
+
+\subsection{The limit of all this}
+None of the above escapes the deeper fact that a backtest objective is one draw from a noisy
+process. The robustness term guards against knife-edge parameters; it does \emph{not} guard
+against the sample itself being favourable. That is why the fit is always paired with
+out-of-sample validation, and why maximising any in-sample objective fails to beat the incumbent
+parameters out of sample. Optimisation locates a good region; validation, not the optimiser,
+decides what we trust.
+
+\section{Capital allocation: where we found the durable edge}\label{sec:alloc}
+
+The tranching identity $\Pi=K(\bar M-1)$ makes the book's profit a capital-weighted average of
+its tranches' multiples. Two allocation questions therefore sit upstream of every parameter:
+\emph{how much capital does each name receive}, and \emph{how is each name's capital split
+between the sleeves}. These two decisions govern realised, out-of-sample performance far more
+than the precise parameter values do.
+
+\subsection{Across names: equal weighting}
+The book is seven names. Five run the daily two-sleeve model; two --- NVDA and AVGO --- run a
+weekly single-tranche variant in which the bid is the anchor day's open floored by the peak cap,
+and neither sleeve signal is used, having been shown not to earn its place at weekly frequency.
+
+Risk-adjusted weighting, return divided by realised volatility, was tested against
+inverse-volatility, Sharpe-proportional and return-proportional schemes. \textbf{Equal weighting
+beat all of them by roughly 10pp}, and is what we run: the floor and the cap are both set to
+$1/n$, which pins each name to an equal share and leaves the risk-adjusted machinery inert. The
+result is not that risk adjustment is wrong in principle but that the return estimates feeding it
+are too noisy to improve on the simplest possible rule.
+
+\subsection{Within a name: the Bayes\,/\,OU split}
+Each daily name's capital is divided between the two sleeves at a flat \textbf{75:25
+Bayes:OU}. Per-name splits were tested and not supported: training windows selected a
+Bayes-heavy share for essentially every name, so the extra freedom bought nothing the flat tilt
+did not already provide, and the realised out-of-sample gain from the tilt itself is about
+$+2$pp against the in-sample curve's $+8$.
+
+The split was re-tested against the corrected OU sleeve of \S\ref{sec:sigma}, on the hypothesis
+that the tilt might have been compensating for the mis-specification. It was not. The
+full-sample curve does invert --- with the corrected sleeve and re-scaled buffers it prefers
+$0\%$ Bayes --- but the walk-forward still selects the deployed share, choosing $100\%$ Bayes as
+its median on every training window and beating $75\%$ in only 8 or 9 folds of 15 by about
+$1.6$pp. The curve's shape is regime-dependent rather than stable. The split stays where it is.
+
+\subsection{The finding that governs everything: re-optimisation does not generalise}
+\label{sec:noreopt}
+We tested directly whether parameters should be re-fitted to recent data, across successively
+stricter experiments on the live feed.
+\begin{enumerate}[topsep=2pt,itemsep=2pt]
+\item \textbf{In-sample, it looks great.} Re-fitting each name to maximise return over the recent
+      window lifted every name's return, by an average of $+71$ percentage points --- measured on
+      the very window we fitted to.
+\item \textbf{Fit one year, test the next.} The sign flips: the re-fitted parameters lost out of
+      sample in 9 of 10 names, by an average of $-218$pp.
+\item \textbf{Walk-forward.} Across rolling folds per name, re-tuned parameters beat the
+      incumbent baseline in \textbf{6 of 40 out-of-sample folds}, with zero of ten names showing
+      a positive average edge.
+\end{enumerate}
+On the weekly variant the same discipline gives the same answer: across six separate
+re-optimisation experiments, re-fitted parameters have won \textbf{1 fold in 18}.
+
+\begin{keybox}{The edge is structural, not parametric}
+Re-optimising parameters to recent data is not merely unhelpful --- it is actively destructive out
+of sample, occasionally catastrophically. The strategy's durable value lives in the
+\emph{mechanism} (the self-tuning Kalman entry, the deliberately decorrelated OU hedge, the
+premium exit, the stop-loss and cash carry) and in \emph{how capital is allocated} across that
+mechanism --- not in the third decimal place of any parameter.
+
+The correction in \S\ref{sec:sigma} is the exception that clarifies the rule. It is not a re-fit:
+it replaces one estimator with a better-specified one, leaving the fitted parameters where they
+were and re-scaling only the buffer whose units changed. It is the one change to a signal that
+has survived out-of-sample testing, and it survived because it corrected a specification error
+rather than searching for a better number.
+\end{keybox}
+
+\begin{keybox}{The one caveat that governs the numbers}
+Headline returns are measured over a single, bull-biased history and are optimistic in absolute
+terms. We lean on them for \emph{ranking} --- which names and which sleeves are relatively better
+--- and deliberately dampen that ranking with caps, floors, the fixed split, and the practice of
+quoting the parameter-neighbourhood median rather than the fitted point. The out-of-sample audit
+above is the reason we distrust point estimates and widen the safety margin wherever a decision
+depends on one.
+\end{keybox}
+
+\section{Conclusion}
+
+We drive our volatility-harvesting book with two statistical engines that were built to disagree.
+The Bayesian local-linear-trend filter infers a hidden fair value and bids a self-tuning,
+volatility-scaled discount beneath it, with no hand-set weights. The Ornstein--Uhlenbeck sleeve
+fades deviations from a slow mean and, at a long lookback, misfires on different days --- driving
+the return correlation to $0.09$ and, blended in, materially reducing drawdown while raising the
+Sharpe ratio. Revision~2 corrects the scale of that sleeve's discount, which had been measuring
+trend rather than innovation.
+
+Above both sits the decision we found matters most: the allocation of capital across names and
+across the two sleeves. Our out-of-sample testing showed that chasing parameter precision
+reliably improves the backtest and reliably fails on unseen data, whereas a disciplined,
+equal-weighted allocation over a robust mechanism is what actually survives. The book is
+therefore built to be robust first and optimal second --- which, on the evidence we have
+gathered, is the only ordering that holds up out of sample.
+
+\vfill
+{\color{bcrule}\rule{\textwidth}{0.5pt}}\\[0.2em]
+{\footnotesize\itshape\color{bcgrey} Reproducible from the live workbook and a validated Python
+replica of the model engine that reproduces its cached results exactly. Same-day round trips are
+verified against 1-minute or 5-minute bars; returns are marked to market, with any position open
+on the final day valued at that day's close. Figures in-sample unless stated; not a forecast or
+an offer.}
+
+\end{document}

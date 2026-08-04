@@ -1,0 +1,647 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage[font=footnotesize,labelformat=empty]{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+\definecolor{bcwarn}{RGB}{250,238,238}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.45em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{1.2cm}
+{\color{bcgold}\rule{\textwidth}{2pt}}\\[0.4cm]
+{\color{bcnavy}\Huge\bfseries Seven-Name Book}\\[0.25cm]
+{\color{bcnavy}\Huge\bfseries Implementation Specification}\\[0.35cm]
+{\color{bcblue}\LARGE Revision 4 --- OU Sigma Correction}\\[0.5cm]
+{\color{bcgold}\rule{\textwidth}{1pt}}\\[0.6cm]
+{\large\color{bcgrey} Five names on the daily Bayesian / Ornstein--Uhlenbeck model}\\[0.2cm]
+{\large\color{bcgrey} Two names on the weekly single-tranche model}\\[0.2cm]
+{\large\color{bcgrey} All seven above the 50\% floor in the tested half; two fall short on the full sample}\\[1.2cm]
+{\color{bcnavy}\large\bfseries Bayesian Capital}\\[0.15cm]
+{\color{bcgrey} Quantitative Research}\\[0.15cm]
+{\color{bcgrey} 4 August 2026 --- Revision 4}\\[1.6cm]
+
+\fbox{\parbox{0.92\textwidth}{\color{bcnavy}\textbf{Purpose.}\\ \color{black}
+The operative configuration for the reduced book. Four names --- TSLA, SPOT, SOFI and PLTR ---
+are removed rather than repaired, having failed on both models. All seven retained names clear a
+50\% annualised floor on the tested half of the sample; on the full sample MU and VRT fall short,
+which \S7 addresses. NVDA and AVGO move from the daily model to a weekly single Monday
+tranche. The remaining five keep their existing daily parameters unchanged.
+
+\textbf{Revision 4 corrects the OU sleeve's uncertainty scale on the five daily names.} It was
+the standard deviation of the closes about the window mean, which on a trending name measures the
+trend rather than the innovation and inflated the entry discount exactly when the sleeve should
+have been working. It is now the standard deviation of the fitted AR(1) residuals. This is a
+specification correction, not a re-fit, and it is the only change to a signal that has survived
+walk-forward here. Section 9 sets it out. The weekly names, the parameters, the allocation and
+the Bayes share are all unchanged.
+
+\textbf{Revision 3 froze this configuration.} The only change since Revision 2 is a 26-week
+maximum holding period on the two weekly names, adopted as a safety rail: at that length it never
+binds in this sample --- zero forced exits, returns identical to uncapped --- so it costs nothing
+observed while bounding an otherwise open-ended exposure. Section 8 sets out why 26 rather than
+the 12 weeks first indicated, and records the re-fit test run with the cap in place before
+freezing. No parameter changes.
+
+\textbf{Revision 2 restated every daily figure on the mark-to-market basis.} Revision 1 took each
+name's terminal value from the model's Fund column, which holds its pre-purchase value while a
+tranche is open, so a position still held at the end was counted at cost. Correcting it lowers
+the daily names by 3 to 11 percentage points and the book's planning figure from 65\% to 59\%.
+No parameter, weight or name selection changes as a result. MU's history has also been corrected
+and extended to 3 August 2026. Section 6 sets out both changes.
+
+All figures are on the execution-verified basis: every same-day round trip is checked against
+minute or 5-minute bars, so no fill depends on an intraday ordering that cannot be known from
+daily data.}}
+\end{titlepage}
+
+\section{The book}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Name} & \textbf{Model} & \textbf{Verified} & \textbf{Tested half} & \textbf{Planning} &
+\textbf{Weight}\\
+\midrule
+\rowcolor{bckeep} RKLB & Daily hybrid   & 134\% & 65\%  & 97\%  & 14.29\%\\
+AVGO & Weekly Monday  & 91\%  & 96\%  & 60\%  & 14.29\%\\
+\rowcolor{bckeep} NVDA & Weekly Monday  & 82\%  & 82\%  & 58\%  & 14.29\%\\
+TSM  & Daily hybrid   & 67\%  & 89\%  & 51\%  & 14.29\%\\
+\rowcolor{bckeep} VST  & Daily hybrid   & 66\%  & 55\%  & 54\%  & 14.29\%\\
+VRT  & Daily hybrid   & 66\%  & 168\% & \textbf{44\%} & 14.29\%\\
+\rowcolor{bckeep} MU   & Daily hybrid   & 51\%  & 124\% & 50\%  & 14.29\%\\
+\midrule
+\textbf{Book} & equal weight & \textbf{79\%} & --- & \textbf{59\%} & 100\%\\
+\textbf{Book ex-RKLB} & & \textbf{70\%} & --- & \textbf{53\%} & \\
+\bottomrule
+\end{tabular}
+\caption{Verified = full sample at the deployed configuration, marked to market and annualised
+over each series' true span. Tested half = the portion scored outside every training window.
+Planning = the figure to budget on, derived in \S5. Bold marks the two figures below the 50\%
+floor. Daily verified figures carry the corrected OU sleeve of \S9; the planning column is
+deliberately unchanged, since it rests on the 50/50 result plus the walk-forward-validated tilt
+and the correction's book-level contribution has not been re-derived on that basis.}
+\end{table}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Name} & \textbf{Revision 1} & \textbf{Revision 2} & \textbf{Change}\\
+\midrule
+\rowcolor{bckeep} RKLB & 111\% & 101\% & $-10$pp\\
+TSM  & 68\% & 63\% & $-5$pp\\
+\rowcolor{bckeep} VST  & 65\% & 61\% & $-4$pp\\
+VRT  & 65\% & 54\% & $-11$pp\\
+\rowcolor{bckeep} MU   & 54\% & 43\% & $-11$pp\\
+\midrule
+NVDA, AVGO & \multicolumn{3}{l}{unchanged --- the weekly runner already valued open positions at
+the close}\\
+\bottomrule
+\end{tabular}
+\caption{Effect of the basis change on the daily names.}
+\end{table}
+
+\textbf{Two names no longer clear the 50\% floor on every measure.} MU returns 43\% on the full
+sample and VRT plans at 44\%. Both clear it comfortably on the tested half --- 124\% and 168\% ---
+which is the measure that decided the book's composition, but the unqualified claim that every
+name clears 50\% no longer holds. \S7 sets out what to do about it.
+
+\section{Daily names --- parameters}
+
+Five names, unchanged from the current workbooks. Nine attempts to improve these parameters were
+tested out of sample across this research and all were rejected; they are reproduced here exactly
+as they stand. Cell references are to the \texttt{2 Tranche StopLoss 50d} sheet.
+
+\begin{table}[H]\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{6}{c}{\textbf{Bayes sleeve}}\\
+\cmidrule(l){2-7}
+\textbf{Name} & $\lambda$ (B2) & $\phi_L$ (D2) & $\psi$ (F2) & $k$ (H2) & prem (J2) &
+peak cap (L2)\\
+\midrule
+\rowcolor{bckeep} RKLB & 0.352847 & 0.237406 & 0.113048 & 0.712293 & 0.026842 & 0.008015\\
+TSM  & 0.462001 & 0.254287 & 0.065039 & 1.004530 & 0.015652 & 0.030484\\
+\rowcolor{bckeep} VST  & 0.373520 & 0.264322 & 0.096187 & 1.385660 & 0.021816 & 0.013663\\
+VRT  & 0.420699 & 0.425851 & 0.081656 & 1.116400 & 0.021691 & 0.048379\\
+\rowcolor{bckeep} MU   & 0.600000 & 0.263600 & 0.010000 & 1.054800 & 0.024300 & 0.038000\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]\centering\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{4}{c}{\textbf{OU sleeve}} & \multicolumn{2}{c}{\textbf{Common}}\\
+\cmidrule(lr){2-5}\cmidrule(l){6-7}
+\textbf{Name} & $W$ (B3) & buffer $k$ (D3) & prem (H3) & cap (J3) & stop (T2) & comm (N2)\\
+\midrule
+\rowcolor{bckeep} RKLB & 85  & \textbf{0.25} & 0.022147 & 0.033647 & 50 & 0.005\\
+TSM  & 77  & \textbf{0.20} & 0.010022 & 0.020893 & 50 & 0.005\\
+\rowcolor{bckeep} VST  & 122 & \textbf{0.65} & 0.014498 & 0.052746 & 50 & 0.005\\
+VRT  & 80  & \textbf{0.40} & 0.026603 & 0.059499 & 50 & 0.005\\
+\rowcolor{bckeep} MU   & 91  & \textbf{0.75} & 0.025000 & 0.029200 & 50 & 0.005\\
+\bottomrule
+\end{tabular}
+\caption{Buffer $k$ (D3) is shown in bold because it changed with the sigma correction of
+\S9 --- residual sigma is about a third of the old scale, so the multiplier is re-scaled to match.
+Previous values were RKLB 0.2206, TSM 0.3992, VST 0.2386, VRT 0.5679, MU 0.3000. Interest on idle
+cash (R2) is 3.14\% for all names. The stop period is a uniform 50
+calendar days: a variable stop was tested, gained 8.9pp in sample and failed walk-forward at
+13 folds of 30.}
+\end{table}
+
+\subsection{Sleeve split}
+
+Bayes share \textbf{0.75} for all five names, entered flat rather than per name. Per-name Bayes
+shares were tested and not supported: training windows selected a Bayes-heavy share for
+essentially every name, so the per-name freedom bought nothing that the flat tilt did not
+already provide.
+
+\section{Weekly names --- parameters}
+
+NVDA and AVGO run a \textbf{single Monday tranche} each. The three-tranche staggered version was
+tested and the simplification costs nothing: NVDA scores 82.0\% on one tranche against 80.3\% on
+three, and its parameter neighbourhood median \emph{improves} from 56.6\% to 58.6\%. AVGO gives
+up 2.8pp of headline (90.7\% against 93.5\%) and gains on the neighbourhood, 64.8\% against
+56.7\%. One tranche is both simpler and no worse.
+
+\subsection{The rule}
+
+Each Monday, if flat:
+\begin{align*}
+\text{buy} &= \min\bigl(\text{Monday open},\ \text{ATH}\times(1-\text{cap})\bigr)\\
+\text{target} &= \text{buy} + \text{previous week close}\times\text{prem}
+\end{align*}
+where ATH is the running maximum of weekly highs through the previous week. Fill on the first
+session of the week whose low reaches the buy price. Sell on any session at or after the fill
+whose high reaches the target. If the target is not reached, \textbf{carry the position} and keep
+the same target --- it is not recomputed while holding. Re-enter the Monday after a sale.
+There is no stop loss.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Name} & \textbf{cap} & \textbf{prem} & \textbf{Max hold} & \textbf{Anchor} &
+\textbf{Tranches} & \textbf{Trades / yr}\\
+\midrule
+\rowcolor{bckeep} NVDA & 0.0935 & 0.0293 & 26 weeks & Monday & 1 & 20\\
+AVGO & 0.0800 & 0.1000 & 26 weeks & Monday & 1 & 6.5\\
+\bottomrule
+\end{tabular}
+\caption{Commission 0.005/share and 3.14\% interest on idle cash, as for the daily names. The
+maximum hold never binds in this sample at 26 weeks; see \S8.}
+\end{table}
+
+\subsection{On the dormant mean-reversion term}
+
+The original weekly workbook computes an entry level
+\[
+L=\min\Bigl(\operatorname{mean}\bigl(m\tfrac{H_{-1}+L_{-1}}{2},\ C_{-1}w\bigr)
++\log_{10}(H_{-1}-L_{-1})\,g,\ \text{Monday open}\Bigr)
+\]
+with $w=1.0082$, $m=1.1627$, $g=2.0374$. On the deployed values this term \textbf{never binds}:
+it sits a median 9.4\% above the Monday open and was the binding constraint in 0 of 120 NVDA
+weeks and 0 of 120 AVGO weeks. The entry is therefore always the Monday open or the ATH cap, as
+written in \S3.1. Retain $w$, $m$ and $g$ if replicating the sheet, but they are inert ---
+$g$ can be multiplied or divided by five with no change to a single trade. Do not lower $m$:
+below roughly 1.0 the term switches on and performance falls (NVDA 80.3\% to 68.5\%, AVGO 53.4\%
+to 37.3\%).
+
+\section{Allocation sheet}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Setting} & \textbf{Cell} & \textbf{Value}\\
+\midrule
+\rowcolor{bckeep} Number of names & --- & \textbf{7}\\
+Weight per name & --- & \textbf{0.142857} $(=1/7)$\\
+\rowcolor{bcact} Floor: min weight per stock & B8 & \textbf{0.142857}\\
+Cap: max weight per stock & E11:E17 & \textbf{0.142857}\\
+\rowcolor{bckeep} Bayes fraction --- flat & B6 & \textbf{0.75}\\
+Split mode & --- & \textbf{1} (flat, not per-name)\\
+\rowcolor{bckeep} Interest on idle cash & R2 & \textbf{0.0314}\\
+\bottomrule
+\end{tabular}
+\caption{Equal weighting is not a default --- it was tested against inverse-volatility,
+Sharpe-proportional and return-proportional schemes and beat all of them by roughly 10pp.
+Setting floor and cap both to $1/7$ pins the book to equal weight.}
+\end{table}
+
+The Bayes fraction and the weight apply only to the five daily names. The two weekly names take
+their $1/7$ of capital into a single Monday tranche with no sleeve split.
+
+\section{Performance --- what to budget}
+
+\subsection{Why the planning figures sit below the verified ones}
+
+Three discounts apply, each measured rather than assumed.
+
+\textbf{The tilt is in-sample.} The Bayes share was walk-forwarded across 30 folds. It won 20 of
+them and selected a Bayes-heavy share in all 30, so the direction is supported --- but the
+realised out-of-sample gain was approximately \textbf{+2pp}, against the 7pp the in-sample curve
+suggests (the five daily names average 57\% at 50/50 and 64\% at 75\%). Daily planning figures are
+therefore the 50/50 result plus 2pp, not the 75\% result.
+
+\textbf{The weekly parameters sit on a narrow ridge.} NVDA's 82\% is the peak of a region whose
+median is 58.6\% and whose lower quartile is 45.4\%. AVGO's neighbourhood median is 64.8\% with a
+lower quartile of 57.5\%. The neighbourhood median is what to budget, because a ridge fitted to
+this sample is unlikely to stay exactly where this sample put it.
+
+\textbf{The weekly figures below are uncapped.} At 26 weeks the cap makes no difference to
+either name in this sample, so NVDA's 82.0\% and AVGO's 90.7\% stand unchanged, as do the
+neighbourhood medians of 58.6\% and 64.8\% behind the planning figures.
+
+\textbf{The weekly model ends fully invested.} Each weekly tranche finishes holding, so all of
+its terminal value is an open position. It is already valued at the close here; marking it 20\%
+lower would take NVDA to roughly 64\% and AVGO to 76\%.
+
+\subsection{The half-sample test}
+
+Weeks 1--59 sit inside every walk-forward training window; weeks 60--120 were scored outside at
+least one. Splitting the two separates a configuration that works from one that fitted an early
+run. This test is what removed four names, and the seven retained were held to the same standard.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Name} & \textbf{First half} & \textbf{Tested half} & \textbf{Shift}\\
+\midrule
+\rowcolor{bckeep} VRT  & $-12$\% & 168.0\% & $+180$pp\\
+MU   & $-10$\% & 124.0\% & $+134$pp\\
+\rowcolor{bckeep} TSM  & 40\%  & 89.0\%  & $+49$pp\\
+AVGO & 72.2\%  & 96.4\%  & $+24$pp\\
+\rowcolor{bckeep} NVDA & 44.2\%  & 81.8\%  & $+38$pp\\
+VST  & 68\%  & 55.0\%  & $-13$pp\\
+\rowcolor{bckeep} RKLB & 146\% & 65.0\%  & $-81$pp\\
+\midrule
+\rowcolor{bcwarn} \textit{Removed:} PLTR & 87.2\% & 6.6\% & $-81$pp\\
+\rowcolor{bcwarn} \textit{Removed:} SPOT & 60.7\% & 3.6\% & $-57$pp\\
+\rowcolor{bcwarn} \textit{Removed:} SOFI & 19.1\% & 13.0\% & $-6$pp\\
+\rowcolor{bcwarn} \textit{Removed:} TSLA & $-0.2$\% & 19.2\% & $+19$pp\\
+\bottomrule
+\end{tabular}
+\caption{All seven retained names clear 50\% in the tested half. VRT and MU are negative in the
+untested half and strongest in the tested one, which is the opposite of a fitted result. The four
+removed names are shown at the 50/50 split on which they were assessed.}
+\end{table}
+
+\subsection{Per-name detail}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Name} & \textbf{50/50} & \textbf{75\% Bayes} & \textbf{Sharpe} & \textbf{max DD} &
+\textbf{buys/yr} & \textbf{stops}\\
+\midrule
+\rowcolor{bckeep} RKLB & 95\% & 101\% & 1.16 & 46\% & 96 & 5\\
+TSM  & 49\% & 63\% & 1.61 & 27\% & 65 & 3\\
+\rowcolor{bckeep} VST  & 52\% & 61\% & 1.13 & 40\% & 68 & 5\\
+VRT  & 42\% & 54\% & 0.95 & 62\% & 54 & 4\\
+\rowcolor{bckeep} MU   & 48\% & 43\% & 0.93 & 42\% & 51 & 4\\
+\bottomrule
+\end{tabular}
+\caption{Daily names, marked to market. MU is the one name where the tilt to 75\% Bayes reduces
+return; its Sharpe also falls, so 50/50 would be defensible for MU alone. The book keeps a flat
+share because per-name shares failed validation.}
+\end{table}
+
+\section{What changed since Revision 1}
+
+\subsection{Mark-to-market accounting}
+
+The model reports a terminal value from the Fund column, following the workbook's
+\texttt{Y4 = Y867+AF867-P2}. That column keeps its pre-purchase value while a tranche is open, so
+a position still held on the last day was counted at cost rather than at the closing price. Every
+daily figure in Revision 1 carried that overstatement.
+
+VST isolates the two components: it ends with nothing held, so its whole 4pp change is the switch
+from the workbook's fixed 2.2-year annualisation to each series' true span. VRT and RKLB, which
+end with both tranches holding, carry roughly a further 7pp of genuine open-position
+overstatement on top of that.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Name} & \textbf{Fund basis} & \textbf{Marked to market} & \textbf{Gap} &
+\textbf{Tranches holding}\\
+\midrule
+\rowcolor{bckeep} VRT  & 65\%  & 54\%  & $+11$pp & 2 of 2\\
+RKLB & 111\% & 101\% & $+11$pp & 2 of 2\\
+\rowcolor{bckeep} MU   & 54\%  & 43\%  & $+11$pp & 1 of 2\\
+TSM  & 68\%  & 63\%  & $+5$pp  & 1 of 2\\
+\rowcolor{bckeep} VST  & 65\%  & 61\%  & $+4$pp  & 0 of 2\\
+\bottomrule
+\end{tabular}
+\caption{MU's 11pp combines the basis change with its data correction, below.}
+\end{table}
+
+This is a reporting change, not a modelling one. No parameter, weight or name selection changes,
+and the ordering of the names is unaffected. It does mean the workbook's own annual-return cells
+read high whenever a tranche is open on the last row --- worth remembering when reading the sheet
+rather than these tables.
+
+\subsection{MU's price history}
+
+MU's series ran to 24 June 2026 with a part-session value on that last day. It now runs to
+3 August 2026, with 24 June rebuilt from the 5-minute bars (its low was 1031.00 against 991.10 in
+the bars). The repair alone changed nothing --- 52\% and 54\% before and after --- but the added
+27 sessions cover a fall from about 1233 to 739 and cost roughly 8pp. Over that month the model
+lost 7.7\% while MU itself fell 20.9\%, so it cushioned the fall rather than avoiding it.
+
+\section{What was tested and rejected}
+
+The four removed names were each put through the full weekly pipeline before being dropped ---
+own-parameter grid, walk-forward, neighbourhood and half-sample split.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrl}
+\toprule
+\textbf{Name} & \textbf{Optimised} & \textbf{Neighbourhood} & \textbf{Walk-forward} &
+\textbf{Reason for removal}\\
+\midrule
+\rowcolor{bcwarn} PLTR & 125.9\% & 95.9\% & 1/3 & 365\% first half, 3.1\% tested half\\
+SOFI & 79.7\%  & 54.8\% & 1/3 & tested half only 23.3\%\\
+\rowcolor{bcwarn} TSLA & 49.4\%  & 21.0\% & 2/3 & optimum on the grid boundary; folds disagreed\\
+SPOT & 35.2\%  & 24.2\% & 0/3 & tested half $-29.1$\%\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Also tested and rejected on the retained names: five-parameter re-optimisation of the weekly model
+(0 of 3 folds), the same with $g$ frozen (0 of 3), two-parameter re-optimisation (1 of 3), and
+anchor mixing across weekdays (0 of 3, and it lowers the neighbourhood median from 56.6\% to
+48.2\%). Across four experiments, re-fitting the weekly parameters has won 1 fold in 9.
+
+The Monday anchor itself \emph{is} supported. Weekend repricing is 1.75\% against 1.41\% for a
+normal overnight gap, and the effect tracks the number of non-trading days rather than the
+weekday label --- a Tuesday following a three-day break reprices 1.88\% against 1.35\% for an
+ordinary Tuesday. Monday is the best anchor for NVDA in every sub-period and for AVGO under both
+its own and NVDA's parameters.
+
+\section{The maximum holding period, and the freeze}
+
+\subsection{Why a cap at all}
+
+The weekly rule carries an unfilled target indefinitely. That is cheap in practice --- NVDA's
+median hold is 4 days and AVGO's 20 --- but the exposure is formally unbounded, and it is the only
+position in the book with no exit condition other than the target being reached. MU, tested for
+the weekly model and rejected, reached 451 days in a single position. NVDA and AVGO top out at 118
+and 122 days in this sample, so the tail is real but not extreme.
+
+\subsection{Why 26 weeks and not 12}
+
+Judged at the deployed parameters, a 12-week cap looked free: NVDA's tested half was unchanged at
+81.8\%, AVGO's rose 1pp, and the cap fired only 8 times in 2.3 years across three names.
+
+Judged on the \emph{parameter neighbourhood} --- the basis every planning figure in this
+document rests on --- it is not free.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+& \multicolumn{2}{c}{\textbf{NVDA}} & \multicolumn{2}{c}{\textbf{AVGO}} &\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+\textbf{Max hold} & at deployed & nbhd median & at deployed & nbhd median &
+\textbf{Forced exits}\\
+\midrule
+\rowcolor{bcwarn} 8 weeks  & 59.4\% & 42.8\% & 76.7\% & 52.9\% & 3 / 4\\
+\rowcolor{bcwarn} 12 weeks & 70.7\% & 46.3\% & 92.4\% & 63.9\% & 2 / 3\\
+16 weeks & 80.0\% & 56.2\% & 84.6\% & 54.3\% & 1 / 2\\
+\rowcolor{bckeep} 26 weeks & 82.0\% & 52.2\% & 90.7\% & 64.8\% & 0 / 0\\
+none & 82.0\% & 58.6\% & 90.7\% & 64.8\% & 0 / 0\\
+\bottomrule
+\end{tabular}
+\caption{A 12-week cap costs NVDA 12pp of neighbourhood median. At 26 weeks the cap does not bind
+at the deployed parameters for either name.}
+\end{table}
+
+At 26 weeks nothing observed changes: zero forced exits, returns identical to uncapped, and
+AVGO's neighbourhood median is unchanged at 64.8\%. NVDA's neighbourhood median still reads 6pp
+below uncapped, because the cap binds at other points in the region even though it does not bind
+at the deployed values; the series is also non-monotonic across lengths (56.2\% at 16 weeks,
+54.8\% at 20, 52.2\% at 26), which is itself a sign that these differences are within the noise.
+
+\textbf{The cap is therefore a safety rail, not a working rule.} It bounds an open-ended exposure
+at six months without altering any historical behaviour. Do not tighten it without repeating this
+test: shorter is not free.
+
+\subsection{Re-fitting with the cap in place}
+
+The cap was chosen with parameters frozen, which is the correct structural test but leaves the
+parameters themselves fitted under a different rule. Before freezing, both names were re-fitted
+with the cap active.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Name} & \textbf{Deployed} & \textbf{Re-fitted} & \textbf{In sample} &
+\textbf{Walk-forward}\\
+\midrule
+\rowcolor{bckeep} NVDA & 0.0935 / 0.0293 & 0.1400 / 0.0500 & $+12.7$pp & 1 of 3, $-19.9$pp\\
+AVGO & 0.0800 / 0.1000 & 0.0800 / 0.1850 & $-0.2$pp & 0 of 3, $-26.7$pp\\
+\bottomrule
+\end{tabular}
+\caption{NVDA's fitted peak cap scattered 5.6$\times$ across folds; AVGO's re-fit found nothing at
+all in sample.}
+\end{table}
+
+One loose end was closed at the same time. Both earlier uncapped fits preferred a wider premium
+for NVDA than the deployed 0.0293, and the time cap was the one change that could have justified
+it, by bounding the wait that makes a wide target risky. Fitting the premium alone, with the peak
+cap frozen, gives \textbf{0 of 3 folds and $-51.2$pp}, and the full-sample optimum lands at
+0.0275 --- effectively the deployed value, which is also the best cell on the sweep at 70.7\%
+against 52.4\% at 0.025 and 45.5\% at 0.035. The 0.055 the joint fit kept selecting only looked
+good alongside a peak cap the folds could not agree on.
+
+\subsection{Frozen}
+
+Across six experiments, re-fitting the weekly parameters has now won \textbf{1 fold in 18}. The
+configuration in \S2 and \S3 is frozen. The cap is the only change adopted since the parameters
+were set, and it was adopted on a structural test with the parameters held fixed --- which this
+re-fit confirms was the right way round.
+
+\section{The OU sigma correction}
+
+\subsection{What was wrong}
+
+The OU sleeve sets its bid a multiple $k$ of a standard deviation below its forecast. That
+standard deviation was computed as \texttt{STDEVP} of the last $W$ closes about the window mean
+--- the dispersion of the price \emph{level}. On a name with a sustained trend, most of that
+dispersion is the trend itself rather than the innovation the discount is supposed to be measured
+in.
+
+The consequence runs the wrong way. The buffer inflates precisely when a name is trending
+hardest, pushing the bid furthest below the market exactly when the sleeve should be working, so
+fills are lost and the fills that do occur are crashes rather than reversions. Measured on the
+book, the old scale ran at 8.7\% of price on TSM and 14.1\% on VRT, against innovation scales of
+2.7\% and 3.9\%.
+
+\subsection{The correction}
+
+Sigma is now the standard deviation of the fitted AR(1) residuals, using the same window, the
+same mean and the same persistence the sheet already computes. In workbook terms, column AZ
+becomes
+\begin{quote}\footnotesize\ttfamily
+=SQRT(SUMPRODUCT((((R1-AX)-AY*(R0-AX))-((AVERAGE(R1)-AX)-AY*(AVERAGE(R0)-AX)))\^{}2)/(\$B\$3-1))
+\end{quote}
+where \texttt{R1} and \texttt{R0} are the two shifted close ranges the \texttt{SLOPE} in AY
+already uses. The mean of the residuals is written as a linear combination of two plain
+\texttt{AVERAGE}s, so no cell needs array entry, and \texttt{SUMPRODUCT} keeps it working on every
+Excel version. The formula was checked against the Python engine to $5\times10^{-15}$.
+
+Because residual sigma is roughly a third of the old value, $k$ (D3) is re-scaled per name as
+shown in \S2. That is a change of units, not a re-fit.
+
+\subsection{Evidence}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{OU sleeve alone} & \textbf{old sigma} & \textbf{corrected} & \textbf{$k$ old} &
+\textbf{$k$ new}\\
+\midrule
+\rowcolor{bckeep} RKLB & 171\% & \textbf{199\%} & 0.10 & 0.25\\
+MU   & 62\%  & \textbf{83\%}  & 0.20 & 0.75\\
+\rowcolor{bckeep} VRT  & 68\%  & 70\%           & 0.20 & 0.40\\
+TSM  & 32\%  & 34\%           & 0.05 & 0.20\\
+\rowcolor{bckeep} VST  & 54\%  & 54\%           & 0.10 & 0.65\\
+\bottomrule
+\end{tabular}
+\caption{Buffer fitted on the training window only in the walk-forward; shown here at the
+full-sample fit.}
+\end{table}
+
+Across three expanding folds on each of the five daily names the corrected scale beat the old one
+in \textbf{10 of 15 folds}, mean $+14.7$pp. At the deployed 75\% Bayes share the book effect is
+smaller, because the sleeve carries a quarter of the capital: the five-name mean rises from 64\%
+to 71\% from the equation alone and to 77\% with the re-scaled buffers.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{At 75\% Bayes} & \textbf{old sigma} & \textbf{corrected} & \textbf{change}\\
+\midrule
+\rowcolor{bckeep} RKLB & 101\% & 134\% & $+33$pp\\
+VRT  & 54\%  & 66\%  & $+12$pp\\
+\rowcolor{bckeep} MU   & 43\%  & 51\%  & $+8$pp\\
+VST  & 61\%  & 66\%  & $+5$pp\\
+\rowcolor{bckeep} TSM  & 63\%  & 67\%  & $+4$pp\\
+\midrule
+mean & 64\% & \textbf{77\%} & $+13$pp\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Two things it does not change}
+
+\textbf{The sleeve split stays at 75\%.} The correction was tested against the hypothesis that
+the tilt had been compensating for the mis-specification. It had not. The full-sample curve does
+invert --- with the corrected sleeve it prefers 0\% Bayes --- but the walk-forward still selects
+the deployed share, choosing 100\% Bayes as its median on every training window and beating 75\%
+in only 8 or 9 folds of 15 by about 1.6pp. The curve's shape is regime-dependent, not stable.
+
+\textbf{The weekly names do not take the correction.} On NVDA and AVGO it fails out of sample ---
+\textbf{2 of 6 folds, mean $-8.2$pp} --- despite helping both in sample. Those are the most
+persistently trending names in the book, which is where the argument for the correction predicts
+the largest gain, so the mechanism is less clean than the reasoning suggests. Pooled across all
+seven names the correction stands at 12 of 21 folds, $+8.2$pp. It is deployed on the five names
+whose own evidence supports it and nowhere else. Even at its in-sample best the corrected daily
+model gives NVDA 49\% and AVGO 38\% against 82\% and 91\% weekly, so it does not reopen the
+choice of model for those two.
+
+\section{Risks and the 50\% floor}
+
+\textbf{Two names miss the floor on the full sample.} MU returns 43\% and VRT plans at 44\%. Both
+are emphatic on the tested half --- 124\% and 168\% --- and both were negative over the first
+half, so the full-sample figure is an average across a period in which the configuration plainly
+did not work and one in which it did. Three readings are available and the evidence does not
+choose between them:
+\begin{itemize}[leftmargin=1.4em,topsep=0.2em]
+\item the tested half is the honest measure, both names pass, and nothing changes;
+\item the full sample is the honest measure, and MU and VRT should be reviewed at the next
+      quarter's data rather than dropped on 27 sessions of one name's history;
+\item the floor was always a screening rule rather than an admission rule, and a book whose worst
+      name plans at 44\% is not a worse book than one which reached 50\% by deletion.
+\end{itemize}
+The recommendation is the second: keep both, and revisit at the next refresh. Dropping MU on the
+strength of one bad month, immediately after adding it, would be reacting to the most recent data
+rather than to the weight of it.
+
+\textbf{Concentration.} Four of the seven --- NVDA, AVGO, TSM and VRT --- are substantially the
+same semiconductor and AI-infrastructure trade. The tested half was a strong period for that
+complex, and the second-half strength of those four is partly one macro move counted four times.
+This is the book's largest unhedged exposure and it increased when the four removed names left.
+The diversifier shortlist was re-tested on the same half-sample basis and none of MRNA, OXY, FSLR,
+COIN or DVN clears anything close to 50\% on the tested half, so the concentration cannot be fixed
+without lowering the floor.
+
+\textbf{Name-level selection.} The seven were identified as the survivors using the same 2024--26
+sample on which they are scored. The half-sample test was run precisely to check this and they
+passed it, but a 50\% floor met by removing everything below the line is a weaker claim than a
+strategy that earns 50\% per name.
+
+\textbf{RKLB dominance.} RKLB contributes roughly 14pp of the book's 59\% planning figure. Without
+it the book plans at 53\%. Its tested half is 65\% against a first half of 146\%, the largest
+decline of any retained name.
+
+\textbf{No price stop on the weekly names.} A position is carried until the target is reached or
+the 26-week cap is hit, whichever comes first. There is no loss-based exit. Median holding is 4
+days for NVDA and 20 for AVGO; the longest in this sample are 118 and 122 days, both inside the
+cap, so the cap has never yet been the binding exit.
+
+\textbf{AVGO trade count.} A single Monday tranche produces roughly 6.5 completed trades a year on
+AVGO. That is a thin base, and the name's optimum is a single grid cell that its neighbours do not
+match --- 68\% at prem 0.08 and 64\% at 0.12 against 94\% at 0.10. AVGO is the least secure of the
+seven.
+
+\textbf{VRT's drawdown.} At 62\% peak-to-trough, VRT is the deepest of the five daily names by a
+wide margin --- the next is RKLB at 46\%. Its Sharpe of 0.95 is the second lowest. VRT earns its
+place on return, not on the path taken to it.
+
+\vfill
+{\color{bcrule}\rule{\textwidth}{0.6pt}}\\[0.2em]
+{\footnotesize\color{bcgrey} All returns are execution-verified: same-day round trips are
+confirmed against 1-minute bars for NVDA and 5-minute bars for the remaining names, with sessions
+outside minute coverage resolved only where the fill is provable at the open. All are marked to
+market, with any position open on the last day valued at that day's close, and annualised over
+each series' true span. Commission 0.005 per share; idle cash earns 3.14\%.}
+
+\end{document}
