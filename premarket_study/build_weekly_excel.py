@@ -48,7 +48,12 @@ def ath_start(stock):
     return mons[1]
 
 
-MAXWK = 12                                    # maximum weeks a position may be held
+# 26 weeks, not 12. A 12-week cap changes nothing at the deployed parameters on the tested half,
+# but it lowers the parameter NEIGHBOURHOOD median -- which is the planning figure used
+# throughout -- from 58.6% to 46.3% on NVDA. At 26 weeks the cap never binds in this sample for
+# either name (0 forced exits, returns identical to uncapped), so it costs nothing observed while
+# still bounding an otherwise open-ended exposure at six months.
+MAXWK = 26                                    # maximum weeks a position may be held
 
 
 def mirror(stock, allow_same_day=True, maxwk=MAXWK):
@@ -172,7 +177,7 @@ def build():
                ('G2', 'Capital', 'H2', CAPITAL, '#,##0'),
                ('I2', 'Interest (pa)', 'J2', INTEREST, '0.0000'),
                ('K2', 'Same-day exit (1/0)', 'L2', 1, '0'),
-               ('M2', 'Max hold (weeks)', 'N2', 12, '0')]
+               ('M2', 'Max hold (weeks)', 'N2', 26, '0')]
         for lc, lab, vc, val, fmtn in pr_:
             m[lc] = lab; m[lc].font = Font(bold=True, color=BLUE)
             m[vc] = val; m[vc].fill = INP; m[vc].number_format = fmtn
@@ -487,13 +492,14 @@ def build():
         ('', 'Target = fill price + previous week\'s close x premium. The target does NOT move '
              'while the position is held.'),
         ('', 'If the target is not reached, carry the position and keep the same target, up to '
-             'the maximum hold in Model!N2 (12 weeks). At that point sell at the week\'s close. '
+             'the maximum hold in Model!N2 (26 weeks). At that point sell at the week\'s close. '
              'Re-enter the Monday after any sale. There is no price stop-loss -- the cap is on '
              'time, not on loss.'),
-        ('', 'The 12-week cap costs nothing measurable over the tested half of the sample (NVDA '
-             'unchanged, AVGO +1pp) and fires 8 times in 2.3 years across the three weekly '
-             'names, but it bounds the worst case at 81 days against 118, 122 and 451 uncapped. '
-             'Set N2 to 0 to disable it.'),
+        ('', 'The cap is a safety rail rather than a working rule. At 26 weeks it never binds in '
+             'this sample for either name: zero forced exits and returns identical to uncapped. '
+             'It exists to bound an otherwise open-ended exposure. Shorter caps are NOT free -- '
+             'at 12 weeks NVDA\'s parameter-neighbourhood median falls from 58.6% to 46.3%, so '
+             'do not tighten N2 without re-testing. Set N2 to 0 to disable it entirely.'),
         ('Parameters', ''),
         ('NVDA', 'cap 0.0935, premium 0.0293'),
         ('AVGO', 'cap 0.0800, premium 0.1000'),
@@ -558,10 +564,11 @@ if __name__ == '__main__':
     #   span        the research model annualises from the first TRADEABLE week; the sheet
     #               annualises over the whole loaded history, which is a week longer
     print('mirror of the sheet formulas against the validated model:\n')
-    # research figures at the 12-week cap, from max_hold_test.py
-    TRADES = {('NVDA', True): 51, ('NVDA', False): 49,
-              ('AVGO', True): 20, ('AVGO', False): 20}
-    RESEARCH = {('NVDA', True): 70.7, ('AVGO', True): 92.4}   # same-day=0 has no research figure
+    # research figures at the 26-week cap, which never binds in this sample, so they equal the
+    # uncapped ones from max_hold_test.py
+    TRADES = {('NVDA', True): 46, ('NVDA', False): 44,
+              ('AVGO', True): 15, ('AVGO', False): 15}
+    RESEARCH = {('NVDA', True): 82.0, ('AVGO', True): 90.7}   # same-day=0 has no research figure
     ok = True
     for s in ('NVDA', 'AVGO'):
         for sd in (True, False):
