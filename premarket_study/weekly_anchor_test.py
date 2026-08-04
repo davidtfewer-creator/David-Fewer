@@ -174,8 +174,13 @@ def cross_name():
               + f'{DAY[order[0]]:>7s}{mr:>10d}')
     print('-'*72)
     wins = sum(1 for r in ranks if r == 1)
-    print(f'Monday ranks 1st in {wins}/{len(NAMES)} names; mean rank {statistics.mean(ranks):.2f} '
-          f'(2.5 if the anchor were irrelevant, 3.00 expected under the null)')
+    # under the null the rank is uniform on 1..5: mean 3.00, sd 1.41, so sd of the mean is
+    # 1.41/sqrt(n) -- but the names are correlated, so the effective n is well below len(NAMES)
+    m = statistics.mean(ranks)
+    z = (m - 3.0)/(1.4142/math.sqrt(len(ranks)))
+    print(f'Monday ranks 1st in {wins}/{len(NAMES)} names; mean rank {m:.2f} '
+          f'(3.00 under the null); z {z:+.2f} treating the names as independent, which they '
+          f'are not')
     return ranks
 
 
