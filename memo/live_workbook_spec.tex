@@ -1,0 +1,306 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+\definecolor{bcwarn}{RGB}{250,238,238}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.45em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+
+\newcommand{\note}[2]{%
+  \begin{center}\fcolorbox{bcrule}{#1}{\parbox{0.95\textwidth}{\vspace{0.2em}#2\vspace{0.2em}}}\end{center}}
+
+\begin{document}
+
+{\color{bcgold}\rule{\textwidth}{1.6pt}}\\[0.3cm]
+{\color{bcnavy}\huge\bfseries Live Daily Book}\\[0.15cm]
+{\color{bcblue}\Large Parameters, Allocation and Return Expectation}\\[0.35cm]
+{\color{bcgold}\rule{\textwidth}{0.8pt}}\\[0.35cm]
+
+\begin{tabular}{@{}ll@{}}
+\textbf{Workbook} & \texttt{TradingExcel\_5stock\_live.xlsx} \\
+\textbf{Date of this note} & 5 August 2026 \\
+\textbf{Price history in the file} & 1 April 2024 to 3 August 2026 --- 587 sessions, 2.34 years \\
+\textbf{Names} & TSM, VRT, VST, RKLB, MU (daily model) \\
+\textbf{Not funded from this workbook} & NVDA and AVGO, which run the weekly Monday model \\
+\end{tabular}
+
+\vspace{0.6em}
+{\color{bcrule}\rule{\textwidth}{0.6pt}}
+
+\section{What the workbook is}
+
+Five names, each traded by two tranches. The Bayes tranche bids below a Kalman
+local-linear-trend estimate of fair value; the OU tranche bids below a one-step AR(1) forecast
+taken over a rolling window. Both bids are then floored by the day's open and by a fixed
+percentage below the running all-time high, and both sell at the bid plus a premium on the prior
+close. A position that has not reached its target within 50 calendar days is closed at the open.
+Cash earns 3.14\% while it waits and commission is half a cent a share.
+
+The two tranches share the name's capital in fixed proportion. That proportion is now 50/50 on
+every name: the 75\% tilt towards Bayes was compensating for a mis-specified OU sigma, and once
+the sigma was corrected the tilt won only 7 of 15 walk-forward folds and lost 2.1pp.
+
+\section{Parameter set}
+
+Everything below is read from the \texttt{Model} sheet of each name. Cell references are given so
+the table can be checked against the file directly.
+
+\vspace{0.4em}
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r r r r r r@{}}
+\toprule
+& \multicolumn{6}{c}{\textbf{Bayes tranche}} & \multicolumn{4}{c}{\textbf{OU tranche}} \\
+\cmidrule(lr){2-7}\cmidrule(lr){8-11}
+& $\lambda$ & $\varphi_L$ & $\psi$ & $k$ & prem. & peak cap & $W$ & buffer & prem. & cap \\
+& \tiny B2 & \tiny D2 & \tiny F2 & \tiny H2 & \tiny J2 & \tiny L2 & \tiny B3 & \tiny D3 & \tiny H3 & \tiny J3 \\
+\midrule
+TSM  & 0.4620 & 0.2543 & 0.0650 & 1.0045 & 0.01565 & 0.03048 & 77  & 0.20 & 0.01002 & 0.02089 \\
+VRT  & 0.4207 & 0.4259 & 0.0817 & 1.1164 & 0.02169 & 0.04838 & 80  & 0.40 & 0.02660 & 0.05950 \\
+VST  & 0.3735 & 0.2643 & 0.0962 & 1.3857 & 0.02182 & 0.01366 & 122 & 0.65 & 0.01450 & 0.05275 \\
+RKLB & 0.3528 & 0.2374 & 0.1130 & 0.7123 & 0.02684 & 0.00802 & 85  & 0.25 & 0.02215 & 0.03365 \\
+MU   & 0.6000 & 0.2636 & 0.0100 & 1.0548 & 0.02430 & 0.03800 & 91  & 0.75 & 0.02500 & 0.02920 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Shared across all five names: commission \$0.005 per share (N2), IBKR interest 3.14\% p.a.\ (R2),
+stop-loss 50 calendar days (T2), Bayes share 0.50 (V2). Each \texttt{Model} sheet backtests on a
+notional \$1{,}000{,}000 (P2); the live capital comes from the \texttt{Allocation} sheet and P2
+does not need changing.
+
+\subsection{The OU buffer is on the residual scale}
+
+The buffers in D3 look inconsistent with earlier versions of the book because the quantity they
+multiply changed. Column AZ now measures the standard deviation of the fitted AR(1)
+\emph{residuals}, not \texttt{STDEVP} of the last $W$ closes. The old measure was the dispersion
+of the price level, which on a trending name is mostly the trend --- so the buffer widened
+exactly when a stock was running and fills were lost. Residual sigma is roughly a third of the
+old value, and D3 was raised to compensate. The pairs are not interchangeable: a buffer from one
+scale used with a sigma from the other gives a bid that is wrong by a factor of about three.
+Section~6 is about a place in the workbook where exactly that has happened.
+
+\section{Allocation settings}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l l r l@{}}
+\toprule
+\textbf{Cell} & \textbf{Input} & \textbf{Value} & \textbf{Effect} \\
+\midrule
+B5 & Total capital available & \$2{,}782{,}455.86 & Split across the five daily names only \\
+B6 & Bayes fraction, flat    & 0.50 & \emph{Not read} while B9 = 2 --- see below \\
+B7 & Volatility lookback     & 120 days & Feeds the average daily range in column D \\
+B8 & Floor, min weight       & 0.20 & \\
+E11:E15 & Cap, max weight    & 0.20 & Floor = cap, so every weight is pinned to 0.20 \\
+B9 & Split mode              & 2 & Per-stock; reads Q11:Q15, all of which are 0.50 \\
+C11:C15 & Return assumption  & 0.55 / 0.53 / 0.57 / 1.15 / 0.54 & Inert while floor = cap \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The floor and the cap are both 0.20, so the risk-weighting machinery in columns F to K runs but
+cannot change anything: each name gets exactly one fifth. That is deliberate --- equal weight was
+the decision --- but it means the return assumptions in column C and the volatility lookback in
+B7 have no effect on the dollar allocation at all. If the weighting is ever re-enabled by
+loosening E11:E15, column C becomes live and should be refreshed to the planning figures in
+Section~4 first; the values in there now are stale.
+
+\vspace{0.3em}
+Resulting allocation, per name:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r@{}}
+\toprule
+& \textbf{Weight} & \textbf{\$ to the name} & \textbf{\$ per tranche} \\
+\midrule
+TSM, VRT, VST, RKLB, MU & 0.20 each & 556{,}491.17 & 278{,}245.59 Bayes / 278{,}245.59 OU \\
+\midrule
+\textbf{Total} & 1.00 & \textbf{2{,}782{,}455.86} & 10 tranches \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\note{bcact}{\textbf{One trap worth knowing about.} Split mode (B9) is set to 2, so the Bayes
+share actually used is column Q, not cell B6. Q11:Q15 are all 0.50 and B6 is also 0.50, so the
+book behaves correctly today --- but editing B6 will change nothing. To move the split, either
+set B9 to 1 or edit Q11:Q15, and mirror the change into V2 on each \texttt{Model} sheet, which is
+what the backtest reads.}
+
+\section{What return to expect}
+
+\subsection{The planning figures}
+
+These are annualised, verified against intraday bars, marked to market, at the deployed 50/50
+split with the corrected OU sleeve.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r@{}}
+\toprule
+& \textbf{First half} & \textbf{Tested half} & \textbf{Full sample} & \textbf{Planning figure} \\
+& \tiny to 23 May 2025 & \tiny from 23 May 2025 & & \tiny full sample less the tilt haircut \\
+\midrule
+RKLB & 162\% & 154\% & 158\% & 156\% \\
+TSM  &  34\% &  82\% &  57\% &  55\% \\
+VST  &  53\% &  71\% &  62\% &  60\% \\
+VRT  & --5\% & 192\% &  67\% &  65\% \\
+MU   &   7\% & 142\% &  63\% &  61\% \\
+\midrule
+\textbf{Book, equal weight} & \textbf{50\%} & \textbf{128\%} & \textbf{81\%} & \textbf{79\%} \\
+\textbf{Book excluding RKLB} & \textbf{22\%} & \textbf{122\%} & \textbf{62\%} & \textbf{60\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\note{bckeep}{\textbf{The number to plan on is 79\% a year, and it should be carried with a wide
+band --- call it 60\% to 80\%.} Two things pull it down. RKLB alone contributes 31 of the 79
+points, so the book's headline depends on one name that has returned 156\% and is not going to be
+assumed to do so indefinitely; without it the four remaining names average 60\%. And the
+dispersion between halves is large: 50\% in the first half against 128\% in the tested half. That
+the tested half is the better one is reassuring about the fit, but it is not evidence the higher
+level persists. The full-sample figure is the middle course between the two regimes and that is
+why it is the planning basis.}
+
+On \$2{,}782{,}455.86 the 79\% central figure is about \$2.2m a year and the 60\% floor about
+\$1.7m. Both are before tax and before any slippage beyond the modelled half-cent commission.
+
+\subsection{Do not use the workbook's own Annual return cell}
+
+Cell Y5 on each \texttt{Model} sheet reports 143\% for TSM and 508\% for RKLB. Those figures are
+arithmetically right and are not a forecast. The sheet books a completed round trip whenever the
+day's low reached the bid \emph{and} the day's high reached the target, because with daily bars it
+has no way to know the low came first. On these names, trading a 3\% daily range against a
+premium of 1.6\% to 2.7\%, that assumption is doing a great deal of work.
+
+Re-running the identical model in Python under each convention isolates it:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r@{}}
+\toprule
+& \textbf{Sheet cell Y5} & \textbf{Sheet's rule} & \textbf{Verified fills} & \textbf{No same-day exits} \\
+& & \tiny all same-day exits & \tiny 5-minute bars & \tiny most conservative \\
+\midrule
+RKLB & 508\% & 438\% & \textbf{158\%} & 36\% \\
+TSM  & 143\% & 129\% & \textbf{~57\%} & 39\% \\
+VST  & 263\% & 240\% & \textbf{~62\%} & 23\% \\
+VRT  & 242\% & 208\% & \textbf{~67\%} & 35\% \\
+MU   & 178\% & 135\% & \textbf{~63\%} & 41\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The gap between the first two columns is not a modelling difference: Y5 annualises with a
+hard-coded $^{1/2.2}$ exponent while the feed now spans 2.34 years. Correct that and the Python
+replica reproduces the sheet to within a point. The whole of the remaining drop is same-day fill
+verification, and the middle column is the honest one.
+
+\subsection{Activity}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r@{}}
+\toprule
+& \textbf{Buys / yr} & \textbf{Bayes} & \textbf{OU} & \textbf{Stops in 2.3 yrs} \\
+\midrule
+RKLB & 96 & 52 & 44 & 5 \\
+TSM  & 65 & 42 & 23 & 3 \\
+VST  & 68 & 37 & 31 & 5 \\
+VRT  & 54 & 41 & 13 & 4 \\
+MU   & 51 & 28 & 23 & 4 \\
+\midrule
+\textbf{Book} & \textbf{335} & 200 & 135 & 21 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+About 335 buys and a similar number of sells a year: 1.3 buys on an average trading day. A
+tranche in cash bids every morning and the tranches are in cash 56\% of the time, so roughly 5.6
+of the 10 orders go in on a typical day. The 50-day stop fires about nine times a year across the
+book.
+
+\section{Daily operation}
+
+Each morning, read the \texttt{Dashboard}: for any tranche currently in cash, place a limit buy at
+its buy level and a GTC sell at its target. Tranches already holding stock need nothing. The
+\texttt{Allocation} sheet's machine-readable block, rows 25 to 34, gives the dollar amount per
+stock and tranche for the IBKR script.
+
+\section{Two things to correct before this file is traded}
+
+\note{bcwarn}{\textbf{1. The Dashboard's OU sigma was never moved to the residual definition,
+and it is the sheet the orders are read from.} Column P still computes
+\texttt{STDEVP(last $W$ closes)} --- the level dispersion Section~2.1 describes --- while the
+\texttt{Model} sheets use residual sigma and the buffers in D3 were raised on the assumption they
+would be multiplying the smaller quantity. The two errors compound, so the OU buy levels come out
+far below the market and would not fill:
+
+\vspace{0.3em}
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r@{}}
+\toprule
+& \textbf{Close} & \textbf{Sigma shown} & \textbf{Correct sigma} & \textbf{OU buy shown} & \textbf{OU buy correct} \\
+\midrule
+TSM  & 406.11 & 23.63 & 12.42 & 402.73 & 404.97 \\
+VRT  & 263.05 & 27.41 & 13.69 & 258.05 & 263.54 \\
+VST  & 155.94 &  8.32 &  4.49 & 150.79 & 153.28 \\
+RKLB &  70.43 & 23.76 &  6.54 &  65.42 &  69.72 \\
+MU   & 829.50 & 254.99 & 56.20 & \textbf{635.96} & \textbf{785.06} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{0.2em}
+MU's OU tranche has been bidding 23\% below the market. The backtests are unaffected --- the
+\texttt{Model} sheets are correct --- so nothing in Section~4 changes. A corrected copy is
+supplied as \texttt{TradingExcel\_5stock\_live\_fixed.xlsx}, in which Dashboard P4:P8 use the same
+residual construction as \texttt{Model!AZ}.}
+
+\note{bcact}{\textbf{2. The \texttt{Notes} and \texttt{Allocation} text still say 0.75.}
+\texttt{Notes} B4 and \texttt{Allocation} A2 describe a Bayes share of 0.75 in flat mode. The
+cells are set to 0.50 in per-stock mode and the book behaves correctly; only the prose is stale.
+It is worth fixing before anyone reads the sheet as documentation.}
+
+\vspace{0.8em}
+{\color{bcrule}\rule{\textwidth}{0.6pt}}
+
+{\footnotesize\color{bcgrey}
+All figures verified against 5-minute bars, marked to market, net of \$0.005 per share commission
+and inclusive of interest on idle cash at 3.14\%. Past backtested performance is not a forecast of
+future returns; the sample is 2.3 years and covers one broadly rising market.}
+
+\end{document}

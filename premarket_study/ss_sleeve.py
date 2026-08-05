@@ -50,13 +50,14 @@ def chk(s):
     return _CHK[s]
 
 
-def sleeve_run(s, bid, prem, stop_days=50, lo=None, hi=None):
+def sleeve_run(s, bid, prem, stop_days=50, lo=None, hi=None, with_mask=False):
+    """Returns (equity, trades), or (equity, trades, holding mask) when with_mask."""
     dts, O, H, L, C = DATA[s]
     n = len(C); lo = 0 if lo is None else lo; hi = n-1 if hi is None else hi
     check = chk(s)
     fund, shares, holding = CAPITAL, 0.0, False
     tgt = entry = None; trades = 0
-    eq = np.zeros(n)
+    eq = np.zeros(n); msk = np.zeros(n, dtype=bool)
     for i in range(n):
         if i < lo or i > hi:
             eq[i] = fund if not holding else shares*C[i]
@@ -78,7 +79,8 @@ def sleeve_run(s, bid, prem, stop_days=50, lo=None, hi=None):
             d = (dts[i]-dts[i-1]).days if i else 0
             fund *= (1 + INTEREST*d/365)
         eq[i] = fund if not holding else shares*C[i]
-    return eq, trades
+        msk[i] = holding
+    return (eq, trades, msk) if with_mask else (eq, trades)
 
 
 def bids(s, kind, k=None):
