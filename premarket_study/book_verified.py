@@ -37,9 +37,10 @@ NC.CAND5.update({
     'TSM':  f'{UP}/19b5b8d9-TSM_5min_Apr2024Aug2026.xlsx',
     'VRT':  f'{UP}/72c19f40-VRT_5min_Apr2024Aug2026.xlsx',
     'MU':   f'{UP}/691cafca-MU_5min_Apr2024Aug2026.xlsx',
+    'VST':  f'{UP}/f7870655-VST_5min_Apr2024Aug2026.xlsx',
 })
 
-DEPLOYED = ('RKLB', 'TSM', 'VRT', 'MU')
+DEPLOYED = ('RKLB', 'TSM', 'VST', 'VRT', 'MU')
 PAIR = ('NVDA', 'AVGO')
 DIVERS = ('GM', 'VLO', 'CF')
 HIGH = (0.040, 0.045, 0.050, 0.060)
@@ -47,7 +48,7 @@ HIGH_STOP = 200
 BUF_BAND = (0.6, 0.8, 1.0, 1.25, 1.5)
 HAIRCUT = 2.1
 PLAN_DIV = {'GM': 33.0, 'VLO': 35.0, 'CF': 41.0}       # handover section 6, unseen windows
-PUBLISHED_4 = {'RKLB': 158.0, 'TSM': 57.0, 'VRT': 67.0, 'MU': 63.0}
+PUBLISHED_4 = {'RKLB': 158.0, 'TSM': 57.0, 'VST': 62.0, 'VRT': 67.0, 'MU': 63.0}
 
 
 def legs():
@@ -118,7 +119,7 @@ def main():
           f'{common[0]} .. {common[-1]}\n')
     print('=== per name ===\n')
     print(f"{'name':6s} {'rule':13s} {'potential':>10s} {'fitted':>8s} {'tested':>8s} "
-          f"{'planned':>8s} {'buys/yr':>8s} {'maxDD':>7s}  basis")
+          f"{'planned':>8s} {'worst½':>7s} {'buys/yr':>8s} {'maxDD':>7s}  basis")
     rows = {}
     for n in DEPLOYED + PAIR + DIVERS:
         f, h1, h2 = wins(curve[n])
@@ -132,18 +133,19 @@ def main():
         rows[n] = (100 * f, 100 * h1, 100 * h2, plan, buys, 100 * dd(curve[n]))
         tag = '  <-- dropped' if n == 'VLO' else ''
         print(f'{n:6s} {rule:13s} {100*f:9.1f}% {100*h1:7.1f}% {100*h2:7.1f}% {plan:7.1f}% '
-              f'{buys:8.0f} {100*dd(curve[n]):6.1f}%  {basis}{tag}')
+              f'{100*min(h1,h2):6.1f}% {buys:8.0f} {100*dd(curve[n]):6.1f}%  {basis}{tag}')
 
     print(f'\n  the deployed four against their published verified figures: ' +
           ', '.join(f'{n} {rows[n][0]:.0f} vs {PUBLISHED_4[n]:.0f}' for n in DEPLOYED))
 
     # ---- books ----------------------------------------------------------------------
-    EIGHT = DEPLOYED + PAIR + ('GM', 'CF')
-    NINE = DEPLOYED + PAIR + DIVERS
-    books = (('NINE (with VLO)', NINE),
-             ('EIGHT (VLO removed)', EIGHT),
-             ('six AI-exposed only', DEPLOYED + PAIR),
-             ('four deployed only', DEPLOYED))
+    D4 = ('RKLB', 'TSM', 'VRT', 'MU')
+    books = (('TEN (everything)', DEPLOYED + PAIR + DIVERS),
+             ('NINE: -VLO', DEPLOYED + PAIR + ('GM', 'CF')),
+             ('NINE: -VST', D4 + PAIR + DIVERS),
+             ('EIGHT: -VST -VLO', D4 + PAIR + ('GM', 'CF')),
+             ('deployed five only', DEPLOYED),
+             ('deployed four (-VST)', D4))
 
     print(f'\n=== books, equal weight, held construction (no rebalancing) ===\n')
     print(f"{'book':24s} {'potential':>10s} {'fitted':>8s} {'tested':>8s} {'planned':>8s} "
@@ -179,19 +181,18 @@ def main():
         print(f'  {label:24s} average pairwise correlation {ac(names):.3f}')
     print(f'\n  deployed five (with VST), for reference: 0.489')
 
-    print(f'\n=== what dropping VLO costs and buys ===\n')
-    for j, nm in ((0, 'potential'), (3, 'planned')):
-        n9 = np.mean([rows[n][j] for n in NINE])
-        n8 = np.mean([rows[n][j] for n in EIGHT])
-        print(f'  {nm:10s} nine {n9:6.1f}%   eight {n8:6.1f}%   ({n8-n9:+.1f}pp)')
-    e9 = sum(curve[n] for n in NINE) / len(NINE)
-    e8 = sum(curve[n] for n in EIGHT) / len(EIGHT)
-    print(f'  {"book curve":10s} nine {100*wins(e9)[0]:6.1f}%   eight {100*wins(e8)[0]:6.1f}%   '
-          f'({100*(wins(e8)[0]-wins(e9)[0]):+.1f}pp)')
-    print(f'  {"maxDD":10s} nine {100*dd(e9):6.1f}%   eight {100*dd(e8):6.1f}%')
-    print(f'  {"corr":10s} nine {ac(NINE):6.3f}    eight {ac(EIGHT):6.3f}')
-    print(f'  {"buys/yr":10s} nine {sum(rows[n][4] for n in NINE):6.0f}    '
-          f'eight {sum(rows[n][4] for n in EIGHT):6.0f}')
+    print(f'\n=== the two removal decisions, side by side ===\n')
+    TEN = DEPLOYED + PAIR + DIVERS
+    for label, names in books[:4]:
+        plan = np.mean([rows[n][3] for n in names])
+        eq = sum(curve[n] for n in names) / len(names)
+        print(f'  {label:20s} planned {plan:5.1f}%  potential {100*wins(eq)[0]:5.1f}%  '
+              f'maxDD {100*dd(eq):5.1f}%  corr {ac(names):.3f}  buys {sum(rows[n][4] for n in names):4.0f}')
+    print(f'\n  VST alone: potential {rows["VST"][0]:.1f}%, worst half {min(rows["VST"][1], rows["VST"][2]):.1f}%,')
+    print(f'  which is the SECOND highest worst-half in the book after RKLB. It is last on the')
+    print(f'  average and second on the floor -- the steadiest earner rather than the weakest one.')
+    wh = sorted(TEN, key=lambda n: -min(rows[n][1], rows[n][2]))
+    print(f'\n  ranked by worst half: ' + ', '.join(f'{n} {min(rows[n][1], rows[n][2]):.0f}%' for n in wh))
 
 
 if __name__ == '__main__':
