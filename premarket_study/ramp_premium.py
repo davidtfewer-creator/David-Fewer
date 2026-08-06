@@ -93,6 +93,15 @@ def load_params(stock, path=BOOK, years=None):
     cached = dict(profit=rows[3][24], buys=rows[3][26], ann=rows[4][24])
     wb.close()
     cap = kv.get('Total capital', kv.get('Fund per tranche'))
+    # The corrected workbooks relabel the buffer 'OU buffer k (resid)' when the OU sigma is the
+    # AR(1) residual rather than the level. The two scales differ by roughly 3x and are NOT
+    # interchangeable, so the label is what tells us which engine path the buffer was calibrated
+    # for; cached['ou_sigma'] carries that through to the caller.
+    if 'OU buffer k (resid)' in kv:
+        buf, cached['ou_sigma'] = kv['OU buffer k (resid)'], 'resid'
+    else:
+        buf, cached['ou_sigma'] = kv['OU buffer k'], 'level'
+    kv['OU buffer k'] = buf
     p = Params(lam=kv['λ'], phi_L=kv['φ_L'], psi=kv['ψ'], k=kv['k'],
                premium=kv['Premium'], peak_cap=kv['Peak cap'],
                comm=kv['Commission ($/sh)'], capital=cap,
