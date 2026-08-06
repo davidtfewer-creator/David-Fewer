@@ -1,0 +1,369 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+\definecolor{bcwarn}{RGB}{250,238,238}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.45em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal Research}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+
+\newcommand{\note}[2]{%
+  \begin{center}\fcolorbox{bcrule}{#1}{\parbox{0.95\textwidth}{\vspace{0.2em}#2\vspace{0.2em}}}\end{center}}
+
+\begin{document}
+
+{\color{bcgold}\rule{\textwidth}{1.6pt}}\\[0.3cm]
+{\color{bcnavy}\huge\bfseries GM, VLO and CF}\\[0.15cm]
+{\color{bcblue}\Large Diversifying the Daily Book Away from the AI Trade}\\[0.35cm]
+{\color{bcgold}\rule{\textwidth}{0.8pt}}\\[0.35cm]
+
+\begin{tabular}{@{}ll@{}}
+\textbf{Date} & 6 August 2026 \\
+\textbf{Candidates assessed} & GM, VLO, CF, ALNY \\
+\textbf{Recommended} & GM, VLO, CF --- ALNY rejected \\
+\textbf{Data} & 5-minute bars, 1 April 2024 to 3 August 2026, 587 sessions each \\
+\textbf{Current book} & RKLB, TSM, VST, VRT, MU (daily model) \\
+\textbf{Basis} & Verified fills, residual OU sigma, 50/50 sleeve split, marked to market \\
+\end{tabular}
+
+\vspace{0.6em}
+{\color{bcrule}\rule{\textwidth}{0.6pt}}
+
+\section{The question this answers}
+
+Not ``do these names make money'' --- they make less than the book does, and that was never in
+doubt. The question is whether they buy their way out of a concentration. Four of the five daily
+names are one trade wearing different hats: TSM is semiconductors, VRT is data-centre cooling,
+VST is power for data centres, MU is high-bandwidth memory. If the theme breaks they break
+together, and a return cost is a rational price for not owning that.
+
+The first pass scored these four on return and drawdown and rejected all of them. That answered
+the wrong question and the conclusion is reversed here for three of them.
+
+\section{The concentration, measured}
+
+Measured on the \emph{shares}, not on the strategy. The strategy sits in cash much of the time,
+which mutes every correlation and makes the book look better diversified than the assets are.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r l@{}}
+\toprule
+& \textbf{Beta to AI factor} & \textbf{$R^2$} & \textbf{Beta to TSM} & \\
+\midrule
+RKLB & 0.77 & 0.18 & 0.69 & in the book \\
+TSM  & 0.70 & 0.67 & 1.00 & in the book, AI \\
+VST  & 1.00 & 0.63 & 0.77 & in the book, AI \\
+VRT  & 1.19 & 0.78 & 1.06 & in the book, AI \\
+MU   & 1.12 & 0.65 & 1.00 & in the book, AI \\
+\midrule
+GM   & 0.19 & 0.07 & 0.23 & candidate \\
+VLO  & 0.11 & 0.02 & 0.06 & candidate \\
+CF   & \textbf{0.00} & 0.00 & --0.04 & candidate \\
+ALNY & 0.12 & 0.02 & 0.10 & candidate \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The AI factor is the equal-weight daily return of TSM, VRT, VST and MU --- the book's own
+AI-adjacent names, no index being available. Beta to TSM alone is shown as a check that the
+composite is not an artefact of how it was assembled; the two agree.
+
+\note{bcwarn}{\textbf{RKLB is not the exception it looks like.} It is a space-launch company, not
+an AI name, but its beta to the factor is 0.77 and to TSM 0.69. It does not share the theme, it
+shares the risk appetite, and it sells off with it. The book is five-for-five exposed, not
+four-for-five. This matters for sizing any replacement: dropping an AI name for RKLB would not
+have helped.}
+
+Average pairwise correlation of daily share returns: the four AI names \textbf{0.58}, the current
+five \textbf{0.48}, the proposed nine \textbf{0.21}, the four candidates among themselves
+\textbf{0.11}. One qualification --- VLO and CF correlate 0.41 with each other, both being
+energy and commodity names. Treat them as one-and-a-bit names rather than two.
+
+\section{Do the models work? The half-sample test}
+
+Fit on the first half only, freeze, score the tested half. Boundary 23 May 2025. Nothing that
+scores the tested half has seen it. Verified 5-minute fills throughout, which the earlier
+diversifier shortlist could not have --- those names had no intraday coverage and were scored on
+the at-open floor.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+& \textbf{Fit 1st half} & \textbf{TESTED half} & \textbf{Full fit} & \textbf{Buys/yr}
+& \textbf{Tested DD} & \textbf{Corr to book} \\
+\midrule
+GM   & 68.3\% & \textbf{37.1\%} & 50.3\% & 94 & 10.8\% & 0.16 \\
+VLO  & 29.6\% & \textbf{35.2\%} & 64.2\% & 20 &  4.3\% & 0.30 \\
+CF   & 47.0\% & \textbf{42.4\%} & 46.9\% & 28 & 15.0\% & 0.01 \\
+\rowcolor{bcwarn}
+ALNY & 44.4\% & \textbf{--8.0\%} & 31.4\% & 23 & 35.8\% & 0.06 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For contrast, the previous diversifier shortlist tested at --1.0\%, 4.1\%, 2.9\%, 15.1\% and
+0.1\%. GM, VLO and CF are in a different class. VLO is the rarer case where the tested half beats
+the fitted half, which is the opposite of the overfitting signature.
+
+\textbf{ALNY fails here and is rejected.} 44.4\% fitted against --8.0\% tested, with a 35.8\%
+drawdown, is the textbook pattern. Its share is as uncorrelated as the others, but a name whose
+model does not work is not a diversifier --- it is a loss with low beta.
+
+\section{A correction: the marginal test and rebalancing}
+
+Whether a name belongs is not whether it clears a return bar. At equal weight a sixth name takes a
+sixth of the capital, so it must beat what it dilutes.
+
+The first version of this test built each book by averaging the names' \emph{daily} returns and
+compounding --- equal weight restored every day. On that basis GM and CF looked close to free,
+halving the book's drawdown at no cost. That construction is wrong: the book does not rebalance,
+each sleeve owns its capital and compounds it independently, and nothing sweeps a winner's profit
+back into a laggard overnight.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+& \multicolumn{3}{c}{\textbf{Rebalanced daily} (wrong basis)}
+& \multicolumn{3}{c}{\textbf{Held} (as the book runs)} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+\textbf{Tested half} & Return & Max DD & Sharpe & Return & Max DD & Sharpe \\
+\midrule
+five names & 111.1\% & 29.7\% & 2.22 & \textbf{127.4\%} & \textbf{14.9\%} & \textbf{2.75} \\
++ GM       & 109.8\% & 16.3\% & 2.85 & 113.0\% & 13.3\% & 2.78 \\
++ VLO      & 108.6\% & 17.4\% & 2.88 & 112.6\% & 13.7\% & 2.80 \\
++ CF       & 110.5\% & 14.9\% & 2.94 & 113.7\% & 13.0\% & 2.83 \\
++ ALNY     &  90.5\% & 22.2\% & 2.58 & 106.3\% & 14.4\% & 2.68 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Corrected, the book's drawdown is already 14.9\%, not 29.7\% --- the 29.7\% \emph{was} the
+rebalancing, feeding capital back into names while they fell. Rebalancing is a drag here, not a
+bonus, costing the five-name book 16.3pp: with strongly trending names it sells the winners.
+
+On this basis each candidate costs 13 to 21pp of return to remove 1 to 2pp of drawdown, and
+Sharpe barely moves. \textbf{On a return-and-drawdown objective, all four should be rejected.}
+That is the correct conclusion to that question, and it is not the question being asked.
+
+\section{The stress windows: what the concentration actually costs}
+
+Concentration is a claim about bad days, so it is tested on bad days. The deepest drawdown
+windows of the AI factor were located automatically rather than chosen.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r@{}}
+\toprule
+& \textbf{Jan--Apr 2025} & \textbf{Jun--Jul 2026} & \textbf{May--Aug 2024} \\
+& \tiny AI factor --45.9\% & \tiny AI factor --17.6\% & \tiny AI factor --27.3\% \\
+\midrule
+five names           & \textbf{--37.3\%} & --9.2\% & --4.5\% \\
+nine names           & \textbf{--18.9\%} & --2.7\% & --1.8\% \\
+five + GM, VLO, CF   & --21.6\%          & --2.9\% & --2.8\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+In the January to April 2025 episode every book share fell together --- VRT --60.0\%,
+VST --47.5\%, RKLB --44.7\%, MU --40.7\%, TSM --34.2\% --- while the candidates lost far less:
+GM --16.2\%, CF --21.8\%, VLO --22.5\%, ALNY --11.7\%. In June to July 2026, VLO rose 30.9\% and
+CF rose 17.9\% \emph{while} the theme fell. That is the hedge; the OU sleeve never delivered one.
+
+Over the full sample, adding the three takes the book's beta to the factor from 0.58 to 0.41 and
+its maximum drawdown from 39.3\% to 27.0\%.
+
+\note{bckeep}{\textbf{One nuance that qualifies the win.} $R^2$ to the AI factor stays at 0.37 for
+the five-name book, the eight and the nine alike, while beta falls from 0.58 to 0.41. Adding these
+names scales total book risk down by about a third rather than changing what the risk \emph{is}.
+Beta and the stress windows are the honest measures of reliance here; $R^2$ is not.}
+
+\section{Walk-forward, and what it cannot show}
+
+Three expanding folds, every name --- the five incumbents included --- re-fitted on each training
+window, no rebalancing. Re-fitting the incumbents matters: their deployed parameters were fitted
+on the whole sample, so scoring those against candidates frozen from train would let the incumbent
+see its own test data.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l l r r r r r r@{}}
+\toprule
+\textbf{Fold} & \textbf{Test window} & \textbf{AI factor} & \textbf{Five} & \textbf{Eight}
+& \textbf{Delta} & \textbf{DD five} & \textbf{DD eight} \\
+\midrule
+1 & 2025-05-28 to 2025-10-13 & +61.2\% & 120.0\% & 79.1\% & --41.0 &  4.6\% & 2.8\% \\
+2 & 2025-10-14 to 2026-03-04 & +31.1\% &  69.2\% & 56.7\% & --12.5 & 11.4\% & 8.3\% \\
+3 & 2026-03-05 to 2026-07-23 & +42.5\% &  49.8\% & 61.6\% & \textbf{+11.8} & 16.1\% & 8.9\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The eight-name book has a lower drawdown in 3 of 3 folds, mean --4.0pp, and a lower return in
+2 of 3, mean --13.9pp. The cost tracks how hard the theme ran, as a diversifier's should: 41pp
+given up when the factor rose 61\%, 12.5pp when it rose 31\%.
+
+\textbf{Fold 3 is the most informative.} The eight-name book won by 11.8pp because RKLB fell
+28.6\% while VLO rose 50.6\% and CF rose 20.2\%. A book name broke for its own reasons and the
+diversifiers carried it --- the thesis in miniature, with the theme itself still up.
+
+\note{bcwarn}{\textbf{What the walk-forward does not test.} The AI factor \emph{rose} in every
+test window: +61.2\%, +31.1\%, +42.5\%. The only AI drawdown in the sample, January to April 2025,
+falls before the first fold boundary and therefore sits in the training half of all three folds.
+The walk-forward prices the premium and never tests the insurance. The halved stress loss in
+Section 5 remains evidence from a single episode inside the fitted region. A reversed
+walk-forward --- fit late, score the crash --- would put that episode out of sample, at the cost
+of inverting time order.}
+
+\section{Planning returns}
+
+Taken only from windows nothing had seen: the three walk-forward folds, plus for these names the
+half-sample fit-then-freeze test, which is the observation closest to how they would be run.
+Median rather than mean, so a single fold does not set the number.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r@{}}
+\toprule
+& \textbf{Fold 1} & \textbf{Fold 2} & \textbf{Fold 3} & \textbf{Half-sample}
+& \textbf{Planning} \\
+\midrule
+GM  & 38.2\% & 28.9\% &  29.5\% & 37.1\% & \textbf{33\%} \\
+VLO & 35.0\% & 34.4\% & 191.0\% & 35.2\% & \textbf{35\%} \\
+CF  &  1.6\% & 40.4\% &  61.6\% & 42.4\% & \textbf{41\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The two routes were derived independently and agree: the fold medians land within 4pp of the
+half-sample figures. GM's four observations span 9pp and VLO has three within a point of each
+other, steadier than any book name manages.
+
+\textbf{A basis check, since the book's figures are quoted differently.} The book's published
+planning figures come from full-sample fits; these come from frozen ones. Scoring the five book
+names on the same unseen-window basis gives a mean of 77.0\% against the published 79.4\% --- about
+2pp. The two can be quoted side by side without correction.
+
+\note{bckeep}{\textbf{Plan on 35\% for each of the three}, with CF slightly above and GM slightly
+below; the difference is well inside the noise. For the Allocation sheet's return-assumption
+column, 0.35 for all three. \\[0.4em]
+\textbf{Cost to the book: about 79\% to about 64\%, some 15pp.} That is an independent route to
+the walk-forward's --13.9pp, which is reassuring. On an equal-weight eight-name book each name
+takes 12.5\% of capital.}
+
+\textbf{Do not read the tightness as precision.} Annualising a four-and-a-half month window
+amplifies everything. The book names make the point: on the same arithmetic MU's fold median comes
+out at 211\% and RKLB's at --1.8\%, both useless as planning figures. The new names' numbers are
+tighter because their models trade steadier, but it is the same calculation. CF's fold 1 was
+1.6\% --- the 41\% is a median, not a floor.
+
+\section{Parameters for the model}
+
+Fitted on the whole sample with the robust differential-evolution objective, verified fills,
+residual OU sigma, 50/50 split --- the same procedure and the same basis the book's own names
+were fitted on. Full-sample figures: GM 50.3\%, VLO 64.2\%, CF 46.9\%, at 61, 35 and 27 buys a
+year respectively. Those are in-sample and are not the planning figures; Section 7 is.
+
+\vspace{0.4em}
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{GM}} & \multicolumn{2}{c}{\textbf{VLO}}
+& \multicolumn{2}{c}{\textbf{CF}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+& \textbf{deploy} & \tiny 1st half & \textbf{deploy} & \tiny 1st half
+& \textbf{deploy} & \tiny 1st half \\
+\midrule
+$\lambda$      & \textbf{0.704472}   & 0.2011   & \textbf{0.723393}  & 1.441    & \textbf{0.736218}  & 0.8737 \\
+$\varphi_L$    & \textbf{0.750723}   & 0.2907   & \textbf{0.625222}  & 0.7016   & \textbf{0.106120}  & 0.4777 \\
+$\psi$         & \textbf{0.0805582}  & 0.04228  & \textbf{0.0200999} & 0.02011  & \textbf{0.0694359} & 0.004598 \\
+$k$            & \textbf{0.461711}   & 0.3827   & \textbf{0.543763}  & 0.9450   & \textbf{2.03552}   & 1.838 \\
+Premium        & \textbf{0.00969721} & 0.005803 & \textbf{0.0303035} & 0.02321  & \textbf{0.0465592} & 0.02545 \\
+Peak cap       & \textbf{0.0423717}  & 0.03368  & \textbf{0.0308569} & 0.05922  & \textbf{0.0286416} & 0.06327 \\
+OU buffer      & \textbf{1.06024}    & 0.6041   & \textbf{1.17841}   & 1.799    & \textbf{0.841237}  & 0.8036 \\
+OU premium     & \textbf{0.0451112}  & 0.009885 & \textbf{0.0419514} & 0.02552  & \textbf{0.0590932} & 0.05159 \\
+OU cap         & \textbf{0.0417662}  & 0.09131  & \textbf{0.0370821} & 0.08021  & \textbf{0.0831024} & 0.09228 \\
+OU lookback $W$& \textbf{45}         & 41       & \textbf{125}       & 117      & \textbf{66}        & 66 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\note{bcwarn}{\textbf{The fits move a great deal between halves, and the returns do not.} GM's
+$\lambda$ goes from 0.20 to 0.70 and its OU premium from 0.0099 to 0.045; CF's $\psi$ moves
+fifteen-fold. Yet the out-of-sample returns those two parameter sets produce sit within a few
+points of each other. The optimum is broad rather than sharp, which is reassuring about the
+result and a warning about the vectors: do not treat these numbers as precise, and do not re-fit
+them expecting an improvement. The one parameter that holds still is the OU lookback --- 41 to 45,
+117 to 125, 65.6 to 65.6 --- which is the structural one.}
+
+Shared with the rest of the book: commission \$0.005 per share, IBKR interest 3.14\% p.a.,
+stop-loss 50 calendar days, Bayes share 0.50, residual OU sigma. Note the OU buffer is on the
+residual scale and is not interchangeable with a level-sigma buffer.
+
+\section{Recommendation}
+
+\note{bcact}{\textbf{Add GM, VLO and CF. Reject ALNY.} Plan each of the three at 35\%, taking the
+book from roughly 79\% to roughly 64\%. In exchange, beta to the AI factor falls from 0.58 to 0.41,
+full-sample maximum drawdown from 39.3\% to 27.0\%, and the loss through the one AI drawdown in
+the sample from 37.3\% to 21.6\%. ALNY is rejected on its model, not its correlation: --8.0\% on
+the tested half against 44.4\% fitted.}
+
+What should temper it:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.15em]
+\item The stress evidence rests on \textbf{one episode}, and that episode is inside the region
+      the parameters were fitted on. No unseen window in this study contains a falling AI market.
+\item \textbf{VLO and CF correlate 0.41.} Funding both buys less independent diversification than
+      the name count suggests.
+\item Everything here comes from \textbf{2.3 years of a broadly rising market}. VLO and CF are
+      energy and commodity names whose behaviour over this window may not represent their regime.
+\item \textbf{The three add 123 buys a year} --- GM 61, VLO 35, CF 27 --- against the current
+      book's 335 across five names, so about 37\% more order flow for names that dilute return.
+\item These three are not credible as \textbf{replacements}. TSM is the weakest book name at
+      82.4\% on the tested half and still doubles the best of them.
+\end{itemize}
+
+\vspace{0.8em}
+{\color{bcrule}\rule{\textwidth}{0.6pt}}
+
+{\footnotesize\color{bcgrey}
+All figures verified against 5-minute bars, marked to market, net of \$0.005 per share commission
+and inclusive of interest on idle cash at 3.14\%. Books are constructed without rebalancing
+between names, matching how the sleeves run. Past backtested performance is not a forecast of
+future returns.}
+
+\end{document}
