@@ -14,12 +14,14 @@ Two checks the headline table cannot answer:
 
 Run:  python3 ramp_nvda_oos.py
 """
+import sys
+
 import numpy as np
 
 import ramp_premium as R
-from ramp_nvda import RAMPS
+from ramp_grid import RAMPS
 
-STOCK = 'NVDA'
+STOCK = sys.argv[1] if len(sys.argv) > 1 else 'NVDA'
 
 
 def window_return(res, dates, start, end=None):

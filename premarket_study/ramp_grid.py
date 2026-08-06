@@ -3,11 +3,13 @@ NVDA: ramped take-profit vs the fixed premium, with flat-premium controls.
 
 Run:  python3 ramp_nvda.py
 """
+import sys
+
 import numpy as np
 
 import ramp_premium as R
 
-STOCK = 'NVDA'
+STOCK = sys.argv[1] if len(sys.argv) > 1 else 'NVDA'
 
 RAMPS = [
     ('fixed (baseline)',      None),

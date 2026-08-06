@@ -18,12 +18,14 @@ Two further guards against reading noise as signal:
 
 Run:  python3 ramp_shape_test.py
 """
+import sys
+
 import numpy as np
 
 import ramp_premium as R
-from ramp_nvda_oos import window_return
+from ramp_oos import window_return
 
-STOCK = 'NVDA'
+STOCK = sys.argv[1] if len(sys.argv) > 1 else 'NVDA'
 MODE = 'verified'
 
 SHAPES = [

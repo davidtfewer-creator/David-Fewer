@@ -50,7 +50,10 @@ from engine import Params, run_model
 
 UPLOADS = '/root/.claude/uploads/822d405e-f99b-5b59-9c6b-87e725054402'
 BOOK = f'{UPLOADS}/69b83a92-TradingExcel_s1.xlsx'
-FIVE_MIN = {'NVDA': f'{UPLOADS}/88d53e8a-NVDA_5min_Apr2024Aug2026.xlsx'}
+FIVE_MIN = {
+    'NVDA': f'{UPLOADS}/88d53e8a-NVDA_5min_Apr2024Aug2026.xlsx',
+    'AVGO': f'{UPLOADS}/b97fece9-AVGO_5min_Apr2024Aug2026.xlsx',
+}
 
 RTH_START = datetime.time(9, 30)
 RTH_END = datetime.time(16, 0)

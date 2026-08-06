@@ -21,12 +21,14 @@ day 3 onward, when the position is actually becoming expensive. So both directio
 
 Run:  python3 ramp_diagnostics.py
 """
+import sys
+
 import numpy as np
 
 import ramp_premium as R
-from ramp_nvda_oos import window_return
+from ramp_oos import window_return
 
-STOCK = 'NVDA'
+STOCK = sys.argv[1] if len(sys.argv) > 1 else 'NVDA'
 MODE = 'verified'
 
 
