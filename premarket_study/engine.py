@@ -56,7 +56,7 @@ class Result:
 def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_signal=None, ou_anchor=None, open_cap=None,
               bayes_gain=0.0, collect=False, same_day_exit=True,
-              cc_up=None, cc_down=None) -> Result:
+              cc_up=None, cc_down=None, ramp=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -167,14 +167,23 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             AO[i] = 1
     AN = [1] + [(dates[i] - dates[i - 1]).days for i in range(1, N)]
 
-    def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None):
+    def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None,
+                    ramp=None):
+        # ramp: time-decayed take-profit. A sequence of multipliers on the premium AMOUNT by
+        # sessions held, ramp[0] applying on the fill day, ramp[1] the next session, and the
+        # last entry from then on. (0.5, 0.75, 1.0) on a 2% premium is "1% today, 1.5%
+        # tomorrow, 2% thereafter". The resting sell is amended UPWARD each morning, which is
+        # what makes it implementable: the order only ever has to be raised, never chased down,
+        # and every amendment is known the evening before, so there is no lookahead.
+        # ramp=None reproduces the fixed premium exactly.
         # cc_up / cc_down: close-conditional premium. On the fill day the target is the usual
         # bid + prevclose*prem. At that day's CLOSE we observe where the stock finished relative
         # to the fill and amend the resting sell for the following days: multiply the premium by
         # cc_up if it closed above the fill, cc_down if at/below. No lookahead -- the close is
         # known before the amendment takes effect. None/None reproduces the fixed-premium model.
         cc = cc_up is not None and cc_down is not None
-        buy_px = None; prem_amt = None; adjusted = True
+        rm = (lambda d: ramp[min(d - 1, len(ramp) - 1)]) if ramp is not None else (lambda d: 1.0)
+        buy_px = None; prem_amt = None; adjusted = True; dh = 0
         # interest_start: first row index that accrues interest. In the workbook the
         # Bayes fund is initialised at row 8 (accrues from row 9 -> i=1) while the OU
         # fund is initialised one row later at row 9 (AR9=0, accrues from row 10 -> i=2).
@@ -198,10 +207,14 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             AA[i] = (Y[i] / (bp + p.comm)) if Z[i] == 1 else (AA[i - 1] if AE[i - 1] == 1 else 0.0)
             if Z[i] == 1:
                 buy_px = bp; prem_amt = C[i - 1] * prem
-                AB[i] = bp + prem_amt
+                dh = 1
+                AB[i] = bp + prem_amt * rm(dh)
                 adjusted = not cc                      # pending amendment at tonight's close
             elif AE[i - 1] == 1:
-                if not adjusted:
+                dh += 1
+                if ramp is not None:
+                    AB[i] = buy_px + prem_amt * rm(dh)
+                elif not adjusted:
                     # first session after the fill: C[i-1] is the fill day's close
                     mult = cc_up if C[i - 1] > buy_px else cc_down
                     AB[i] = buy_px + prem_amt * mult
@@ -246,9 +259,9 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                     interest=sum(AQ), AP=AP, AQ=AQ, AO=AO, AN=AN)
 
     t1 = run_tranche(X,  p.premium, p.capital * p.bayes_pct,        interest_start=1,
-                     cc_up=cc_up, cc_down=cc_down)
+                     cc_up=cc_up, cc_down=cc_down, ramp=ramp)
     t2 = run_tranche(AM, p.ou_prem, p.capital * (1 - p.bayes_pct),  interest_start=2,
-                     cc_up=cc_up, cc_down=cc_down)
+                     cc_up=cc_up, cc_down=cc_down, ramp=ramp)
 
     fY = t1['Y'][-1]; fAF = t2['Y'][-1]
     terminal = fY + fAF
