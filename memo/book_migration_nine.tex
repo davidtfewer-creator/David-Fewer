@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage[a4paper,top=1.05in,bottom=1.05in,left=1.0in,right=1.0in]{geometry}
 \usepackage[T1]{fontenc}
-\usepackage{mathpazo}
+\usepackage{lmodern}
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{array}
@@ -13,6 +13,7 @@
 \usepackage{enumitem}
 \usepackage{lastpage}
 \usepackage{tikz}
+\usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 
 % --- house palette, sampled from the July 2026 whitepaper -------------------
@@ -29,13 +30,6 @@
   {\color{bcgold}\normalsize\bfseries}{\color{bcgold}\thesubsection}{0.7em}{}
 \titlespacing*{\section}{0pt}{18pt}{8pt}
 \titlespacing*{\subsection}{0pt}{14pt}{6pt}
-
-% letterspaced wordmark. Written with explicit kerns: a token-by-token macro
-% silently drops the inter-word space, since TeX skips spaces when grabbing
-% undelimited arguments.
-\newcommand{\wordmark}{%
-  B\kern.16em A\kern.16em Y\kern.16em E\kern.16em S\kern.16em I\kern.16em A\kern.16em N%
-  \kern.55em C\kern.16em A\kern.16em P\kern.16em I\kern.16em T\kern.16em A\kern.16em L}
 
 \pagestyle{fancy}\fancyhf{}
 \lfoot{\color{bcnavy}\footnotesize\scshape Bayesian Capital}
@@ -67,11 +61,7 @@
 \begin{center}
 \vspace*{1.15in}
 
-\begin{tikzpicture}
-  \fill[bcnavy] (0,0) rectangle (3.1,3.1);
-  \node[bcgold] at (1.55,1.85) {\fontsize{40}{40}\selectfont\bfseries BC};
-  \node[bcgold] at (1.55,0.72) {\fontsize{7}{7}\selectfont\wordmark};
-\end{tikzpicture}
+\includegraphics[width=5.4cm]{assets/bc_logo.pdf}
 
 \vspace{42pt}
 {\color{bcgrey}\rule{0.42\textwidth}{0.5pt}}

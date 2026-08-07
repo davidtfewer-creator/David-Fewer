@@ -25,3 +25,6 @@ premarket_study/*.log
 
 # intraday AM/PM session cache (derived from uploaded workbooks)
 premarket_study/halfweek_sessions.pkl
+
+# the house logo is a build asset for the memos, not derived output
+!memo/assets/bc_logo.pdf
