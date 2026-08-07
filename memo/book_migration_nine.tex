@@ -1,0 +1,446 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,top=1.05in,bottom=1.05in,left=1.0in,right=1.0in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{mathpazo}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage{tikz}
+\usepackage[hidelinks]{hyperref}
+
+% --- house palette, sampled from the July 2026 whitepaper -------------------
+\definecolor{bcnavy}{RGB}{14,30,60}
+\definecolor{bcgold}{RGB}{176,135,60}
+\definecolor{bcgrey}{RGB}{90,90,90}
+\definecolor{bccream}{RGB}{245,239,224}
+\definecolor{bcrule}{RGB}{214,214,214}
+\definecolor{bcpanel}{RGB}{240,243,247}
+
+\titleformat{\section}
+  {\color{bcnavy}\large\bfseries}{\color{bcnavy}\thesection}{0.8em}{}
+\titleformat{\subsection}
+  {\color{bcgold}\normalsize\bfseries}{\color{bcgold}\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\subsection}{0pt}{14pt}{6pt}
+
+% letterspaced wordmark. Written with explicit kerns: a token-by-token macro
+% silently drops the inter-word space, since TeX skips spaces when grabbing
+% undelimited arguments.
+\newcommand{\wordmark}{%
+  B\kern.16em A\kern.16em Y\kern.16em E\kern.16em S\kern.16em I\kern.16em A\kern.16em N%
+  \kern.55em C\kern.16em A\kern.16em P\kern.16em I\kern.16em T\kern.16em A\kern.16em L}
+
+\pagestyle{fancy}\fancyhf{}
+\lfoot{\color{bcnavy}\footnotesize\scshape Bayesian Capital}
+\cfoot{\color{bcgrey}\footnotesize Systematic Trading \quad White Paper}
+\rfoot{\color{bcnavy}\footnotesize\bfseries\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcgold}\leaders\hrule height \footrulewidth\hfill}}
+
+\newcommand{\keybox}[1]{%
+  \begin{center}\begin{tikzpicture}
+    \node[fill=bccream, draw=bcgold, line width=0.8pt, inner sep=10pt,
+          text width=\dimexpr\textwidth-24pt\relax, align=justify] {#1};
+  \end{tikzpicture}\end{center}}
+\newcommand{\notebox}[1]{%
+  \begin{center}\begin{tikzpicture}
+    \node[fill=bcpanel, draw=bcrule, line width=0.8pt, inner sep=10pt,
+          text width=\dimexpr\textwidth-24pt\relax, align=justify] {#1};
+  \end{tikzpicture}\end{center}}
+
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{1.4em}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{document}
+
+% ============================ TITLE PAGE ============================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{1.15in}
+
+\begin{tikzpicture}
+  \fill[bcnavy] (0,0) rectangle (3.1,3.1);
+  \node[bcgold] at (1.55,1.85) {\fontsize{40}{40}\selectfont\bfseries BC};
+  \node[bcgold] at (1.55,0.72) {\fontsize{7}{7}\selectfont\wordmark};
+\end{tikzpicture}
+
+\vspace{42pt}
+{\color{bcgrey}\rule{0.42\textwidth}{0.5pt}}
+
+\vspace{22pt}
+{\color{bcnavy}\fontsize{21}{27}\selectfont\bfseries
+Widening the Book from\\ Five Names to Nine}
+
+\vspace{14pt}
+{\color{bcnavy}\fontsize{13}{17}\selectfont\bfseries
+Concentration, Cost, and the Evidence for Migration}
+
+\vspace{16pt}
+\parbox{0.74\textwidth}{\centering\color{bcgold}\small\itshape
+Adding NVDA and AVGO on a patient high-premium rule and GM and CF as
+non-thematic diversifiers, retiring VLO, and what the change costs}
+
+\vspace{22pt}
+{\color{bcgold}\rule{0.42\textwidth}{1.0pt}}
+
+\vspace{54pt}
+{\color{bcnavy}\normalsize\bfseries Bayesian Capital}\\[4pt]
+{\color{bcgrey}\normalsize Systematic Trading Research}\\[4pt]
+{\color{bcgrey}\normalsize 7 August 2026}
+
+\vspace{22pt}
+{\color{bcgrey}\small\itshape White paper --- strictly confidential}
+
+\vfill
+{\color{bcgrey}\footnotesize All figures computed on verified fills from 5-minute bars.
+Reproducible from \texttt{book\_verified.py} and \texttt{migration\_evidence.py}.}
+\vspace{0.3in}
+\end{center}
+\clearpage
+
+% ============================ SUMMARY ============================
+\section*{\color{bcnavy}Executive summary}
+\addcontentsline{toc}{section}{Executive summary}
+
+\keybox{\textbf{The recommendation is to migrate from five names to nine, and the honest
+description of that change is a purchase, not an improvement.} The deployed five plan at
+\textbf{73.6\%} a year; the nine-name book plans at \textbf{59.1\%}. In exchange, average
+pairwise correlation falls from \textbf{0.489 to 0.339}, beta to the AI theme from
+\textbf{0.603 to 0.489}, and the loss in the sample's deepest theme drawdown from
+\textbf{$-$39.0\% to $-$30.8\%}. That is roughly \textbf{14.5 percentage points of planned
+return} for about a fifth less exposure to a single trade, spread across nine legs instead of
+five. It should not be presented as a way to earn more.}
+
+Three findings support the change beyond the correlation arithmetic.
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=4pt,topsep=4pt]
+  \item \textbf{The five-name plan rests on one name.} RKLB contributes 29.2 of the 73.6
+        percentage points. Were RKLB merely to match the other four, the five-name plan would
+        fall to 55.5\%; were it to earn nothing, to 44.4\%. The nine-name plan is lower but
+        does not depend on any single position.
+  \item \textbf{The strategy loses to simply holding the stock on the incumbents and beats it
+        on the additions.} Over this sample the rule underperforms buy-and-hold on four of five
+        AI names and outperforms on all three diversifiers, by 17 to 36 points. The names on
+        which the machinery genuinely earns its keep are the ones being added.
+  \item \textbf{There is a live test of the insurance, contrary to the record.} A $-$27.9\%
+        theme drawdown falls in the tested half of the sample, and the wider books lost 8 to 11
+        points less in it.
+\end{enumerate}
+
+% ============================ 1 ============================
+\section{The proposal}
+
+The deployed book is five names --- RKLB, TSM, VST, VRT and MU --- each taking a fifth of
+capital and running two sleeves, Bayesian and Ornstein--Uhlenbeck, at 50/50. The proposal
+widens it to nine at 11.1\% each:
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llp{0.46\textwidth}}
+\toprule
+\textbf{Action} & \textbf{Names} & \textbf{Rule} \\
+\midrule
+Retain & RKLB, TSM, VST, VRT, MU & Deployed rule and parameters, unchanged \\
+Add & NVDA, AVGO & Premium 4--6\%, 200-day stop, residual OU sigma with the
+                   buffer re-expressed in residual units \\
+Add & GM, CF & Diversifier vectors as fitted, unchanged \\
+Retire & VLO & Excluded --- see \S7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Capital is allocated once and each name compounds independently thereafter --- the \emph{held}
+construction. Rebalancing between names is not merely avoided but forbidden: it feeds capital
+into falling names and sells winners, and when it was applied inadvertently in earlier work it
+cost 16.3 points of return and inflated measured drawdown from 14.9\% to 29.7\%.
+
+% ============================ 2 ============================
+\section{Basis of measurement}
+
+Every figure in this document is computed on \textbf{verified fills}: a same-day round trip is
+booked only where 5-minute bars prove the low preceded the high. This matters more than any
+other methodological choice. The live workbook's own cells report 221\% for VST and 438\% for
+RKLB; essentially the entire distance between those numbers and the ones below is same-day fill
+verification rather than any disagreement about the model.
+
+Three respects in which this supersedes earlier drafts of the same analysis:
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=4pt,topsep=4pt]
+  \item \textbf{Nothing is quoted.} Every row is recomputed here from validated workbooks and
+        5-minute files on one basis. The engine reproduces each workbook's cached results to the
+        penny before any figure is trusted.
+  \item \textbf{The at-open floor is no longer used to rank.} It is a hard lower bound but a
+        poor ordering device: measured against verified fills its error runs from $+$10.1 points
+        (MU) to $+$88.3 points (RKLB), and it reverses the order of TSM and VRT. The original
+        case for dropping VST rested on it and did not survive.
+  \item \textbf{Planning figures use each name's own measured haircut.} The deployed names carry
+        the 2.1-point out-of-sample allowance measured for them; GM, VLO and CF carry
+        unseen-window figures, whose measured give-back is far larger. Applying 2.1 points to
+        those three, as an earlier draft did, overstated each by roughly 20 points.
+\end{enumerate}
+
+% ============================ 3 ============================
+\section{The names}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llrrrrrrr}
+\toprule
+\textbf{Name} & \textbf{Rule} & \textbf{Potential} & \textbf{Fitted} & \textbf{Tested} &
+\textbf{Worst half} & \textbf{Planned} & \textbf{Buys/yr} & \textbf{Max DD} \\
+\midrule
+\rowcolor{bcpanel}
+RKLB & deployed    & 148.1\% & 162.5\% & 135.1\% & 135.1\% & 146.0\% & 118 & 46.9\% \\
+MU   & deployed    &  61.5\% &   7.1\% & 139.0\% &   7.1\% &  59.4\% &  57 & 34.1\% \\
+\rowcolor{bcpanel}
+VST  & deployed    &  56.7\% &  53.4\% &  59.9\% &  53.4\% &  54.6\% &  79 & 38.9\% \\
+VRT  & deployed    &  56.4\% & $-$5.2\% & 152.2\% & $-$5.2\% & 54.3\% & 74 & 62.7\% \\
+\rowcolor{bcpanel}
+TSM  & deployed    &  56.0\% &  34.3\% &  79.9\% &  34.3\% &  53.9\% &  92 & 27.8\% \\
+\midrule
+AVGO & 4--6\%/200d &  48.7\% &  19.9\% &  82.5\% &  19.9\% &  46.6\% &  19 & 38.7\% \\
+\rowcolor{bcpanel}
+NVDA & 4--6\%/200d &  45.2\% &  45.9\% &  44.5\% &  44.5\% &  43.1\% &  15 & 27.1\% \\
+\midrule
+GM   & deployed    &  50.3\% &  44.0\% &  56.5\% &  44.0\% &  33.0\% &  61 & 14.6\% \\
+\rowcolor{bcpanel}
+CF   & deployed    &  46.9\% &  39.2\% &  54.7\% &  39.2\% &  41.0\% &  27 & 20.5\% \\
+\midrule
+\textit{VLO} & \textit{excluded} & \textit{64.2\%} & \textit{11.4\%} & \textit{137.9\%} &
+\textit{11.4\%} & \textit{35.0\%} & \textit{35} & \textit{19.8\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Potential} is the full-sample verified figure. \textbf{Planned} applies each name's own
+measured out-of-sample basis. \textbf{Worst half} is the lower of the fitted and tested window
+returns --- what a name is worth if the flattering window turns out to have been the fitted one.
+
+Two observations that a ranking by potential conceals.
+
+\textbf{The incumbents are less reliable than their averages suggest.} Ranked by worst half the
+order is RKLB 135\%, VST 53\%, NVDA 44\%, GM 44\%, CF 39\%, TSM 34\%, AVGO 20\%, VLO 11\%,
+MU 7\%, VRT $-$5\%. Three of the five deployed names sit in the bottom four. VRT returns 56.4\%
+on halves of $-$5.2\% and 152.2\%; GM returns 50.3\% on halves of 44.0\% and 56.5\%. Those are
+not the same kind of fifty per cent.
+
+\textbf{The published figures were optimistic.} Recomputed: VST 56.7\% against a published
+62\%, VRT 56.4\% against 67\%, RKLB 148.1\% against 158\%. TSM and MU come in close. The
+five-name book's published 79\% plan should be read as \textbf{73.6\%}.
+
+% ============================ 4 ============================
+\section{The books}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Book} & \textbf{Potential} & \textbf{Fitted} & \textbf{Tested} & \textbf{Planned} &
+\textbf{Buys/yr} & \textbf{Max DD} & \textbf{Corr} \\
+\midrule
+Five (deployed)      & 80.8\% & 51.9\% & 113.4\% & \textbf{73.6\%} & 419 & 39.3\% & 0.489 \\
+\rowcolor{bccream}
+\textbf{Nine (recommended)} & 67.2\% & 45.5\% & 90.9\% & \textbf{59.1\%} & 540 & 30.8\% & 0.339 \\
+Nine (VST out, VLO in) & 68.0\% & 40.9\% & 98.7\% & 56.9\% & 497 & 29.1\% & 0.283 \\
+Eight (both out)     & 68.5\% & 44.5\% &  95.0\% & 59.7\% & 462 & 30.3\% & 0.322 \\
+Ten (all names)      & 66.9\% & 42.1\% &  94.6\% & 56.7\% & 576 & 29.7\% & 0.299 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Migration costs \textbf{14.5 points} of planned return. Trade activity rises from 419 to 540
+buys a year, and drawdown falls from 39.3\% to 30.8\%.
+
+\subsection{Why the return falls, and why that is not a verdict on the added names}
+
+RKLB plans at 146\%. Every other name in the universe plans below 60\%. Under equal weighting
+the book return sits close to the average of its names, so \emph{any} addition below the book
+average dilutes it, however good the added name is. The five-name book's 73.6\% is not a
+property of the strategy; it is a property of holding RKLB at a fifth of capital.
+
+The same arithmetic is the strongest argument for widening. RKLB contributes 29.2 of the 73.6
+points. If RKLB merely matched the other four the five-name plan falls to 55.5\%; if RKLB
+earned nothing, to 44.4\%. The nine-name plan of 59.1\% is lower, and it stands on nine legs.
+
+% ============================ 5 ============================
+\section{What migration buys}
+
+\subsection{Concentration}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Book} & \textbf{Avg pairwise corr} & \textbf{Beta to AI factor} & \textbf{$R^2$} \\
+\midrule
+Five (deployed)      & 0.489 & 0.603 & 0.391 \\
+\rowcolor{bccream}
+\textbf{Nine (recommended)} & \textbf{0.339} & \textbf{0.489} & 0.471 \\
+Eight (both out)     & 0.322 & 0.484 & 0.423 \\
+Ten (all names)      & 0.299 & 0.461 & 0.473 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The deployed book is one trade. TSM is semiconductors, VRT data-centre cooling, VST
+data-centre power, MU high-bandwidth memory. RKLB is not an AI name but carries beta 0.77 to
+the factor and 0.69 to TSM --- it shares the risk appetite rather than the theme. Five for five.
+
+\notebox{\textbf{A measure we deliberately do not lead with.} $R^2$ to the AI factor barely
+moves --- and rises slightly --- while beta falls by a fifth. Widening the book scales total
+exposure to the theme \emph{down}; it does not change what the exposure \emph{is}. Beta and the
+stress windows are the honest measures here. A document that led with $R^2$, or that claimed the
+book had stopped being an AI book, would be overstating the case.}
+
+\subsection{Behaviour in the theme's worst drawdowns}
+
+Windows located automatically as the AI factor's deepest peak-to-trough declines within the
+sample, rather than chosen.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+& \textbf{Jan--Apr 2025} & \textbf{Jun--Jul 2026} & \textbf{May--Aug 2024} \\
+& factor $-$45.9\% & factor $-$27.9\% & factor $-$27.3\% \\
+& \textit{fitted half} & \textbf{\textit{tested half}} & \textit{fitted half} \\
+\midrule
+Five (deployed)      & $-$39.0\% & $-$27.8\% & $-$5.2\% \\
+\rowcolor{bccream}
+\textbf{Nine (recommended)} & $\mathbf{-30.8}$\% & $\mathbf{-19.2}$\% & $-$5.4\% \\
+Eight (both out)     & $-$30.3\% & $-$20.3\% & $-$6.2\% \\
+Ten (all names)      & $-$29.7\% & $-$16.5\% & $-$4.9\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\keybox{\textbf{A correction to the internal record.} Previous work states that the AI factor
+rose in every walk-forward test window, so the sample \emph{prices the premium for diversifying
+and never tests the insurance}. That holds for the walk-forward folds. It does \textbf{not} hold
+for the half-sample split used throughout this document: June--July 2026 is a $-$27.9\% factor
+drawdown sitting squarely in the tested half, and the wider books lost 8 to 11 points less in
+it. \emph{The caveat is stated rather than buried:} the diversifier vectors are full-sample
+fits, so that window lies inside their fitted region too, and this is therefore not clean
+out-of-sample evidence. It is like-for-like --- the deployed five are also full-sample fits over
+the same window --- and it is the closest thing to a live test of the insurance that the sample
+contains.}
+
+% ============================ 6 ============================
+\section{An inversion worth dwelling on}
+
+The most instructive single result in this analysis is not a book statistic but a comparison
+against doing nothing clever at all.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Name} & \textbf{Strategy} & \textbf{Buy and hold} & \textbf{Does the rule add value?} \\
+\midrule
+RKLB & 148.1\% & 238.1\% & no, $-$90 points \\
+MU   &  61.5\% & 125.2\% & no, $-$64 \\
+VRT  &  56.4\% &  66.0\% & no, $-$10 \\
+AVGO &  48.7\% &  57.8\% & no, $-$9 \\
+TSM  &  56.0\% &  57.0\% & no, $-$1 \\
+\midrule
+\rowcolor{bccream} VLO &  64.2\% & 28.0\% & \textbf{yes, $+$36} \\
+\rowcolor{bccream} CF  &  46.9\% & 16.2\% & \textbf{yes, $+$31} \\
+\rowcolor{bccream} GM  &  50.3\% & 32.5\% & \textbf{yes, $+$18} \\
+\rowcolor{bccream} VST &  56.7\% & 39.6\% & \textbf{yes, $+$17} \\
+\rowcolor{bccream} NVDA&  45.2\% & 42.4\% & \textbf{yes, $+$3} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The limit-order book \emph{loses} to simply holding the stock on four of five AI names and
+\emph{beats} it on all three diversifiers. That is precisely what a dip-buying,
+premium-selling rule should do: it forgoes upside in a runaway trend and earns in a choppy or
+range-bound one. Regime analysis says the same from the other direction --- the deployed rule's
+exposure-matched edge is $+$14.1\% when the theme is weak and $-$17.3\% when it is running.
+
+The implication is uncomfortable for the incumbent book and favourable to migration. Over this
+sample the deployed five have been a leveraged bet on the AI theme executed through machinery
+that performed \emph{worse} than owning the theme outright. The names on which the machinery
+demonstrably earns its keep are the ones proposed for addition.
+
+% ============================ 7 ============================
+\section{The two disputed names}
+
+\subsection{VLO --- retire}
+
+VLO returns 64.2\% on halves of 11.4\% and 137.9\%. That spread is the classic
+wide-fold overfitting tell, and its measured out-of-sample give-back of 29 points is the largest
+of any name in the universe: a full fit of 64.2\% against an unseen-window figure of 35\%.
+Excluding it raises the planned book from 56.7\% to 59.1\% and costs 0.040 of correlation. The
+trade is worth making.
+
+\subsection{VST --- retain, and a correction}
+
+VST was previously proposed for removal on the observation that it was the weakest of the
+deployed five at the at-open floor. \textbf{That basis is disqualified} and the recommendation
+is reversed here.
+
+On verified fills VST is indeed the lowest of the deployed five at 56.7\% --- but only barely,
+against TSM at 56.0\% and VRT at 56.4\%, a gap well inside the noise of this study. On the
+measure that matters for reliability it is \emph{second of ten}: its worst half is 53.4\%,
+behind only RKLB. Its two halves are 53.4\% and 59.9\%, against VRT's $-$5.2\% and 152.2\% for
+an almost identical average. VST is the steadiest earner in the deployed book, not the weakest
+one, and it is among the five names on which the strategy beats buy-and-hold.
+
+Removing it would buy 0.6 of a point of planned return and 0.017 of correlation while deleting the
+book's most reliable non-RKLB position. It is retained.
+
+% ============================ 8 ============================
+\section{The case against migration}
+
+A justification that argues only one side is not a justification. The strongest objections:
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=5pt,topsep=4pt]
+  \item \textbf{14.5 points is a large and certain price for an uncertain benefit.} The return
+        cost is arithmetic and will be paid in full. The diversification benefit is a claim
+        about states of the world that have occurred three times in 2.3 years.
+  \item \textbf{Two of the three stress windows lie in the fitted half}, and the third sits
+        inside the diversifiers' own fitted region.
+  \item \textbf{The added names give back heavily out of sample where it has been measured.}
+        GM's full fit of 50.3\% becomes 33\% on unseen windows. The honest expectation for the
+        diversifiers is between a half and two-thirds of what the backtest shows, which is why
+        their planning figures are set where they are.
+  \item \textbf{NVDA and AVGO carry an unmeasured haircut.} Their planning figures apply the
+        deployed names' 2.1-point allowance, but nothing establishes a haircut at the
+        4--6\%/200-day setting. These are the two softest numbers in the document.
+  \item \textbf{Two and a third years is a short sample} containing one broad market regime,
+        and the parameters of every name were fitted within it.
+\end{enumerate}
+
+% ============================ 9 ============================
+\section{Recommendation}
+
+\keybox{\textbf{Migrate to nine names at 11.1\% of capital each: RKLB, TSM, VST, VRT, MU,
+NVDA, AVGO, GM and CF.} Planned return 59.1\% on approximately 540 buys a year, maximum
+drawdown 30.8\%, average pairwise correlation 0.339 and beta to the AI factor 0.489. Retire
+VLO. Run NVDA and AVGO at a 4--6\% premium with a 200-day stop on residual OU sigma, with
+buffers re-expressed in residual units --- NVDA 2.2331, AVGO 0.6929.}
+
+\subsection{What would change this recommendation}
+
+\begin{itemize}[leftmargin=1.5em,itemsep=3pt,topsep=4pt]
+  \item A \textbf{reversed walk-forward} --- fitting on the late sample and scoring the
+        January--April 2025 crash --- would put the insurance genuinely out of sample. It
+        remains the single most valuable outstanding test.
+  \item A \textbf{measured haircut for NVDA and AVGO} at the patient setting, which would firm
+        up the two softest rows in the book.
+  \item \textbf{Evidence that RKLB's 146\% is not repeatable} would strengthen the case for
+        migration sharply, since the five-name plan depends on it.
+\end{itemize}
+
+\notebox{\textbf{What this document does not establish.} That the nine-name book will return
+59.1\%. Planning figures are haircut backtests over 2.3 years of a single market regime, and the
+interval around every number here is far wider than the differences being discussed. The
+defensible claim is comparative --- that the wider book carries roughly a fifth less beta and a
+third less average correlation to a single theme, for roughly 14.5 points of expected return ---
+not that either level will be realised.}
+
+\end{document}
