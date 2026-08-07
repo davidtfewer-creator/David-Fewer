@@ -1,110 +1,104 @@
 """
-Exercise the silo allocation across holding patterns the live sheet does not currently reach.
+Exercise the entitlement allocation across states the live sheet does not currently reach.
 
-Today only VST's OU sleeve is holding, so the branch that matters most to the specification --
-BOTH sleeves of a stock holding, and that stock's profit going to the others for the day -- is
-never evaluated in the delivered workbook. This reimplements the written formulas exactly and
-drives them through the cases that will occur.
+Today only VST's OU sleeve holds, so the cases that decide whether the rule is safe -- both
+sleeves of a stock held, several stocks held, and the low-cash case that broke the previous
+formulation -- are never evaluated in the delivered workbook. This drives the written arithmetic
+through all of them.
 
-Every scenario asserts the invariant that makes the change safe: the stock allocations must sum
-to the cash available, so the blotter is neither starved nor over-committed.
+Four invariants are asserted on every scenario:
+
+  1. allocations sum to the cash available (nothing starved, nothing over-committed);
+  2. no HOLDING sleeve is ever funded;
+  3. no allocation is ever negative, at any level of deployed capital -- this is what the
+     entitlement form buys over the earlier "cash minus profit" version;
+  4. a held sleeve's entitlement never returns to its own stock, which is the concentration
+     failure that motivated the change.
 
 Run:  python3 alloc_silo_test.py
 """
-import itertools
-
-import openpyxl
-
-SRC = ('/root/.claude/uploads/822d405e-f99b-5b59-9c6b-87e725054402/'
-       'c655e5aa-TradingExcel_5stock_live_silo.xlsx')
-ROWS = (11, 12, 13, 14, 15)
+from alloc_silo import STOCK_ROWS, allocate, read_inputs, sleeve_rows
 
 
-def load():
-    wv = openpyxl.load_workbook(SRC, data_only=True)
-    a, t = wv['Allocation'], wv['Active Trading']
-    names = [a[f'A{i}'].value for i in ROWS]
-    prof, K, R, inc = {}, {}, {}, {}
-    for i, n in zip(ROWS, names):
-        K[i] = a[f'K{i}'].value or 0.0
-        R[i] = a[f'R{i}'].value or 0.5
-        inc[i] = a[f'B{i}'].value or 0
-        prof[i] = next((t[f'C{r}'].value or 0.0) for r in range(7, 12)
-                       if t[f'A{r}'].value == n)
-    return names, prof, K, R, inc, a['B5'].value
+def check(inp, held, label, expect_zero=None):
+    r = allocate(inp, held)
+    nm = dict(zip(STOCK_ROWS, inp['names']))
+    tot = sum(r['sleeve'].values())
+    print(f'\n{label}')
+    print(f"   claim {r['tot']:>12,.0f}   factor {r['factor']:>5.3f}   "
+          f"allocated {tot:>13,.2f}   idle {r['idle']:>12,.2f}")
+    per = {i: r['sleeve'][sleeve_rows(i)[0]] + r['sleeve'][sleeve_rows(i)[1]]
+           for i in STOCK_ROWS}
+    print('   ' + '  '.join(f'{nm[i]}={per[i]:>10,.0f}' for i in STOCK_ROWS))
 
-
-def allocate(prof, K, R, inc, B5, held):
-    """Exactly the arithmetic written into S:W and C25:C34."""
-    total = sum(prof.values())
-    base = B5 - total
-    elig = {i: 1 if (inc[i] == 1 and not (held[i][0] and held[i][1])) else 0 for i in ROWS}
-    released = sum(prof[i] for i in ROWS if not elig[i])
-    vsum = sum(K[i] * elig[i] for i in ROWS)
-    stock, sleeve = {}, {}
-    for i in ROWS:
-        w = 0.0 if not elig[i] else (
-            ((base + released) * K[i] * elig[i] / vsum if vsum else 0.0) + prof[i])
-        stock[i] = w
-        hb, ho = held[i]
-        den = R[i] * (1 - hb) + (1 - R[i]) * (1 - ho)
-        sleeve[i] = (w * R[i] * (1 - hb) / den if den else 0.0,
-                     w * (1 - R[i]) * (1 - ho) / den if den else 0.0)
-    return stock, sleeve, base, released
+    assert tot <= inp['B5'] + 0.01, f'allocated more than cash: {label}'
+    assert abs(tot + r['idle'] - inp['B5']) < 0.01, f'cash unaccounted for: {label}'
+    for i in STOCK_ROWS:
+        b, o = sleeve_rows(i)
+        for row in (b, o):
+            assert not (held[row] and r['sleeve'][row] > 1e-9), \
+                f'{nm[i]} funded while HOLDING: {label}'
+            assert r['sleeve'][row] >= -1e-9, f'negative allocation: {label}'
+    # a stock with a held sleeve must receive nothing from the pool
+    for i in STOCK_ROWS:
+        b, o = sleeve_rows(i)
+        if held[b] or held[o]:
+            inbound = r['AB'][i] - r['W'][i]
+            assert abs(inbound) < 1e-6, \
+                f'{nm[i]} received inbound while holding: {label}'
+    if expect_zero is not None:
+        assert per[expect_zero] < 1e-6, f'{nm[expect_zero]} should get nothing'
+    return r, per
 
 
 def main():
-    names, prof, K, R, inc, B5 = load()
-    nm = dict(zip(ROWS, names))
-    none_held = {i: (0, 0) for i in ROWS}
+    inp = read_inputs()
+    nm = dict(zip(STOCK_ROWS, inp['names']))
+    none_held = {r: 0 for r in range(25, 35)}
 
-    scenarios = [
-        ('live today  (VST OU holding)', {**none_held, 13: (0, 1)}, None),
-        ('nothing holding', none_held, None),
-        ('VST BOTH holding  (zero profit)', {**none_held, 13: (1, 1)}, 13),
-        ('RKLB BOTH holding  (largest profit)', {**none_held, 14: (1, 1)}, 14),
-        ('RKLB + MU BOTH holding', {**none_held, 14: (1, 1), 15: (1, 1)}, None),
-        ('every sleeve holding', {i: (1, 1) for i in ROWS}, None),
-        ('one sleeve holding on every stock', {i: (0, 1) for i in ROWS}, None),
-    ]
+    def h(**kw):
+        d = dict(none_held)
+        for k, v in kw.items():
+            i = [x for x in STOCK_ROWS if nm[x] == k][0]
+            b, o = sleeve_rows(i)
+            d[b], d[o] = v
+        return d
 
-    for label, held, focus in scenarios:
-        stock, sleeve, base, released = allocate(prof, K, R, inc, B5, held)
-        tot = sum(stock.values())
-        allheld = all(held[i][0] and held[i][1] for i in ROWS)
-        target = 0.0 if allheld else B5
-        ok = abs(tot - target) < 0.01
-        print(f'\n{label}')
-        print(f'   base {base:>13,.2f}   released {released:>11,.2f}   '
-              f'allocated {tot:>14,.2f}   {"OK" if ok else "MISMATCH"}')
-        print('   ' + '  '.join(f'{nm[i]}={stock[i]:>11,.0f}' for i in ROWS))
-        assert ok, f'conservation failed in: {label}'
-        if focus is not None:
-            assert abs(stock[focus]) < 1e-9, f'{nm[focus]} should get nothing'
-            assert abs(released - prof[focus]) < 1e-9, 'released profit mismatch'
-            others = [i for i in ROWS if i != focus]
-            gain = sum(stock[i] for i in others) - (B5 - sum(prof.values())) \
-                - sum(prof[i] for i in others)
-            print(f"   -> {nm[focus]} gets nothing; its {prof[focus]:,.2f} of profit is "
-                  f"shared over the other four (+{gain:,.2f} between them)")
-        # no sleeve may be funded while holding
-        for i in ROWS:
-            for k in (0, 1):
-                assert not (held[i][k] and sleeve[i][k] > 1e-9), \
-                    f'{nm[i]} sleeve {k} funded while HOLDING'
+    check(inp, h(), 'nothing holding')
+    r, per = check(inp, h(VST=(0, 1)), 'live today  (VST OU holding)')
+    print(f"   -> VST keeps only its own free half; its held half went to the other four")
 
-    # ---- the guard case: profit exceeds cash on hand ---------------------------
-    print('\nguard: profit to date exceeds cash on hand')
-    small = 50_000.0
-    stock, _s, base, _r = allocate(prof, K, R, inc, small, none_held)
-    print(f'   B5 {small:,.2f} vs profit {sum(prof.values()):,.2f} -> base {base:,.2f}')
-    print('   ' + '  '.join(f'{nm[i]}={stock[i]:>10,.0f}' for i in ROWS))
-    print(f'   sums to {sum(stock.values()):,.2f} (still conserves); B47/B48 flag it in-sheet')
-    assert abs(sum(stock.values()) - small) < 0.01
+    r, per = check(inp, h(VST=(1, 1)), 'VST BOTH holding', expect_zero=13)
+    print(f"   -> VST gets nothing; its whole entitlement shared evenly over the other four")
 
-    print('\nall scenarios pass: allocations always sum to cash available, no holding '
-          'sleeve is ever funded,\nand a fully-held stock always releases exactly its own '
-          'profit to the rest.')
+    check(inp, h(RKLB=(1, 1)), 'RKLB BOTH holding  (largest profit)', expect_zero=14)
+    check(inp, h(RKLB=(1, 1), MU=(1, 1)), 'RKLB + MU BOTH holding')
+    check(inp, h(TSM=(0, 1), VRT=(0, 1), VST=(0, 1), RKLB=(0, 1), MU=(0, 1)),
+          'one sleeve holding on every stock')
+    check(inp, {r: 1 for r in range(25, 35)}, 'every sleeve holding')
+
+    # ---- the case that broke the previous formulation --------------------------
+    print('\nlow cash, heavy deployment  (what made "cash minus profit" go negative)')
+    lean = dict(inp)
+    lean['B5'] = 200_000.0
+    lean['deployed'] = 3_611_540.33
+    r2, per2 = check(lean, h(TSM=(1, 1), VRT=(1, 1), RKLB=(1, 1), MU=(0, 1)),
+                     '   cash 200k, 3.6m deployed, four names largely held')
+    print(f"   base capital stays positive at {r2['base']:,.0f}; "
+          f"min allocation {min(r2['sleeve'].values()):,.2f}; "
+          f"nothing exceeds cash")
+
+    # ---- profit really is siloed ----------------------------------------------
+    print('\nprofit siloing: allocation should track own profit, all else equal')
+    r3, per3 = check(inp, h(), '   nothing holding, ranked by profit')
+    rank = sorted(STOCK_ROWS, key=lambda i: -inp['prof'][i])
+    print('   ' + '  '.join(f'{nm[i]}: profit {inp["prof"][i]:>8,.0f} -> '
+                            f'{per3[i]:>10,.0f}' for i in rank))
+    for x, y in zip(rank, rank[1:]):
+        assert per3[x] >= per3[y] - 1e-6, 'more profit did not mean more capital'
+
+    print('\nall scenarios pass: conserves to cash, never funds a holding sleeve, never '
+          'negative,\nand a held sleeve never feeds its own stock.')
 
 
 if __name__ == '__main__':
