@@ -69,9 +69,14 @@ HIGH = list(STD)
 HIGH[4] = (0.040, 0.160)                 # Bayes take-profit premium; AVGO reached 11.82% at 12%
 HIGH[7] = (0.040, 0.160)                 # OU take-profit premium
 
-#          label        bounds  stop  min-trade floor over the training window (~7/yr)
-REGIMES = (('standard',  STD,     50,  8),
-           ('high-prem', HIGH,   200,  8))
+# The minimum-trade floor is a RATE per year, not a raw count, because a fixed count silently
+# loosens as the training window grows -- 8 trades is 7/yr across the half sample and 3.4/yr
+# across the full one. That is what let a near-non-trading VLO fit through elsewhere. The rate
+# differs by regime on purpose: the standard regime should sustain 20 a year, while the
+# high-premium regime is designed to trade less and 7 a year is the confirmed minimum there.
+#          label        bounds  stop  floor (trades/yr the fit must sustain)
+REGIMES = (('standard',  STD,     50, 20.0),
+           ('high-prem', HIGH,   200,  7.0))
 
 
 def repair(vec):
@@ -134,7 +139,7 @@ def breach_share(bars, chk, vec, t, lo, hi):
 
 def job(arg):
     name, ri = arg
-    label, bounds, stop, floor = REGIMES[ri]
+    label, bounds, stop, floor_rate = REGIMES[ri]
     A.BOUNDS = bounds                     # A.fit and A.robust both read this
     bars, _dv, idx = A.five_min(R.FIVE_MIN[name])
     d, O, H, L, C = bars
@@ -146,6 +151,7 @@ def job(arg):
 
     folds, vec_a, vecs = [], None, []
     for k, (lo, hi) in enumerate(bnds):
+        floor = int(round(floor_rate * (d[lo - 1] - d[0]).days / 365.25))
         vec = fit_repaired(bars, chk, t0, 0, lo - 1, floor, bounds)
         vecs.append(vec)
         if k == 0:
@@ -170,7 +176,7 @@ def job(arg):
                 dd=max([f['dd'] for f in folds] + [h_dd]),
                 bh=(Cn[n - 1] / Cn[iS]) ** (1 / yrs) - 1,
                 prem=vecs[0][4], ou_prem=vecs[0][7], vecs=vecs,
-                bounds=bounds, floor=floor, breach=brc, ntrades=ntr)
+                bounds=bounds, floor_rate=floor_rate, breach=brc, ntrades=ntr)
 
 
 def main():

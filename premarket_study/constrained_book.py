@@ -49,7 +49,16 @@ CAPITAL = 1_000_000
 SLICE, FOLDS = 100, 3
 MIN_FOLD = 5                      # raw trades below which a fold is not evidence of anything
 BOUNDS = PP.STD                   # psi 0.25, peak_cap 0.25, ou_cap 0.25
-STOP, FLOOR = 50, 8
+STOP = 50
+
+# The minimum-trade floor is a RATE, not a raw count. A fixed floor of 8 is 7 trades a year
+# across the 287-session half sample but only 3.4 across the full 587, so the same number
+# silently loosens as the training window grows. That is what let VLO through: it fitted a cap
+# of 23.53%, bid 23.5% below the peak, cleared the raw floor on the training window and then
+# managed 3 trades across 300 unseen sessions -- a near-non-trading solution scoring +167% on
+# one window. 20 a year is the standard-regime rate; it is a degeneracy guard, well below the
+# 20-trades-per-FOLD evidence bar used to judge results.
+FLOOR_RATE = 20.0
 
 # Unconstrained planned returns, from planned_return.log, for the before/after column.
 PRIOR = {'RKLB': -10.4, 'TSM': 72.6, 'VST': 20.0, 'VRT': 94.7, 'MU': 69.4,
@@ -69,7 +78,9 @@ def one(name):
 
     folds, vec_a = [], None
     for k, (lo, hi) in enumerate(bnds):
-        vec = PP.fit_repaired(bars, chk, t0, 0, lo - 1, FLOOR, BOUNDS)
+        train_yrs = (d[lo - 1] - d[0]).days / 365.25
+        floor = int(round(FLOOR_RATE * train_yrs))
+        vec = PP.fit_repaired(bars, chk, t0, 0, lo - 1, floor, BOUNDS)
         if k == 0:
             vec_a = vec
         ret, rate, dd, _ = A.score(bars, chk, vec, t0, lo, hi)
