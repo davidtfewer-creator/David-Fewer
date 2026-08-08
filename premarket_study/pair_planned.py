@@ -19,10 +19,23 @@ footing from every other name in the table. Both are run:
 
 Everything else is held identical to planned_return.py -- same three expanding fits, same four
 tested windows, same median, same robust objective, same verified fills from 5-minute bars,
-same residual OU sigma, same widened psi bound, same minimum-trade floor of 8. The floor is
-deliberately NOT relaxed for the high-premium arm: if a configuration cannot manage eight buys
-across a 287-session training window it is not a book candidate, and letting it off that would
-be exactly the kind of per-name special-casing this exercise exists to remove.
+same residual OU sigma, same widened psi bound.
+
+The minimum-trade floor stays at 8 across the training window, the same as every other name.
+That is about seven trades a year, which the user has confirmed is an acceptable minimum for
+the high-premium regime. The floor is a degeneracy guard -- it stops the optimiser finding a
+do-nothing solution that collects interest and books no risk -- rather than a trade-frequency
+preference, and at seven a year it leaves a 10% premium ample room. Realised buy counts are
+reported so that a fit sitting on the floor is visible if it happens.
+
+The premium ceiling IS raised, to 12%. AVGO's optimum is expected around 10%, and a bound at
+8% would pin the fit at the edge and understate it exactly as the old psi cap did to VRT.
+Whether either name actually pins at 12% is reported rather than assumed.
+
+One tension is surfaced rather than resolved silently: a high-premium name legitimately
+trading eight or ten times a year would fail the proposed 25-buys-a-year admission rule, which
+was calibrated on names running 1.5-2.7% premia. That rule cannot judge this regime as it
+stands.
 
 Bounds are set inside the worker rather than at module scope, because the two arms need
 different ones and the pool workers are reused across jobs.
@@ -44,15 +57,17 @@ SLICE, FOLDS = 100, 3
 
 STD = list(P.WIDE)                       # psi already widened to 0.25
 HIGH = list(P.WIDE)
-HIGH[4] = (0.040, 0.080)                 # Bayes take-profit premium
-HIGH[7] = (0.040, 0.080)                 # OU take-profit premium
+HIGH[4] = (0.040, 0.120)                 # Bayes take-profit premium, headroom above 10%
+HIGH[7] = (0.040, 0.120)                 # OU take-profit premium
 
-REGIMES = (('standard', STD, 50), ('high-prem', HIGH, 200))
+#          label        bounds  stop  min-trade floor over the training window (~7/yr)
+REGIMES = (('standard',  STD,     50,  8),
+           ('high-prem', HIGH,   200,  8))
 
 
 def job(arg):
     name, ri = arg
-    label, bounds, stop = REGIMES[ri]
+    label, bounds, stop, floor = REGIMES[ri]
     A.BOUNDS = bounds                     # A.fit and A.robust both read this
     bars, _dv, idx = A.five_min(R.FIVE_MIN[name])
     d, O, H, L, C = bars
@@ -64,7 +79,7 @@ def job(arg):
 
     folds, vec_a, vecs = [], None, []
     for k, (lo, hi) in enumerate(bnds):
-        vec = A.fit(bars, chk, t0, 0, lo - 1, floor=8)
+        vec = A.fit(bars, chk, t0, 0, lo - 1, floor=floor)
         vecs.append(vec)
         if k == 0:
             vec_a = vec
@@ -86,7 +101,8 @@ def job(arg):
                 buys=sum(f['buys'] * f['yrs'] for f in folds) / yrs,
                 dd=max([f['dd'] for f in folds] + [h_dd]),
                 bh=(Cn[n - 1] / Cn[iS]) ** (1 / yrs) - 1,
-                prem=vecs[0][4], ou_prem=vecs[0][7], vecs=vecs)
+                prem=vecs[0][4], ou_prem=vecs[0][7], vecs=vecs,
+                bounds=bounds, floor=floor)
 
 
 def main():
@@ -121,6 +137,21 @@ def main():
             cells = ' '.join(f"{100*f['ret']:+11.1f}% {f['buys']:3.0f}" for f in r['folds'])
             print(f"{n:6s} {r['label']:11s} {cells} {100*r['half']:+11.1f}%")
 
+    print('\n\n=== fitted premia across the three training windows ===')
+    print('    a value at the ceiling is a pinned fit, not a chosen one -- the psi lesson\n')
+    print(f"{'name':6s} {'regime':11s} {'ceiling':>8s} " + ' '.join(
+        f"{'fit '+str(k+1):>16s}" for k in range(FOLDS)))
+    for n in PAIR:
+        for ri in range(len(REGIMES)):
+            r = res[(n, ri)]
+            hi = r['bounds'][4][1]
+            cells = []
+            for v in r['vecs']:
+                pin = '*' if v[4] >= hi - 0.02 * (hi - r['bounds'][4][0]) else ' '
+                cells.append(f"{100*v[4]:7.2f}%/{100*v[7]:6.2f}%{pin}")
+            print(f"{n:6s} {r['label']:11s} {100*hi:7.1f}% " + ' '.join(cells))
+    print('  (Bayes premium / OU premium per fit; * = within 2% of the ceiling)')
+
     print('\n\n=== does the high-premium thesis hold? ===\n')
     for n in PAIR:
         s, h = res[(n, 0)], res[(n, 1)]
@@ -151,6 +182,11 @@ def main():
             print(f"{n:6s} {r['label']:11s} {100*r['planned']:+8.1f}% {r['buys']:7.1f} "
                   f"{100*r['worst']:+8.1f}% {r['npos']:>2d}/4  "
                   + ('ADMIT' if not why else 'REJECT  (' + '; '.join(why) + ')'))
+    print('\n  NOTE: the 25-buys-a-year rule was calibrated on names running 1.5-2.7% premia.')
+    print('  The high-premium regime is DESIGNED to trade less -- that is the thesis, not a')
+    print('  defect -- so a name can clear every return and consistency test here and still')
+    print('  fail on frequency. Read a frequency rejection below as the rule being mis-cut for')
+    print('  this regime, not as evidence against the name.')
 
 
 if __name__ == '__main__':
