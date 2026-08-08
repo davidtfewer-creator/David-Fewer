@@ -63,13 +63,73 @@ CAPITAL = 1_000_000
 SLICE, FOLDS = 100, 3
 
 STD = list(P.WIDE)                       # psi already widened to 0.25
-HIGH = list(P.WIDE)
+STD[5] = (0.002, 0.250)                  # peak cap: must be able to reach the premium
+STD[8] = (0.005, 0.250)
+HIGH = list(STD)
 HIGH[4] = (0.040, 0.160)                 # Bayes take-profit premium; AVGO reached 11.82% at 12%
 HIGH[7] = (0.040, 0.160)                 # OU take-profit premium
 
 #          label        bounds  stop  min-trade floor over the training window (~7/yr)
 REGIMES = (('standard',  STD,     50,  8),
            ('high-prem', HIGH,   200,  8))
+
+
+def repair(vec):
+    """Never bid so close to the peak that the exit needs a new all-time high.
+
+    The engine caps each bid at G[i-1]*(1-cap), where G is the running maximum high, and sells
+    at bid + premium*C[i-1]. The target therefore clears the old peak whenever
+    cap < (C/G)*premium, and since C never exceeds G, requiring cap >= premium is sufficient
+    and is the form used here.
+
+    This is not a tuning preference. A sleeve whose target sits above the all-time high can
+    only be filled by the stock making a new one, so its exits are conditional on the trend
+    continuing -- it looks excellent while a name keeps printing highs and stops working the
+    moment that pauses, with the position then held to the stop. The deployed book already
+    contains two such sleeves: RKLB (premium 2.684% against a 0.801% cap) and VST (2.182%
+    against 1.366%). Those are the two incumbents that fail on planned return; TSM, VRT and MU
+    all satisfy the constraint and all pass.
+
+    It binds hardest exactly where the high-premium regime lives. At an 8-12% premium the old
+    peak_cap ceiling of 0.07 made the constraint unsatisfiable, so every high-premium result
+    computed before this repair was trading a breach-dependent Bayes sleeve.
+
+    Applied by lifting the cap to meet the premium rather than by cutting the premium, so the
+    take-profit under test stays the one asked for.
+    """
+    v = list(vec)
+    v[5] = max(v[5], v[4])               # Bayes: peak_cap >= premium
+    v[8] = max(v[8], v[7])               # OU:    ou_cap  >= ou_prem
+    return v
+
+
+def fit_repaired(bars, chk, t, lo, hi, floor, bounds):
+    """A.fit, with every candidate vector repaired before it is scored."""
+    from scipy.optimize import differential_evolution
+    res = differential_evolution(
+        lambda v: -A.robust(bars, chk, repair(v), t, lo, hi, floor), bounds,
+        maxiter=6, popsize=6, seed=42, tol=0.01, mutation=(0.5, 1.0),
+        recombination=0.7, polish=False, init='sobol', workers=1)
+    return repair(list(res.x))
+
+
+def breach_share(bars, chk, vec, t, lo, hi):
+    """Of the buys in [lo,hi], what share had a sell target above the running all-time high?"""
+    from optimise_candidates import mp
+    from engine import run_model
+    d, O, H, L, C = bars
+    r = run_model(d, O, H, L, C, mp(vec, t), ou_sigma='resid', same_day_exit=chk, collect=True)
+    fr = r.frames
+    G = fr['G']
+    tot = brc = 0
+    for s in ('t1', 't2'):
+        f = fr[s]
+        for i in range(lo, hi + 1):
+            if f['Z'][i] == 1 and f['AB'][i] is not None and G[i - 1] is not None:
+                tot += 1
+                if f['AB'][i] > G[i - 1] + 1e-9:
+                    brc += 1
+    return (brc / tot if tot else float('nan')), tot
 
 
 def job(arg):
@@ -86,7 +146,7 @@ def job(arg):
 
     folds, vec_a, vecs = [], None, []
     for k, (lo, hi) in enumerate(bnds):
-        vec = A.fit(bars, chk, t0, 0, lo - 1, floor=floor)
+        vec = fit_repaired(bars, chk, t0, 0, lo - 1, floor, bounds)
         vecs.append(vec)
         if k == 0:
             vec_a = vec
@@ -95,6 +155,7 @@ def job(arg):
                           yrs=(d[hi] - d[lo]).days / 365.25))
     h_ret, _hb, h_dd, _ = A.score(bars, chk, vec_a, t0, iS, n - 1)
     f_ret, _fb, _fd, _ = A.score(bars, chk, vec_a, t0, 0, iS - 1)
+    brc, ntr = breach_share(bars, chk, vec_a, t0, iS, n - 1)
 
     tested = [f['ret'] for f in folds] + [h_ret]
     yrs = (d[n - 1] - d[iS]).days / 365.25
@@ -109,7 +170,7 @@ def job(arg):
                 dd=max([f['dd'] for f in folds] + [h_dd]),
                 bh=(Cn[n - 1] / Cn[iS]) ** (1 / yrs) - 1,
                 prem=vecs[0][4], ou_prem=vecs[0][7], vecs=vecs,
-                bounds=bounds, floor=floor)
+                bounds=bounds, floor=floor, breach=brc, ntrades=ntr)
 
 
 def main():
@@ -158,6 +219,21 @@ def main():
                 cells.append(f"{100*v[4]:7.2f}%/{100*v[7]:6.2f}%{pin}")
             print(f"{n:6s} {r['label']:11s} {100*hi:7.1f}% " + ' '.join(cells))
     print('  (Bayes premium / OU premium per fit; * = within 2% of the ceiling)')
+
+    print('\n\n=== the peak cap: does an exit need a new all-time high? ===')
+    print('    cap must be at least the premium, else the target clears the running peak\n')
+    print(f"{'name':6s} {'regime':11s} {'premium':>8s} {'peak cap':>9s} {'ou prem':>8s} "
+          f"{'ou cap':>8s} {'breach share':>13s} {'unseen buys':>12s}")
+    for n in PAIR:
+        for ri in range(len(REGIMES)):
+            r = res[(n, ri)]
+            v = r['vecs'][0]
+            print(f"{n:6s} {r['label']:11s} {100*v[4]:7.2f}% {100*v[5]:8.2f}% "
+                  f"{100*v[7]:7.2f}% {100*v[8]:7.2f}% {100*r['breach']:12.1f}% "
+                  f"{r['ntrades']:12d}")
+    print('\n  breach share is measured on the unseen span with the frozen vector. with the')
+    print('  repair active it should be zero or near it; anything left is the C/G slack, since')
+    print('  cap >= premium is sufficient but not tight.')
 
     print('\n\n=== does the high-premium thesis hold? ===\n')
     for n in PAIR:
