@@ -50,6 +50,24 @@ import admit_candidates as A
 import nine_computed as NC
 import ramp_premium as R
 from engine import Params
+from optimise_candidates import BOUNDS, NAMES
+
+# ---------------------------------------------------------------------------------------------
+# psi bound correction. The shipped cap of 0.1000 was excluding known-good configurations and
+# pinning fitters at the boundary, which is on the house list of overfitting tells:
+#   * RKLB's DEPLOYED psi is 0.1130 -- above the cap, so no refit could ever rediscover the
+#     vector the book actually trades;
+#   * VRT's fitter, given room, goes to 0.20-0.22 and its tested half improves from +40.1% to
+#     +80.1%. Its published +48.2% planned return was understated by the bound alone.
+# Patched on admit_candidates rather than at source: A.fit and A.robust both read that module's
+# BOUNDS, and the Pool workers fork after this runs, so they inherit it. Nothing else in the
+# repository changes behaviour.
+# Widening psi is a correctness fix backed by both names above. No other bound is touched --
+# the boundary-seeking report at the end of this script is what would evidence the next one.
+# ---------------------------------------------------------------------------------------------
+WIDE = list(BOUNDS)
+WIDE[2] = (0.001, 0.25)
+A.BOUNDS = WIDE
 
 UP = '/root/.claude/uploads/822d405e-f99b-5b59-9c6b-87e725054402'
 INCUMBENT = {
@@ -85,9 +103,10 @@ def one_name(name):
               for k in range(FOLDS)]
     iS = bounds[0][0]                       # start of the unseen span == half-sample split
 
-    folds, vec_a = [], None
+    folds, vec_a, vecs = [], None, []
     for k, (lo, hi) in enumerate(bounds):
         vec = A.fit(bars, chk, t0, 0, lo - 1, floor=8)
+        vecs.append(vec)
         if k == 0:
             vec_a = vec
         ret, buys, dd, _ = A.score(bars, chk, vec, t0, lo, hi)
@@ -115,7 +134,7 @@ def one_name(name):
         stitched=float(raw ** (1 / sum(f['yrs'] for f in folds)) - 1),
         worst=float(min(tested)), npos=sum(1 for x in tested if x > 0),
         buys=tot_buys / yrs, dd=max([f['dd'] for f in folds] + [h_dd]),
-        bh=bh_tested, closes=(d, Cn), sessions=n,
+        bh=bh_tested, closes=(d, Cn), sessions=n, vecs=vecs,
     )
 
 
@@ -169,6 +188,43 @@ def main():
               f"{100*(r['planned']-r['bh']):+11.1f}pp")
     print('\n  not exposure-matched: the model holds cash much of the time, so this overstates')
     print('  the gap in a rising window. It is here as context, not as a gate.')
+
+    # ---- boundary-seeking: which bound to look at next -------------------------
+    print('\n\n=== boundary-seeking parameters (within 2% of a bound) ===')
+    print('    a fitter pinned at a bound is not choosing that value, it is being stopped at')
+    print('    it. this is the evidence that would justify widening the next one.\n')
+    hits = {}
+    for n in ORDER:
+        for vec in res[n]['vecs']:
+            for i, x in enumerate(vec):
+                lo, hi = WIDE[i]
+                span = hi - lo
+                if x <= lo + 0.02 * span:
+                    hits[(NAMES[i], 'lo')] = hits.get((NAMES[i], 'lo'), 0) + 1
+                elif x >= hi - 0.02 * span:
+                    hits[(NAMES[i], 'hi')] = hits.get((NAMES[i], 'hi'), 0) + 1
+    tot = len(ORDER) * FOLDS
+    if hits:
+        print(f"{'parameter':12s} {'edge':5s} {'fits pinned':>12s} {'of':>4s}  bound")
+        for (nm, side), c in sorted(hits.items(), key=lambda kv: -kv[1]):
+            i = NAMES.index(nm)
+            print(f'{nm:12s} {side:5s} {c:12d} {tot:4d}  {WIDE[i]}')
+    else:
+        print('  none -- every fitted parameter sits in the interior of its range.')
+
+    # ---- parameter stability across training windows ---------------------------
+    print('\n\n=== parameter stability: how far the fit moves between training windows ===')
+    print('    max/min of each policy parameter across the three fits. a name whose optimum')
+    print('    swings wildly will score badly under refit no matter how good it is to trade.\n')
+    POL = [3, 4, 5, 6, 7, 8]
+    print(f"{'name':6s} " + ' '.join(f'{NAMES[i]:>10s}' for i in POL) + f"{'worst':>9s}")
+    for n in ORDER:
+        vs = res[n]['vecs']
+        rat = []
+        for i in POL:
+            col = [v[i] for v in vs]
+            rat.append(max(col) / max(min(col), 1e-9))
+        print(f'{n:6s} ' + ' '.join(f'{r:9.1f}x' for r in rat) + f'{max(rat):8.1f}x')
 
     # ---- correlation, reported and non-binding --------------------------------
     print('\n\n=== correlation, for weighting judgement -- binds on nothing ===\n')
