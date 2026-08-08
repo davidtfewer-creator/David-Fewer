@@ -1,5 +1,5 @@
 """
-Five-fold expanding walk-forward on the admission survivors: AMD, HOOD, FSLR, ARM.
+Expanding walk-forward on the admission survivors: AMD, HOOD, FSLR, ARM.
 
 Why this exists. The admission screen rested on a single half-sample split, and the house
 elimination standard does not accept that: "multiple folds, not a single split", "pattern, not
@@ -8,24 +8,27 @@ BOTH frozen and refitted parameters. HOOD is the recorded case of a single split
 wrong elimination -- eliminated at -6%, then +95/+72/+64/-22/+36 over five folds.
 
 Design, following the recorded mechanics:
-  * five EXPANDING folds -- fit on everything up to the fold boundary, freeze, score the next
-    unseen ~10% slice, roll forward;
+  * EXPANDING folds -- fit on everything up to the fold boundary, freeze, score the next unseen
+    slice, roll forward;
   * the filter always runs from the first session, so each slice carries its full warm-up: the
     model has read all prior bars, it simply did not trade the scored window;
   * both arms reported. REFIT re-optimises on each expanding train. FROZEN fits once on the
     first train and never again. The elimination criterion needs both to fail.
 
-Reading it, per the house rules: 5/5 positive is meaningful (sign test p ~ 0.03), 4/5 decent,
-3/5 is no evidence either way. Trade count per fold is the most-overlooked number -- a fold
-under 20 trades is absence of evidence, not evidence of failure. Scattered negatives are noise;
-consecutive and deepening negatives are decay. The four names are shown fold by fold so a
+Reading it, per the house rules: with five folds 5/5 positive is meaningful (sign test p ~ 0.03)
+and 3/5 is no evidence either way; with three folds even 3/3 is only p ~ 0.125, so magnitude and
+the frozen arm carry more of the weight. Trade count per fold is the most-overlooked number -- a
+fold under 20 trades is absence of evidence, not evidence of failure. Scattered negatives are
+noise; consecutive and deepening negatives are decay. The four names are shown fold by fold so a
 common-mode window -- everything failing at once -- is visible rather than mistaken for four
 independent failures.
 
 Verified fills and residual OU sigma throughout, matching the live book and the admission run.
 
-Run:  python3 walk_forward_admit.py
+Run:  python3 walk_forward_admit.py [folds] [slice]     # default 3 folds of 100 sessions
 """
+import sys
+
 import numpy as np
 
 import admit_candidates as A
@@ -34,8 +37,15 @@ from engine import Params, run_model
 from optimise_candidates import mp
 
 NAMES = ('AMD', 'HOOD', 'FSLR', 'ARM')
-FOLDS = 5
 CAPITAL = 1_000_000
+
+# Folds and slice length are arguments because the two are a direct trade-off and the first
+# run showed which way it binds. Five slices of 58 sessions put only 4-17 buys in each fold,
+# below the 20-trade floor at which a fold counts as evidence at all, so every magnitude was
+# uninterpretable. Three slices of 100 sessions give roughly 15-30 buys per fold: fewer signs
+# to read, but each one means something.
+FOLDS = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+SLICE = int(sys.argv[2]) if len(sys.argv) > 2 else 100
 
 
 def slice_return(bars, chk, vec, t, lo, hi):
@@ -59,11 +69,13 @@ def main():
         d = bars[0]
         chk = R.make_checker(idx, d, bars[1])
         n = len(d)
-        step = n // (FOLDS + 5)              # ~10% slices, five of them, rest is initial train
+        step = SLICE
         bounds = [(n - (FOLDS - k) * step, n - (FOLDS - k - 1) * step - 1)
                   for k in range(FOLDS)]
+        if bounds[0][0] < 200:
+            raise SystemExit(f'initial train only {bounds[0][0]} sessions - too short to fit')
         print(f'\n=== {name} ===', flush=True)
-        print(f'  {n} sessions; slices of {step} (~{100*step/n:.0f}%); '
+        print(f'  {n} sessions; {FOLDS} slices of {step} (~{100*step/n:.0f}%); '
               f'initial train {bounds[0][0]} sessions', flush=True)
 
         first_vec = None
@@ -79,7 +91,7 @@ def main():
                   f'({b_re:3d} buys)   frozen {100*r_fr:+8.1f}% ({b_fr:3d} buys)', flush=True)
         results[name] = rows
 
-    print('\n\n=== summary ===\n')
+    print(f'\n\n=== summary ({FOLDS} folds of {SLICE} sessions) ===\n')
     print(f"{'name':6s} {'refit folds+':>12s} {'refit stitched':>15s} "
           f"{'frozen folds+':>13s} {'frozen stitched':>16s} {'min buys/fold':>14s}")
     for name in NAMES:
@@ -101,8 +113,9 @@ def main():
         allneg = all(results[n][k][3] < 0 for n in NAMES)
         print(f'{k+1:<5d} {w:26s} {cells}' + ('   <- all four negative' if allneg else ''))
 
-    print('\nreading: 5/5 positive is meaningful, 4/5 decent, 3/5 is no evidence either way.')
-    print('a fold under 20 buys is absence of evidence, not evidence of failure.')
+    print(f'\nreading: with {FOLDS} folds the sign test is weak on its own -- 3/3 is p ~ 0.125 --')
+    print('so magnitude and the frozen arm carry more of the weight than they did at five folds.')
+    print('a fold under 20 buys is still absence of evidence, not evidence of failure.')
     print('elimination requires the failure to be repeated, material, explicable, and to')
     print('survive BOTH the refit and frozen arms.')
 
