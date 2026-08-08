@@ -28,9 +28,16 @@ do-nothing solution that collects interest and books no risk -- rather than a tr
 preference, and at seven a year it leaves a 10% premium ample room. Realised buy counts are
 reported so that a fit sitting on the floor is visible if it happens.
 
-The premium ceiling IS raised, to 12%. AVGO's optimum is expected around 10%, and a bound at
-8% would pin the fit at the edge and understate it exactly as the old psi cap did to VRT.
-Whether either name actually pins at 12% is reported rather than assumed.
+The premium ceiling is 16%, reached in two steps. It was first raised from 8% to 12% because
+AVGO's optimum was expected near 10% and a low bound pins the fit at the edge and understates
+the name, exactly as the old psi cap did to VRT. At 12% AVGO's third training window came back
+at 11.82% -- inside the ceiling by 0.18pp, which is a boundary-seeking fit in all but name, so
+its +65.7% could still have been understated. Raised again to 16% to settle it.
+
+Both names in the regime get the same ceiling even though only AVGO motivated it. NVDA's fits
+sat at 7.5-9.0%, comfortably interior, so widening cannot move it; giving AVGO a private bound
+would be the per-name special-casing this exercise exists to remove, and running NVDA at the
+wider bound costs nothing and confirms its optimum is genuinely interior rather than assumed.
 
 One tension is surfaced rather than resolved silently: a high-premium name legitimately
 trading eight or ten times a year would fail the proposed 25-buys-a-year admission rule, which
@@ -57,8 +64,8 @@ SLICE, FOLDS = 100, 3
 
 STD = list(P.WIDE)                       # psi already widened to 0.25
 HIGH = list(P.WIDE)
-HIGH[4] = (0.040, 0.120)                 # Bayes take-profit premium, headroom above 10%
-HIGH[7] = (0.040, 0.120)                 # OU take-profit premium
+HIGH[4] = (0.040, 0.160)                 # Bayes take-profit premium; AVGO reached 11.82% at 12%
+HIGH[7] = (0.040, 0.160)                 # OU take-profit premium
 
 #          label        bounds  stop  min-trade floor over the training window (~7/yr)
 REGIMES = (('standard',  STD,     50,  8),
