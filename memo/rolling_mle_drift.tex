@@ -1,0 +1,128 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{parskip}
+
+\title{Is the price process non-stationary on monthly timescales?\\
+\large The rolling-MLE drift study, and the verdict on periodic re-optimisation}
+\author{Bayesian Capital}
+\date{9 August 2026}
+
+\begin{document}
+\maketitle
+
+\section*{The question}
+
+The hypothesis under test: stock behaviour shifts with the AI-trade market view on
+roughly monthly timescales, so parameters fitted to the full 2.2-year window are a stale
+average, and a scheme that refits every one to three months on a trailing 3--12 month
+window would track the market and out-earn the frozen configuration.
+
+The refit scheme itself cannot be tested cheaply on P\&L --- its objective sees only
+6--25 trades per short window against ten parameters --- so the hypothesis was tested
+where it is identified: on prices. The Kalman local-linear-trend filter's noise scales
+$(\lambda, \varphi_L, \psi)$ have an exact Gaussian likelihood through their one-step
+innovations, giving 63--126 daily observations per window against three parameters.
+If the market's regime changes the price process, these are the parameters of that
+process, and the likelihood will see it move.
+
+\section*{Method}
+
+Rolling 63- and 126-day windows stepped 21 days across 2024-04-01 to 2026-08-07
+(591 sessions), five names (RKLB, TSM, VST, VRT, MU). Per window: maximum-likelihood
+fit of $(\lambda, \varphi_L, \psi)$ with standard errors from the Hessian, the OU
+sleeve's rolling AR(1) coefficient and residual sigma at the deployed lookback, and
+the AI factor's drawdown state (equal-weight TSM/VRT/VST/MU, as in the concentration
+study). The instrument was validated on simulated data first: truth recovered within
+2.5 standard errors in 7 of 8 126-day windows; median $|z|\approx 1$ on a stationary
+path; a mid-sample doubling of $\varphi_L$ detected in 4 of 4 paths.
+
+Two tests, deliberately independent of each other:
+\begin{enumerate}
+  \item \textbf{Error-bar test.} $\chi^2/\mathrm{dof}$ of non-overlapping window
+        estimates about the full-sample MLE. Stationary calibration $\approx 1$.
+  \item \textbf{Likelihood-ratio homogeneity test} (free of the Hessian): one vector
+        for all windows vs one per window, $LR = 2(\sum_w \ell_w(\hat\theta_w) -
+        \sum_w \ell_w(\hat\theta))$, $\chi^2_{3(K-1)}$. Plus the sharpest version of
+        the hypothesis: the only AI drawdown episode in sample (January--April 2025,
+        factor $-45.9\%$) as its own segment against the rest, 3 degrees of freedom.
+\end{enumerate}
+
+\section*{Results}
+
+\textbf{The parameters do not move.} Every windows LR test accepts homogeneity, and
+not narrowly:
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+ & \multicolumn{2}{c}{63d windows ($K=9$)} & \multicolumn{2}{c}{126d windows ($K=4$)} & crash vs rest \\
+ & LR (dof 24) & $p$ & LR (dof 9) & $p$ & $p$ (dof 3) \\
+\midrule
+MU   & 15.4 & 0.91 & 4.5 & 0.88 & 0.83 \\
+RKLB & 15.6 & 0.90 & 4.3 & 0.89 & 0.19 \\
+TSM  & 16.2 & 0.88 & 9.2 & 0.42 & 0.32 \\
+VRT  & 18.7 & 0.77 & 7.5 & 0.59 & 0.04 \\
+VST  & 13.3 & 0.96 & 2.7 & 0.98 & 0.81 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The LR statistics sit \emph{below} their degrees of freedom throughout --- windows agree
+with each other more closely than chance requires. Even the crash test fails: one name
+in five reaches $p=0.04$, which across fifteen tests is what chance produces. The
+Jan--Apr 2025 episode, the strongest regime change in the sample, did not change the
+process parameters. The $\chi^2$/dof table agrees ($0.3$--$1.2$ almost everywhere;
+TSM's $\lambda$ at 2.5 is the single mild exception), and $\psi$ is flat at
+effectively zero in every window. The OU AR(1) coefficient is pinned at $0.95$--$0.98$
+with IQR $0.02$--$0.06$ --- stable, and incidentally so close to a unit root that the
+``mean-reversion'' forecast is a random walk anchor in practice, consistent with the
+weekly finding that the MR term never binds.
+
+\textbf{Why the intuition is right and the conclusion is wrong.} The market
+\emph{does} change on monthly timescales --- the OU residual sigma moves from 2.0\% to
+5.5\% of price across the sample. But the filter's noises are specified as
+\emph{scales on the daily range} $F_t$: $q_L = (\varphi_L F_t)^2$, $r = (\lambda
+F_t)^2$. The regime enters through $F_t$, day by day, with no refit --- faster than any
+monthly re-optimisation could. What $(\lambda, \varphi_L, \psi)$ measure is the ratio
+of level-shock, observation-noise and slope-noise to the range, and those ratios are
+regime-invariant to within measurement error. The specification already contains the
+adaptation the refit scheme was meant to add. The small coherent wobble that does
+exist ($\varphi_L$ rising a few percent of its value in deep drawdowns, Spearman
+$-0.4$ to $-0.7$ on overlapping windows) is second-order and inside the error bars.
+
+\textbf{A side finding on what the P\&L optimiser fitted.} The full-sample MLE is far
+from the deployed vector on every name --- e.g.\ TSM MLE
+$\lambda/\varphi_L/\psi = 0.19/0.77/0.003$ against deployed $0.46/0.25/0.065$. The
+likelihood says the close \emph{is} the level (small $\lambda$) and the level moves
+$\sim\!0.6$--$0.8$ of the daily range; the deployed values instead buy heavy smoothing
+--- a fair value that lags the market, producing deeper bids through $\mathrm{fair} -
+k\sigma$. That is a \emph{policy} effect, not an estimate of the process, and it is
+why the P\&L surface is a ridge: $k$ can compensate almost any $(\lambda, \varphi_L,
+\psi)$. The deployed vector is not thereby wrong --- but these three parameters should
+be understood as bid-shaping knobs, not statistics, and no amount of refitting them
+will track a market regime.
+
+\section*{Verdict}
+
+Periodic re-optimisation --- monthly or quarterly, on 3--12 month trailing windows ---
+has nothing real to track. The process parameters are homogeneous across the sample at
+every horizon tested, including across the one genuine regime break available. A refit
+scheme would be fitting estimation noise with 6--25 trades of signal per window, and
+the 40-fold P\&L evidence already shows how that ends. This closes the question at the
+level of the price process, which is stronger than closing it at the level of one more
+walk-forward: there is no drift for \emph{any} P\&L refit scheme to capture, whatever
+its cadence and window.
+
+What the market's monthly variation actually calls for is already deployed (range
+scaling, rolling AR(1), rolling residual sigma). If anything further is pursued, the
+supported direction is sizing, not signal: the OU residual sigma trajectory is the
+one series that moves with the regime, and exposure or buffer conditioning on it would
+be a structural change --- the category that has survived out-of-sample before.
+Reproduction: \texttt{premarket\_study/rolling\_mle.py} (study),
+\texttt{test\_rolling\_mle.py} (instrument validation),
+\texttt{mle\_homogeneity.py} (LR tests), \texttt{analyze\_mle\_drift.py} (tables and
+figure); data extracted from the live workbook's Query sheet, not committed.
+
+\end{document}

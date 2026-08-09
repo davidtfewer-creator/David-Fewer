@@ -25,3 +25,8 @@ premarket_study/*.log
 
 # intraday AM/PM session cache (derived from uploaded workbooks)
 premarket_study/halfweek_sessions.pkl
+
+# rolling-MLE study: workbook-extracted prices and derived output
+premarket_study/data_mle/
+premarket_study/mle_drift.png
+premarket_study/rolling_mle.csv
