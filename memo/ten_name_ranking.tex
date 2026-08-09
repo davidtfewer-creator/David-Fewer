@@ -1,0 +1,97 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{parskip}
+
+\title{The ten-name ranking on verified fills,\\
+\large and what goes into the daily book}
+\author{Bayesian Capital}
+\date{9 August 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Basis}
+
+Every name on the identical instrument: residual OU sigma, verified same-day fills
+from 5-minute bars, single split at 2025-05-23 (no multi-fold slicing --- each tested
+number stands on 30--120 verified fills). ``Ref'' is the full-sample-provenance vector
+(deployed for incumbents; the diversifier-study fits for GM/VLO/CF; the NVDA daily
+vector; AVGO fitted here on the full sample, flagged) scored on the tested half ---
+all ten carry the same lookahead flavour, so they are comparable with each other.
+A and B are the train-half-only fits, the genuinely out-of-sample numbers.
+Candidates' daily bars are derived from the 5-minute regular-hours data; GM, VLO and
+CF reproduce the diversifier study's full-sample figures exactly (50.3\%, 64.2\%,
+46.9\%), confirming the basis.
+
+\section*{The ranking (tested half, annualised, verified)}
+
+\begin{center}
+\begin{tabular}{llrrrrrrr}
+\toprule
+ & & ref TEST & A TEST & B TEST & buys/yr & maxDD & AI $\beta$ & book corr \\
+\midrule
+RKLB & inc & 159.7\% & 12.1\% & 34.3\% & 119 & 40.0\% & 0.79 & 0.94 \\
+VRT  & inc & 157.4\% & 63.3\% & 50.0\% &  95 & 34.0\% & 1.19 & 0.48 \\
+MU   & inc & 148.5\% & 113.4\% & 73.7\% & 84 & 31.7\% & 1.14 & 0.59 \\
+VLO  & $+$ & 137.9\% & 41.2\% & 30.2\% &  49 & 10.7\% & 0.11 & 0.04 \\
+TSM  & inc &  80.7\% & 58.4\% & 76.4\% &  99 & 16.7\% & 0.69 & 0.47 \\
+GM   & $+$ &  56.5\% & 42.7\% & 31.8\% &  56 & 11.3\% & 0.17 & 0.24 \\
+CF   & $+$ &  54.7\% & 52.9\% & 42.4\% &  31 & 17.4\% & $-0.01$ & $-0.01$ \\
+AVGO & $+$ &  53.7\% & 21.7\% & 35.2\% &  60 & 22.5\% & 0.74 & 0.31 \\
+NVDA & $+$ &  46.9\% & 49.0\% & 28.3\% &  38 & 12.4\% & 0.70 & 0.43 \\
+VST  & inc &  46.2\% & 25.4\% & 32.6\% &  80 & 16.3\% & 0.98 & 0.35 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Book effect of the additions (held construction, common calendar):
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+ & full \%/yr & full maxDD & test \%/yr & test maxDD \\
+\midrule
+five (current)        & 84.8\% & 39.3\% & 122.4\% & 29.6\% \\
+eight ($+$GM/VLO/CF)  & 71.4\% & 29.7\% & 101.9\% & 20.1\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Jan--Apr 2025 stress (the one AI drawdown in sample): five $-18.7\%$, eight
+$-11.8\%$ on verified strategy equity.
+
+\section*{Decision}
+
+\textbf{Add GM, VLO and CF.} Tested 55--138\% with AI beta 0.0--0.17, book
+correlation 0.0--0.24 and single-name drawdowns of 11--17\% against the incumbents'
+17--40\%. The additions cost about 13pp of book return and buy 10pp of drawdown and
+a third off the stress loss --- the same trade the June study measured, now confirmed
+on the verified single-split instrument. CF deserves note as the most robust name in
+the entire table: its train-only fits (52.9\%, 42.4\%) sit within a few points of its
+full-sample reference (54.7\%) --- the only name where fresh fitting transports ---
+and it is the one true zero-beta name.
+
+\textbf{Do not add NVDA or AVGO to the daily book.} Under the daily model they earn
+47--54\% tested --- below every incumbent except VST --- while carrying AI betas of
+0.70--0.74 and book correlations of 0.3--0.4: incumbent-grade concentration at
+below-incumbent returns. They also already hold the weekly sleeve, so daily
+admission would double exposure to the two names rather than diversify anything.
+They stay where they are.
+
+\textbf{VST is the weakest slot in the book.} Lowest tested return (46.2\%), highest
+AI beta (0.98), and its fresh fits collapse (25--33\%). Nothing here requires
+removing it, but if the eight-name allocation ever needs a funding source or the
+book needs to shed a name, VST is the candidate --- flagged, not actioned.
+
+\textbf{Planning figures} stay at the June levels --- GM 33\%, VLO 35\%, CF 41\% ---
+which the new tested numbers are consistent with. VLO's 137.9\% tested half is one
+energy rally (its train half earned 11.5\%) and must not be planned on.
+
+Weights on admission: eight names at 12.5\% each, floor and cap both 0.125, per the
+open implementation item in the handover.
+
+Reproduction: \texttt{premarket\_study/fresh\_opt\_cands.py} (candidate sweep),
+\texttt{rank\_book.py} (this table); derived data untracked.
+
+\end{document}
