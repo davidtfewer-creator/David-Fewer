@@ -13,6 +13,7 @@
 \usepackage[most]{tcolorbox}
 \usepackage{titlesec}
 \usepackage{caption}
+\usepackage{graphicx}
 
 \definecolor{bcnavy}{RGB}{24,38,68}
 \definecolor{bcgold}{RGB}{198,160,74}
@@ -31,14 +32,7 @@
 \begin{titlepage}
 \centering
 \vspace*{3.2cm}
-\begin{tikzpicture}
-  \fill[bcnavy] (0,0) rectangle (5,5);
-  \node[bcgold] at (2.42,2.95)
-    {\fontsize{44}{44}\selectfont\rmfamily B\hspace{-0.45em}\raisebox{-0.28ex}{C}};
-  \node[bcgold] at (2.5,1.35)
-    {\footnotesize\rmfamily\textls{BAYESIAN CAPITAL}};
-  \fill[bcgold] (2.5,0.95) circle (0.035);
-\end{tikzpicture}
+\includegraphics[width=5cm]{bc_logo.png}
 
 \vspace{1.6cm}
 {\color{bcnavy}\rule{7cm}{0.6pt}}
