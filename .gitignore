@@ -33,3 +33,7 @@ premarket_study/rolling_mle.csv
 premarket_study/data_5min/
 premarket_study/fresh_opt_results.json
 premarket_study/fresh_opt_run.log
+premarket_study/fresh_opt_results.json
+premarket_study/fresh_opt_cands.json
+premarket_study/fresh_opt_cands.log
+premarket_study/rank_book.json
