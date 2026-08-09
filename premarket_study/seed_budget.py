@@ -54,7 +54,12 @@ import ramp_premium as R
 from engine import Params
 from optimise_candidates import NAMES as PNAMES, POLICY
 
-TARGETS = ('TSM', 'VRT', 'RKLB')
+# Names are an argument so the study can be run narrow and fast first. The question here is
+# about the OPTIMISER, not about any particular stock, so one well-behaved name answers it: if
+# budget does not tame the spread on an easy objective it will not tame it on a hard one.
+# TSM is that name -- compliant deployed vector, 4/4 positive windows, no all-time-high-breach
+# complication -- and its 32.1pp spread is one of the numbers that invalidated the rankings.
+TARGETS = tuple(sys.argv[2].split(',')) if len(sys.argv) > 2 else ('TSM',)
 SEEDS = (42, 7, 123, 2024, 999)
 BUDGETS = (('B1 maxiter6 pop6', 6, 6),
            ('B2 maxiter20 pop12', 20, 12),
