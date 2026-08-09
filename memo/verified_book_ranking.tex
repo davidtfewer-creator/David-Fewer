@@ -181,7 +181,7 @@ from the train half only.
 \begin{center}
 \begin{tabular}{llrrrcrrrrr}
 \toprule
- & & ref TEST & A & B & planned range & plan & trades/yr & maxDD & AI $\beta$ & corr \\
+ & & ref TEST & A & B & observed range & full & trades/yr & maxDD & AI $\beta$ & corr \\
 \midrule
 RKLB & inc & 159.7\% & 12.1\% & 34.3\% & 156--160\% & 161\% & 118 & 40.0\% & 0.79 & 0.94 \\
 VRT  & inc & 157.4\% & 63.3\% & 50.0\% & $-5$--157\% & 58\% & 74 & 34.0\% & 1.19 & 0.48 \\
@@ -201,19 +201,21 @@ VST  & inc &  46.2\% & 25.4\% & 32.6\% & 46--53\% & 50\% & 78 & 16.3\% & 0.98 & 
 \tabnote{All columns on verified fills. \textbf{ref TEST}: the
 full-sample-provenance vector on the tested half --- the same lookahead flavour for
 all ten, so mutually comparable. \textbf{A / B}: the train-only fits on the tested
-half, genuinely out of sample. \textbf{Planned range}: the reference vector's
+half, genuinely out of sample. \textbf{Observed range}: the reference vector's
 verified return on the two disjoint halves --- the train half contains the crash,
 the test half the bull run --- bracketing what a regime does to the name;
-\textbf{plan} is the full-sample through-cycle figure. \textbf{trades/yr}: average
-verified buys per year over the full sample. \textbf{corr}: correlation of the
-name's daily strategy returns with the current five-name book, tested half.}
+\textbf{full} is the full-sample through-cycle figure. Both are measurements of a
+full-sample-fitted vector, not planning figures --- see section 7 for what to plan
+on. \textbf{trades/yr}: average verified buys per year over the full sample.
+\textbf{corr}: correlation of the name's daily strategy returns with the current
+five-name book, tested half.}
 
-Where A and B collapse far below the planned range (RKLB 12\%, AVGO 22\%), the
-plan rests on one specific parameter vector that cannot be recovered from half the
-data --- plan on the low end. A wide range (VRT, MU, VLO) means earnings are
-regime-driven: any single year lands anywhere inside it. GM and CF are the most
-\emph{plannable} names in the table --- the narrowest honest ranges relative to
-their plans, and effectively zero beta. CF is the only name whose fresh fits
+Where A and B collapse far below the observed range (RKLB 12\%, AVGO 22\%), the
+name's earnings rest on one specific parameter vector that cannot be recovered
+from half the data --- plan on the low end. A wide range (VRT, MU, VLO) means
+earnings are regime-driven: any single year lands anywhere inside it. GM and CF
+are the most \emph{plannable} names in the table --- the narrowest ranges relative
+to their through-cycle figures, and effectively zero beta. CF is the only name whose fresh fits
 transport (52.9\%/42.4\% against a 54.7\% reference).
 
 \begin{center}
@@ -274,7 +276,7 @@ stress loss --- the trade the June study measured, confirmed here on the verifie
 instrument.
 
 \textbf{Decline NVDA and AVGO} (judged purely on the numbers --- the weekly book
-has been withdrawn). Plans of 40\% and 51\% with AI betas of 0.70--0.74 and book
+has been withdrawn). Through-cycle figures of 40\% and 51\% with AI betas of 0.70--0.74 and book
 correlations of 0.3--0.4: at equal weight a new name takes capital from what it
 dilutes, and these two would lower the book's return without lowering its risk.
 AVGO adds the second-worst fragility check in the table and a reference vector
@@ -296,31 +298,37 @@ and is not to be planned on.
 The book as it stands after admission, all figures on the verified basis:
 
 \begin{center}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
- & plan & trades/yr & AI $\beta$ & corr to five-book \\
+ & full sample & planning & trades/yr & AI $\beta$ & corr to five-book \\
 \midrule
-TSM  &  56\% &  92 & 0.69 & 0.47 \\
-VRT  &  58\% &  74 & 1.19 & 0.48 \\
-VST  &  50\% &  78 & 0.98 & 0.35 \\
-RKLB & 161\% & 118 & 0.79 & 0.94 \\
-MU   &  65\% &  57 & 1.14 & 0.59 \\
-GM   &  50\% &  61 & 0.17 & 0.24 \\
-VLO  &  64\% &  35 & 0.11 & 0.04 \\
-CF   &  47\% &  27 & $-0.01$ & $-0.01$ \\
+TSM  &  56\% &  55\% &  92 & 0.69 & 0.47 \\
+VRT  &  58\% &  65\% &  74 & 1.19 & 0.48 \\
+VST  &  50\% &  60\% &  78 & 0.98 & 0.35 \\
+RKLB & 161\% & 156\% & 118 & 0.79 & 0.94 \\
+MU   &  65\% &  61\% &  57 & 1.14 & 0.59 \\
+GM   &  50\% &  33\% &  61 & 0.17 & 0.24 \\
+VLO  &  64\% &  35\% &  35 & 0.11 & 0.04 \\
+CF   &  47\% &  41\% &  27 & $-0.01$ & $-0.01$ \\
 \midrule
-\textbf{average / total} & \textbf{69\%} & \textbf{542} & \textbf{0.63} & \textbf{0.39} \\
+\textbf{average / total} & \textbf{69\%} & \textbf{63\%} & \textbf{542} & \textbf{0.63} & \textbf{0.39} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\tabnote{Plan is each name's full-sample through-cycle verified return; the average
-is the simple mean --- the held construction (equal capital, compounding
-independently) gives \textbf{71.4\%/yr} for the eight-name book. Trades/yr is the
-average verified buy count per year; the bottom row is the book's \emph{total},
-$\approx$542 fills a year, about 2.2 per session across the sixteen sleeves. Correlations are measured against
-the \emph{current five-name} book on the tested half, so the incumbents' values
-partly reflect self-correlation; the candidates' values are the clean read.}
+\tabnote{\textbf{Full sample} is the measured through-cycle verified return of the
+deployed/reference vector --- it carries that vector's fit lookahead and is a
+measurement, not a target. \textbf{Planning} is the figure to plan on: for the
+incumbents the established planning basis (full-sample less the measured
+out-of-sample haircut, per the book specification); for the additions the June
+unseen-window medians, which the new tested numbers are consistent with. On
+planning figures the eight-name book runs $\approx$\textbf{63\%/yr}; the measured
+held construction over the sample gives 71.4\%/yr. Trades/yr is the average
+verified buy count per year; the bottom row is the book's \emph{total},
+$\approx$542 fills a year, about 2.2 per session across the sixteen sleeves.
+Correlations are measured against the \emph{current five-name} book on the tested
+half, so the incumbents' values partly reflect self-correlation; the candidates'
+values are the clean read.}
 
 \subsection{The book's weighting to the AI trade after admission}
 
