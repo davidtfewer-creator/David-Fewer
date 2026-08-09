@@ -30,3 +30,5 @@ premarket_study/halfweek_sessions.pkl
 premarket_study/data_mle/
 premarket_study/mle_drift.png
 premarket_study/rolling_mle.csv
+premarket_study/data_5min/
+premarket_study/fresh_opt_results.json
