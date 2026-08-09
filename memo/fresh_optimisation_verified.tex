@@ -1,0 +1,121 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{parskip}
+
+\title{The fresh optimisation on verified fills:\\
+\large the honest baseline, two reduced searches, and the clear position}
+\author{Bayesian Capital}
+\date{9 August 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Setup}
+
+Starting from the top, one blade, no layers. Basis: the live five-name workbook
+(engine mirror-checked to the digit on all five Model sheets --- annual return, buys
+and stops all reproduce), residual OU sigma, and \textbf{verified same-day fills}: a
+same-day round trip is kept only where the 5-minute bars (587 of 591 sessions
+covered; the last four fall back to the provable at-open case) show the low reached
+the bid before the high reached the target. Protocol: fit on the first half only,
+boundary 2025-05-23, freeze, score the second half; the deployed configuration is
+scored frozen on the same slice.
+
+Both searches are smaller and better-posed than the old 10-dimensional one:
+
+\textbf{Variant A (8-dim).} $\lambda$ fixed at 1: the model is \emph{exactly}
+invariant under $(\lambda,\varphi_L,\psi,k) \to (c\lambda,c\varphi_L,c\psi,k/c)$ ---
+confirmed numerically to the sixth decimal --- so the old space carried a pure flat
+direction. ou\_W frozen at deployed, the one parameter that held still between
+halves. Searched: $\varphi_L$ (log scale), $\psi$, $k$, premium, peak cap, and the
+three OU policy knobs.
+
+\textbf{Variant B (6-dim).} The filter $(\lambda,\varphi_L,\psi)$ pinned at its
+maximum-likelihood estimate on the train half only (prices identify it; P\&L does
+not), ou\_W frozen; only the six policy knobs searched.
+
+Objective: the established robust one ($0.5\cdot$base $+\,0.5\cdot$mean of $\pm3\%$
+policy perturbations, minimum-trade floor), computed on the verified train return.
+
+\section*{The honest baseline}
+
+Verified fills roughly third the sheet's numbers (annualised, full sample):
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+ & TSM & VRT & VST & RKLB & MU \\
+\midrule
+sheet Y5            & 145\% & 242\% & 265\% & 525\% & 178\% \\
+\textbf{verified}   & \textbf{56\%} & \textbf{58\%} & \textbf{50\%} & \textbf{161\%} & \textbf{65\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Book, held construction (equal capital, each name compounding independently):
+\textbf{84.8\%/yr} over the full sample; 119.6\%/yr over the tested half alone
+(the second half was the AI bull run).
+
+\section*{The optimisation result: 10 of 10 to frozen deployed}
+
+Tested-half annualised returns, verified fills, all configurations frozen before
+scoring:
+
+\begin{center}
+\begin{tabular}{lrrr|rr}
+\toprule
+ & deployed & A (8-dim) & B (6-dim) & A train & B train \\
+\midrule
+TSM  & \textbf{80.7\%} & 58.4\% & 76.4\% & 51.8\% & 59.6\% \\
+VRT  & \textbf{157.4\%} & 63.3\% & 50.0\% & 63.4\% & 56.3\% \\
+VST  & \textbf{46.2\%} & 25.4\% & 32.6\% & 99.6\% & 85.8\% \\
+RKLB & \textbf{159.7\%} & 12.1\% & 34.3\% & 289.2\% & 259.0\% \\
+MU   & \textbf{148.5\%} & 113.4\% & 73.7\% & 31.8\% & 33.9\% \\
+\midrule
+book & \textbf{119.6\%} & 55.4\% & 53.6\% & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The fitted-to-tested collapses are not subtle: RKLB's fresh 8-dim fit turns 289\%
+on train into 12\% tested; VST's turns 100\% into 25\%. Removing the exact
+degeneracy, freezing ou\_W, pinning the filter by likelihood, and computing the
+objective on verified fills --- every methodological improvement available --- did
+not change the outcome by one name.
+
+\section*{Reading it honestly}
+
+The deployed configuration was fitted on the full sample, so its tested-half score
+contains lookahead; its margin over A and B is \emph{not} evidence that deployed is
+optimal. The operative finding is the other direction: \textbf{a fresh parameter
+search, on the honest objective, in well-posed reduced spaces, does not transport
+out of sample on a single name.} Combined with the rolling-MLE result (the price
+process is homogeneous across the sample --- there is no drift for refitting to
+track) and the 40-fold historical record, three independent lines of evidence now
+say the same thing.
+
+\section*{The clear position}
+
+\begin{enumerate}
+  \item \textbf{Plan on the verified numbers}: name-level 50--65\% (RKLB 161\%),
+        book $\approx$ 85\%/yr before any out-of-sample haircut. The sheet's cells
+        overstate by roughly $3\times$ and should not be quoted.
+  \item \textbf{Keep the deployed parameter vector. Stop searching for a better
+        one.} The expected gain from any further parameter optimisation is
+        approximately zero and the downside (a VST- or RKLB-style mirage going
+        live) is real.
+  \item \textbf{Future effort goes to structure, not parameters} --- specification
+        changes are the only category that has ever survived this blade (residual
+        sigma $+7$ to $+13$pp; the 50/50 split). Candidates: sizing or buffers
+        conditioned on the OU residual-sigma level, and the still-unimplemented
+        GM/VLO/CF diversification.
+\end{enumerate}
+
+Reproduction: \texttt{premarket\_study/fresh\_opt.py} (protocol and both variants),
+\texttt{live5\_load.py} (workbook loader and mirror check),
+\texttt{minute\_index.py} (5-minute fill checker); results in
+\texttt{fresh\_opt\_results.json} (untracked, derived).
+
+\end{document}
