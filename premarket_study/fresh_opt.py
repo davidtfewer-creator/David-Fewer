@@ -171,10 +171,9 @@ def main(only=None):
                         test=annualise(b_te, dts, telo, tehi), buys_test=b_b,
                         vec=list(rB.x), mle=[float(x) for x in mle])
         results[s] = res
-
-    with open('fresh_opt_results.json', 'w') as fh:
-        json.dump(results, fh, indent=1, default=str)
-    print('\nwrote fresh_opt_results.json', flush=True)
+        with open('fresh_opt_results.json', 'w') as fh:      # incremental: survive kills
+            json.dump(results, fh, indent=1, default=str)
+        print(f'  wrote fresh_opt_results.json ({len(results)} names)', flush=True)
 
     print(f'\n{"name":6s}{"deployed TEST":>14s}{"A TEST":>10s}{"B TEST":>10s}', flush=True)
     for s, r in results.items():
