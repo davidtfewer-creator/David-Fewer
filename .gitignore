@@ -37,3 +37,5 @@ premarket_study/fresh_opt_results.json
 premarket_study/fresh_opt_cands.json
 premarket_study/fresh_opt_cands.log
 premarket_study/rank_book.json
+website/node_modules/
+website/package*.json
