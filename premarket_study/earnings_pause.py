@@ -55,6 +55,10 @@ EARNINGS = {
              '2025-08-07', '2025-11-10', '2026-02-26', '2026-05-07', '2026-08-10'],
     'MU':   ['2024-06-26', '2024-09-25', '2024-12-18', '2025-03-20', '2025-06-25',
              '2025-09-23', '2025-12-17', '2026-03-18', '2026-06-24'],
+    'TSLA': ['2024-04-23', '2024-07-23', '2024-10-23', '2025-01-29', '2025-04-22',
+             '2025-07-23', '2025-10-22', '2026-01-28', '2026-04-22', '2026-07-22'],
+    'AVGO': ['2024-06-12', '2024-09-05', '2024-12-12', '2025-03-06', '2025-06-05',
+             '2025-09-04', '2025-12-11', '2026-03-04', '2026-06-03'],
 }
 
 
@@ -68,6 +72,13 @@ def load_params(stock):
     if stock in STOCKS:
         _, params, _ = load_book()
         return params[stock]
+    from fresh_opt_cands import aw_params
+    t0 = Params(capital=1_000_000, comm=0.005, interest=0.0314, stop_days=50,
+                bayes_pct=0.5, years=2.2, ou_W=80)
+    if stock == 'AVGO':   # reference fitted in the candidate sweep (full-sample, flagged)
+        return aw_params(json.load(open('fresh_opt_cands.json'))['AVGO']['reference']['vec'], t0)
+    if stock == 'TSLA':   # reference fitted for this study (full-sample, flagged)
+        return aw_params(json.load(open('tsla_reference.json'))['vec'], t0)
     raise ValueError(stock)
 
 
