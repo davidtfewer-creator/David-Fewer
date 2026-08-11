@@ -56,7 +56,7 @@ class Result:
 def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_signal=None, ou_anchor=None, open_cap=None,
               bayes_gain=0.0, collect=False, same_day_exit=True,
-              cc_up=None, cc_down=None) -> Result:
+              cc_up=None, cc_down=None, no_buy=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -64,6 +64,9 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
       open_cap[i]    -> value used as the O_t cap in BOTH bids (default O[i], the true open)
       ou_anchor[i]   -> 'current price' fed to the OU forecast (default C[i-1], prev close)
       bayes_signal[i]-> reserved for the Bayes leg experiment (extra Kalman obs); unused in baseline
+      no_buy[i]      -> truthy suppresses NEW entries on row i for both tranches (the
+                        morning bid is not placed); resting exits, targets and stops
+                        run unchanged. Used for the earnings-pause study.
 
     Pass None to use the baseline; pass a list to override per row.
     """
@@ -159,6 +162,13 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         anchor = C[i - 1] if ou_anchor is None else ou_anchor[i]
         OUf[i] = OUmean[i] + OUar[i] * (anchor - OUmean[i])
         AM[i] = min(OUf[i] - p.ou_buf_k * OUsig[i], oc(i), G[i - 1] * (1 - p.ou_cap))
+
+    # --- pause hook: no new entries on flagged rows (exits unaffected) ---
+    if no_buy is not None:
+        for i in range(N):
+            if no_buy[i]:
+                X[i] = None
+                AM[i] = None
 
     # --- month-end flags (AO): 1 if last row or month changes next row ---
     AO = [0] * N
