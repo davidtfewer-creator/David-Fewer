@@ -38,9 +38,23 @@ from fresh_opt_cands import daily_from_5min
 from fresh_opt import SPLIT, annualise
 from minute_index import make_checker
 
+# Report dates verified against company filings/IR pages and the price data's gap
+# signature; pre-market reporters (TSM, VRT, VST) gap on the report day, after-close
+# reporters (NVDA, RKLB, MU) on the next session. Week-granular windows make a
+# one-day dating error immaterial.
 EARNINGS = {
     'NVDA': ['2024-05-22', '2024-08-28', '2024-11-20', '2025-02-26', '2025-05-28',
              '2025-08-27', '2025-11-19', '2026-02-25', '2026-05-20'],
+    'TSM':  ['2024-04-18', '2024-07-18', '2024-10-17', '2025-01-16', '2025-04-17',
+             '2025-07-17', '2025-10-16', '2026-01-15', '2026-04-16', '2026-07-16'],
+    'VRT':  ['2024-04-24', '2024-07-24', '2024-10-23', '2025-02-12', '2025-04-23',
+             '2025-07-30', '2025-10-22', '2026-02-11', '2026-04-22', '2026-07-29'],
+    'VST':  ['2024-05-07', '2024-08-08', '2024-11-07', '2025-02-27', '2025-05-06',
+             '2025-08-07', '2025-11-06', '2026-02-26', '2026-05-07', '2026-08-06'],
+    'RKLB': ['2024-05-06', '2024-08-08', '2024-11-12', '2025-02-27', '2025-05-08',
+             '2025-08-07', '2025-11-10', '2026-02-26', '2026-05-07', '2026-08-10'],
+    'MU':   ['2024-06-26', '2024-09-25', '2024-12-18', '2025-03-20', '2025-06-25',
+             '2025-09-23', '2025-12-17', '2026-03-18', '2026-06-24'],
 }
 
 
@@ -50,6 +64,10 @@ def load_params(stock):
         d['ou_W'] = int(round(d['ou_W']))
         return Params(capital=1_000_000, comm=0.005, interest=0.0314, stop_days=50,
                       bayes_pct=0.5, years=2.2, **d)
+    from live5_load import load as load_book, STOCKS
+    if stock in STOCKS:
+        _, params, _ = load_book()
+        return params[stock]
     raise ValueError(stock)
 
 
