@@ -46,19 +46,22 @@ INTEREST = 0.0314
 STOP_DAYS = 50
 
 
-def load_all(engine_kwargs_per_name=None):
-    """Per-name data, params, engine bid series, checkers -- on a common calendar."""
+def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
+    """Per-name data, params, engine bid series, checkers -- on a common calendar.
+    names: book composition override; params_override: dict name -> Params for
+    names outside the standard REF table (e.g. candidate reference vectors)."""
     book_data, book_params, _ = load_book()
     ek = engine_kwargs_per_name or {}
+    po = params_override or {}
     data, sleeves = {}, []
     common = None
-    for s in NAMES:
+    for s in (names or NAMES):
         if s in BOOK:
             dts, O, H, L, C = book_data[s]
             p = book_params[s]
         else:
             dts, O, H, L, C = daily_from_5min(s)
-            p = ref_params(s)
+            p = po.get(s) or ref_params(s)
         data[s] = dict(dts=dts, O=O, H=H, L=L, C=C, p=p,
                        idx={d: i for i, d in enumerate(dts)},
                        chk=make_checker(s, dts, O))
@@ -68,7 +71,7 @@ def load_all(engine_kwargs_per_name=None):
         data[s]['AM'] = r.frames['AM']
         common = set(dts) if common is None else (common & set(dts))
     cal = sorted(common)
-    for s in NAMES:
+    for s in (names or NAMES):
         p = data[s]['p']
         sleeves.append(dict(name=s, kind='B', bids='X', prem=p.premium))
         sleeves.append(dict(name=s, kind='O', bids='AM', prem=p.ou_prem))
