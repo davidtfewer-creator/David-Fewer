@@ -76,12 +76,21 @@ def load_all(engine_kwargs_per_name=None):
 
 
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
-             no_buy=None, collect_trades=False):
-    """no_buy: dict name -> set of dates with entries suppressed (both sleeves)."""
+             no_buy=None, collect_trades=False, weights=None, cap_frac=None,
+             date_lo=None, date_hi=None):
+    """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
+    weights: dict name -> relative weight (renormalised over the sleeves free each
+    morning; equal when None). cap_frac: max fraction of the pool one sleeve may
+    take in a morning (None = uncapped, the deployed behaviour). date_lo/date_hi
+    restrict the simulated window (policy fitting on one half)."""
+    if date_lo is not None or date_hi is not None:
+        cal = [d for d in cal
+               if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
     n = len(sleeves)
     for s in sleeves:
         s.update(holding=False, shares=0.0, target=None, entry=None,
-                 own=capital / n)
+                 own=capital / n,
+                 w=(weights or {}).get(s['name'], 1.0))
     cash = capital
     equity_curve = []
     trades = []
@@ -114,8 +123,13 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if s['_bid'] is not None:
                     active.append(s)
         free_days += len(active)
-        if mode == 'pooled':
-            alloc = (cash / len(active)) if active else 0.0
+        if mode == 'pooled' and active:
+            wsum = sum(s['w'] for s in active)
+            for s in active:
+                a = cash * s['w'] / wsum
+                if cap_frac is not None:
+                    a = min(a, cap_frac * cash)
+                s['_alloc'] = a
 
         # -------- exits on positions held from before today
         for s in sleeves:
@@ -151,7 +165,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             bid = s['_bid']
             if nd['L'][i] > bid + 1e-12:
                 continue
-            budget = alloc if mode == 'pooled' else s['own']
+            budget = s['_alloc'] if mode == 'pooled' else s['own']
             if budget <= 0:
                 continue
             shares = budget / (bid + COMM)
@@ -187,7 +201,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
 
     eq = equity_curve
     N = len(cal)
-    cut = next(i for i, d in enumerate(cal) if d >= SPLIT)
+    cut = next((i for i, d in enumerate(cal) if d >= SPLIT), N - 1)
+    cut = max(cut, 1)
     peak, dd = -1e30, 0.0
     for e in eq:
         peak = max(peak, e)
