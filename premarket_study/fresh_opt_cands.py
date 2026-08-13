@@ -53,6 +53,10 @@ REF = {
                  ou_buf_k=0.7432317834252365, ou_prem=0.03737698844908682,
                  ou_cap=0.023213731637427307, ou_W=48),
     'AVGO': None,   # fitted on the full sample below
+    'AMD':  None,   # Aug 2026 AI-candidate round: references fitted here, flagged
+    'MRVL': None,
+    'SMCI': None,
+    'CEG':  None,
 }
 
 AW_BOUNDS = A_BOUNDS + [(30, 150)]              # + ou_W
