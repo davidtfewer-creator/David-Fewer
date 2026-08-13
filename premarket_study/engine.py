@@ -56,7 +56,8 @@ class Result:
 def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_signal=None, ou_anchor=None, open_cap=None,
               bayes_gain=0.0, collect=False, same_day_exit=True,
-              cc_up=None, cc_down=None, no_buy=None) -> Result:
+              cc_up=None, cc_down=None, no_buy=None,
+              cap_on_target=False, ath_target_guard=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -67,6 +68,17 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
       no_buy[i]      -> truthy suppresses NEW entries on row i for both tranches (the
                         morning bid is not placed); resting exits, targets and stops
                         run unchanged. Used for the earnings-pause study.
+      cap_on_target  -> True moves the peak cap from the BUY to the SALE: the bid is
+                        capped at ATH*(1-cap) - prevclose*premium so the take-profit
+                        target itself sits at least `cap` below the running peak. The
+                        default False reproduces the deployed behaviour (cap on the
+                        bid), under which a sleeve with premium > cap can construct
+                        trades whose exit requires a new all-time high.
+      ath_target_guard -> float eps: a SECOND, targeted constraint on top of the
+                        deployed buy cap: bid <= ATH*(1-eps) - prevclose*premium, so
+                        no trade is ever constructed whose exit needs a print above
+                        ATH*(1-eps). Unlike cap_on_target it leaves every non-trap
+                        bid untouched. None (default) disables it.
 
     Pass None to use the baseline; pass a list to override per row.
     """
@@ -116,7 +128,12 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         fair = Lvl[i - 1] + Slp[i - 1]
         if bayes_signal is not None and bayes_signal[i] is not None:
             fair = fair + bayes_gain * (bayes_signal[i] - fair)
-        X[i] = min(fair - p.k * W[i - 1], oc(i), G[i - 1] * (1 - p.peak_cap))
+        capX = G[i - 1] * (1 - p.peak_cap)
+        if cap_on_target:
+            capX -= C[i - 1] * p.premium
+        if ath_target_guard is not None:
+            capX = min(capX, G[i - 1] * (1 - ath_target_guard) - C[i - 1] * p.premium)
+        X[i] = min(fair - p.k * W[i - 1], oc(i), capX)
 
     # --- OU machinery + bid AM (row>=W) ---
     OUmean = [None] * N; OUar = [None] * N; OUsig = [None] * N; OUf = [None] * N
@@ -161,7 +178,12 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             raise ValueError(ou_sigma)
         anchor = C[i - 1] if ou_anchor is None else ou_anchor[i]
         OUf[i] = OUmean[i] + OUar[i] * (anchor - OUmean[i])
-        AM[i] = min(OUf[i] - p.ou_buf_k * OUsig[i], oc(i), G[i - 1] * (1 - p.ou_cap))
+        capM = G[i - 1] * (1 - p.ou_cap)
+        if cap_on_target:
+            capM -= C[i - 1] * p.ou_prem
+        if ath_target_guard is not None:
+            capM = min(capM, G[i - 1] * (1 - ath_target_guard) - C[i - 1] * p.ou_prem)
+        AM[i] = min(OUf[i] - p.ou_buf_k * OUsig[i], oc(i), capM)
 
     # --- pause hook: no new entries on flagged rows (exits unaffected) ---
     if no_buy is not None:
