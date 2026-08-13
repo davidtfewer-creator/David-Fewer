@@ -41,3 +41,4 @@ website/node_modules/
 website/package*.json
 premarket_study/weekly_12m.json
 premarket_study/weekly_12m.png
+premarket_study/weekly_realised_12m.json

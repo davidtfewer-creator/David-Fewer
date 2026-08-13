@@ -153,6 +153,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
                                        entry=s['entry'], exit=d,
+                                       pnl=proceeds - s['cost'],
                                        stopped=(px < s['target'] - 1e-12)))
                 s.update(holding=False, shares=0.0, target=None, entry=None)
 
@@ -185,9 +186,11 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     s['own'] = proceeds
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
-                                       entry=d, exit=d, stopped=False))
+                                       entry=d, exit=d, pnl=proceeds - cost,
+                                       stopped=False))
             else:
-                s.update(holding=True, shares=shares, target=target, entry=d)
+                s.update(holding=True, shares=shares, target=target, entry=d,
+                         cost=cost)
 
         # -------- mark to market
         mv = 0.0
