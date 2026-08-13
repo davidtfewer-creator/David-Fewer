@@ -146,7 +146,7 @@ def main(only=None):
                                  lambda v: aw_params(v, t0), A_POLICY)
             rr = de(obj, AW_BOUNDS)
             t = aw_params(rr.x, t0)
-            print(f'  AVGO reference fitted full-sample (flagged): '
+            print(f'  {s} reference fitted full-sample (flagged): '
                   f'phi_L {t.phi_L:.3f} psi {t.psi:.4f} k {t.k:.3f} ou_W {t.ou_W}',
                   flush=True)
         else:
