@@ -39,3 +39,5 @@ premarket_study/fresh_opt_cands.log
 premarket_study/rank_book.json
 website/node_modules/
 website/package*.json
+premarket_study/weekly_12m.json
+premarket_study/weekly_12m.png
