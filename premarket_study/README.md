@@ -376,3 +376,28 @@ heuristic wins **5/9**; means heuristic **50.1%** vs BO refit **42.8%** vs BO de
 - TSM is the reverse rarity: the refit BO (92%) beats both the heuristic (86%) and deployed (74%).
 - Decision-relevant comparison stays deployed-vs-heuristic (what runs is the full-sample vector,
   which transports; see the sleeve-replacement table): incumbent 6/9 and +39pp aggregate.
+
+## TSM walk-forward: the swap candidate confirmed on folds (`heuristic_wf_tsm.py`)
+
+Three expanding folds, heuristic refit on train only and scored frozen OOS, deployed Bayes/OU
+sleeves as the bar (full-sample vectors — flattered), 50/50 pairings held-construction, at-open:
+
+| fold | test window | heur refit | heur frozen | Bayes | OU | B+OU | B+heur | delta |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 2025-06-06 → 2025-10-27 | 83.9% | 125.4% | 84.1% | 51.8% | 67.4% | 84.0% | +16.6 |
+| 2 | 2025-10-28 → 2026-03-20 | 15.0% | 15.1% | 35.2% | 0.7% | 17.2% | 24.8% | +7.7 |
+| 3 | 2026-03-23 → 2026-08-13 | 112.5% | 114.6% | 173.4% | 64.0% | 114.5% | 141.8% | +27.3 |
+
+- **Bayes+heuristic beats the deployed Bayes+OU in 3/3 folds** (+7.7 to +27.3pp), with equal or
+  lower fold drawdown, against an incumbent whose parameters saw every test slice.
+- **The mechanism is consistent, not one lucky fold**: TSM's OU sleeve is the weak leg in every
+  fold (52%, 0.7%, 64% vs Bayes 84%, 35%, 173%), and the heuristic correlates less with Bayes
+  (0.54–0.66) than OU does (0.73–0.84) — it replaces a weak, redundant sleeve with a stronger,
+  more independent one on this name.
+- **The frozen first-half heuristic vector matches or beats the per-fold refit** (125 vs 84 in
+  fold 1) — freeze it; do not re-optimise. The refit vectors barely move (w≈1, prem≈0.04) except
+  ρ (+8.6 → −1.8) with little effect on outcome: the optimum is broad.
+- Standing caveats: nested folds are not independent evidence; TSM was selected post-hoc from
+  nine names (multiple comparisons), and fills at TSM's open are self-verifying so the result is
+  phantom-free. If deployed: swap OU → heuristic on TSM only, frozen first-half vector
+  (w 0.9557, a 1.0440, ρ 7.2990, π 0.0400, c 0.0278).
