@@ -158,6 +158,26 @@ forecast accuracy; it is monetising the range's contemporaneous link to next-day
 Scripts: `har_rv.py`, `har_study.py`; engine hooks `F_series` / `ou_sigma='series'` (mirror
 re-verified exact after the change).
 
+### 3.11 Volatility-regime gate: rejected — the model is a stress harvester
+A 2-state Gaussian HMM on log realised vol (train-half EM fit, strictly ex-ante forward-filter
+probabilities) was used to gate entries on top of the deployed configuration: PAUSE (no entries
+when P(stressed) > tau) and SCALE (buffers x (1 + gamma*P)), grids chosen on train, frozen, scored
+on the tested half. Verdict on all nine names:
+- **The diagnostic kills the premise**: stressed-regime entries are the *better* trades in 8 of 9
+  names (e.g. MU +2.56% vs +1.67% calm, MRVL +3.48% vs +1.87%, CF +3.95% vs +2.37%) and carry
+  *fewer* stops. The book's edge is buying panic dips; the stressed state is where it gets paid.
+- PAUSE never wins: train picks the do-nothing cell in 5/9 names, and where it pauses anything the
+  tested half is butchered (MRVL 191->77, RKLB 160->103, CF 55->11).
+- SCALE is net negative (7/9 lose) and the two small winners want *opposite* gammas (RKLB +0.3,
+  VLO -0.3) — noise, not signal.
+Together with §3.10 this closes the "smooth statistical overlay" family: HAR sigma, regime gates
+and calendar pauses (except MU's post-report case, which is directional-information-driven, not
+vol-driven) all fail because volatility spikes are the product, not the hazard. CAVEAT: every
+stressed episode in this sample mean-reverted inside a bull market; this result says nothing about
+a genuine bear regime, where the same trades could be the killers. Bear protection remains a
+judgement call, not a backtestable rule (§3.1 sample limits). Scripts: `regime_gate.py`; engine
+hook `k_mult` (mirror re-verified exact).
+
 ---
 
 ## 4. Live workbook state and known issues
