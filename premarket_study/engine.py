@@ -58,7 +58,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_gain=0.0, collect=False, same_day_exit=True,
               cc_up=None, cc_down=None, no_buy=None,
               cap_on_target=False, ath_target_guard=None,
-              F_series=None, ou_sig_series=None, k_mult=None) -> Result:
+              F_series=None, ou_sig_series=None, k_mult=None,
+              prem_mult=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -90,6 +91,13 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
       k_mult[i]      -> per-row multiplier on BOTH bid buffers (k and ou_buf_k) at
                         bid formation: >1 bids deeper, <1 bids closer. None rows
                         mean 1. Used by the regime-gate study.
+      prem_mult      -> (mult_bayes, mult_ou): per-row multipliers on the take-profit
+                        premium, applied on the FILL row (the resting target keeps
+                        the fill-day value, as deployed). None rows mean 1. Bids are
+                        untouched — only the sell target moves. Used by the
+                        vol-scaled-premium study. NOTE: cap_on_target /
+                        ath_target_guard cap arithmetic still assumes the fixed
+                        premium; do not combine.
 
     Pass None to use the baseline; pass a list to override per row.
     """
@@ -216,7 +224,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             AO[i] = 1
     AN = [1] + [(dates[i] - dates[i - 1]).days for i in range(1, N)]
 
-    def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None):
+    def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None,
+                    pm=None):
         # cc_up / cc_down: close-conditional premium. On the fill day the target is the usual
         # bid + prevclose*prem. At that day's CLOSE we observe where the stock finished relative
         # to the fill and amend the resting sell for the following days: multiply the premium by
@@ -246,7 +255,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             Z[i] = 1 if (AE[i - 1] == 0 and bp is not None and L[i] <= bp) else 0
             AA[i] = (Y[i] / (bp + p.comm)) if Z[i] == 1 else (AA[i - 1] if AE[i - 1] == 1 else 0.0)
             if Z[i] == 1:
-                buy_px = bp; prem_amt = C[i - 1] * prem
+                buy_px = bp
+                prem_amt = C[i - 1] * prem * (1.0 if (pm is None or pm[i] is None) else pm[i])
                 AB[i] = bp + prem_amt
                 adjusted = not cc                      # pending amendment at tonight's close
             elif AE[i - 1] == 1:
@@ -294,10 +304,11 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         return dict(Y=Y, AA=AA, AB=AB, AC=AC, AD=AD, AE=AE, Z=Z, AV=AV, stops=stops,
                     interest=sum(AQ), AP=AP, AQ=AQ, AO=AO, AN=AN)
 
+    pm_b, pm_o = prem_mult if prem_mult is not None else (None, None)
     t1 = run_tranche(X,  p.premium, p.capital * p.bayes_pct,        interest_start=1,
-                     cc_up=cc_up, cc_down=cc_down)
+                     cc_up=cc_up, cc_down=cc_down, pm=pm_b)
     t2 = run_tranche(AM, p.ou_prem, p.capital * (1 - p.bayes_pct),  interest_start=2,
-                     cc_up=cc_up, cc_down=cc_down)
+                     cc_up=cc_up, cc_down=cc_down, pm=pm_o)
 
     fY = t1['Y'][-1]; fAF = t2['Y'][-1]
     terminal = fY + fAF
