@@ -123,7 +123,7 @@ def incumbent(data, lo, hi):
     dts, O, H, L, C, p = data
     out = {}
     for sd, tag in ((True, 'sdY'), ('at_open', 'open'), (False, 'sdN')):
-        r = run_model(dts, O, H, L, C, p, collect=True, same_day_exit=sd)
+        r = run_model(dts, O, H, L, C, p, ou_sigma='resid', collect=True, same_day_exit=sd)
         eq = r.frames['equity']
         buys = sum(r.frames['t1']['Z'][lo:hi + 1]) + sum(r.frames['t2']['Z'][lo:hi + 1])
         out[tag] = (seg_ann(eq, dts, lo, hi), buys, eq)
