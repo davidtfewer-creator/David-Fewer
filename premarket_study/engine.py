@@ -58,7 +58,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_gain=0.0, collect=False, same_day_exit=True,
               cc_up=None, cc_down=None, no_buy=None,
               cap_on_target=False, ath_target_guard=None,
-              F_series=None, ou_sig_series=None) -> Result:
+              F_series=None, ou_sig_series=None, k_mult=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -87,6 +87,9 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         the supplied per-row series (dollar units) instead of being
                         estimated from the window (rows where the series is None
                         fall back to the residual estimate).
+      k_mult[i]      -> per-row multiplier on BOTH bid buffers (k and ou_buf_k) at
+                        bid formation: >1 bids deeper, <1 bids closer. None rows
+                        mean 1. Used by the regime-gate study.
 
     Pass None to use the baseline; pass a list to override per row.
     """
@@ -141,7 +144,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             capX -= C[i - 1] * p.premium
         if ath_target_guard is not None:
             capX = min(capX, G[i - 1] * (1 - ath_target_guard) - C[i - 1] * p.premium)
-        X[i] = min(fair - p.k * W[i - 1], oc(i), capX)
+        km = 1.0 if (k_mult is None or k_mult[i] is None) else k_mult[i]
+        X[i] = min(fair - p.k * km * W[i - 1], oc(i), capX)
 
     # --- OU machinery + bid AM (row>=W) ---
     OUmean = [None] * N; OUar = [None] * N; OUsig = [None] * N; OUf = [None] * N
@@ -195,7 +199,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             capM -= C[i - 1] * p.ou_prem
         if ath_target_guard is not None:
             capM = min(capM, G[i - 1] * (1 - ath_target_guard) - C[i - 1] * p.ou_prem)
-        AM[i] = min(OUf[i] - p.ou_buf_k * OUsig[i], oc(i), capM)
+        km = 1.0 if (k_mult is None or k_mult[i] is None) else k_mult[i]
+        AM[i] = min(OUf[i] - p.ou_buf_k * km * OUsig[i], oc(i), capM)
 
     # --- pause hook: no new entries on flagged rows (exits unaffected) ---
     if no_buy is not None:
