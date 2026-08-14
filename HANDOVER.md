@@ -178,6 +178,26 @@ a genuine bear regime, where the same trades could be the killers. Bear protecti
 judgement call, not a backtestable rule (§3.1 sample limits). Scripts: `regime_gate.py`; engine
 hook `k_mult` (mirror re-verified exact).
 
+### 3.12 Vol-scaled take-profit premium: rejected — the headroom is real but not worth waiting for
+Colleague's suggestion: the buy side is vol-aware (k·σ) while the sell side asks a fixed
+premium — should the premium breathe with σ? Tested with premium × (σ_entry/σ̃_train)^α per sleeve
+(level-preserving at train-median σ, so only the dynamics were on trial; bids and fills identical
+to deployed), α ∈ {0.25..1.0} train-picked and frozen. Result:
+- The **diagnostic half-confirms the intuition**: on the Bayes sleeve, high-σ entries leave more
+  headroom above the fixed target (holding-window high vs target: TSM +1.84% vs +0.72% median,
+  MRVL +3.58% vs +1.41%, GM +1.51% vs +0.69%). The money the colleague suspects is there IS there.
+- But **harvesting it fails**: train picks α=0 (fixed premium) in 7/9 names; the two exceptions
+  are the cautionary tales — RKLB train-picked α=0.75 (+32pp train) and the frozen test collapsed
+  160%→71%, GM picked α=0.25 and lost 2.6pp. Test deltas are negative almost everywhere at
+  every α.
+- Mechanism: high-σ trades at the fixed premium exit FAST (2–6 day median holds). Fattening the
+  target converts quick recycles into multi-day holds; the foregone turnover/compounding (and the
+  occasional slide into stop territory) costs more than the extra premium collects. The fixed
+  premium is not naive — it is a turnover engine, and turnover is where the book's compounding
+  lives.
+Script: `premium_vol.py`; engine hook `prem_mult` (fill-row premium multipliers per sleeve,
+mirror re-verified exact).
+
 ---
 
 ## 4. Live workbook state and known issues
