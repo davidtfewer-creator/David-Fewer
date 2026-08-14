@@ -59,6 +59,8 @@ EARNINGS = {
              '2025-07-23', '2025-10-22', '2026-01-28', '2026-04-22', '2026-07-22'],
     'AVGO': ['2024-06-12', '2024-09-05', '2024-12-12', '2025-03-06', '2025-06-05',
              '2025-09-04', '2025-12-11', '2026-03-04', '2026-06-03'],
+    'MRVL': ['2024-05-30', '2024-08-29', '2024-12-03', '2025-03-05', '2025-05-29',
+             '2025-08-28', '2025-12-02', '2026-03-05', '2026-05-28'],
 }
 
 
@@ -79,6 +81,8 @@ def load_params(stock):
         return aw_params(json.load(open('fresh_opt_cands.json'))['AVGO']['reference']['vec'], t0)
     if stock == 'TSLA':   # reference fitted for this study (full-sample, flagged)
         return aw_params(json.load(open('tsla_reference.json'))['vec'], t0)
+    if stock == 'MRVL':   # admission reference (August 2026 round)
+        return aw_params(json.load(open('fresh_opt_cands.json'))['MRVL']['reference']['vec'], t0)
     raise ValueError(stock)
 
 
