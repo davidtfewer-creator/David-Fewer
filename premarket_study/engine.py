@@ -57,7 +57,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               bayes_signal=None, ou_anchor=None, open_cap=None,
               bayes_gain=0.0, collect=False, same_day_exit=True,
               cc_up=None, cc_down=None, no_buy=None,
-              cap_on_target=False, ath_target_guard=None) -> Result:
+              cap_on_target=False, ath_target_guard=None,
+              F_series=None, ou_sig_series=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -79,6 +80,13 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         no trade is ever constructed whose exit needs a print above
                         ATH*(1-eps). Unlike cap_on_target it leaves every non-trap
                         bid untouched. None (default) disables it.
+      F_series[i]    -> replaces the daily range H-L as the volatility scale feeding
+                        the Kalman noises q_L, q_b, r (dollar units). Used by the
+                        HAR-RV study; None reproduces the deployed range proxy.
+      ou_sigma='series' with ou_sig_series[i] -> the OU buffer sigma is taken from
+                        the supplied per-row series (dollar units) instead of being
+                        estimated from the window (rows where the series is None
+                        fall back to the residual estimate).
 
     Pass None to use the baseline; pass a list to override per row.
     """
@@ -87,7 +95,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         return O[i] if open_cap is None else open_cap[i]
 
     # --- derived series ---
-    F = [H[i] - L[i] for i in range(N)]
+    F = list(F_series) if F_series is not None else [H[i] - L[i] for i in range(N)]
     G = [0.0] * N
     G[0] = H[0]
     for i in range(1, N):
@@ -158,12 +166,16 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             # that measures the trend, not the innovation, so the buffer inflates precisely when
             # the stock is running.
             OUsig[i] = math.sqrt(sum((v - mean_w) ** 2 for v in win) / Wn)   # STDEVP
-        elif ou_sigma == 'resid':
+        elif ou_sigma == 'resid' or (ou_sigma == 'series'
+                                     and (ou_sig_series is None or ou_sig_series[i] is None)):
             # residual of the fitted AR(1): what the reversion model cannot explain
+            # (also the fallback for 'series' rows without a supplied value)
             a = OUar[i]
             e = [win[j] - (mean_w + a * (win[j-1] - mean_w)) for j in range(1, Wn)]
             me = sum(e) / len(e)
             OUsig[i] = math.sqrt(sum((v - me) ** 2 for v in e) / len(e))
+        elif ou_sigma == 'series':
+            OUsig[i] = ou_sig_series[i]
         elif ou_sigma == 'detrend':
             # residual about a linear trend through the window, with the mean re-anchored to the
             # fitted value at the window end rather than the arithmetic average
