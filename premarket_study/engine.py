@@ -59,7 +59,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               cc_up=None, cc_down=None, no_buy=None,
               cap_on_target=False, ath_target_guard=None,
               F_series=None, ou_sig_series=None, k_mult=None,
-              prem_mult=None) -> Result:
+              prem_mult=None, price_stop=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -98,6 +98,13 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         vol-scaled-premium study. NOTE: cap_on_target /
                         ath_target_guard cap arithmetic still assumes the fixed
                         premium; do not combine.
+      price_stop     -> float fraction (e.g. 0.20): a stop-loss at buy_px*(1-frac),
+                        firing whenever the day's low reaches it BEFORE the 50-day
+                        time stop. Fill at the stop level, or at the open if the
+                        session gaps below it. If the take-profit target and the
+                        stop level are both touched in the same session the stop
+                        wins (pessimistic; such sessions are counted in
+                        frames['t*']['ps_ambig']). None (default) disables it.
 
     Pass None to use the baseline; pass a list to override per row.
     """
@@ -233,6 +240,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         # known before the amendment takes effect. None/None reproduces the fixed-premium model.
         cc = cc_up is not None and cc_down is not None
         buy_px = None; prem_amt = None; adjusted = True
+        ps_exits = 0; ps_ambig = 0
         # interest_start: first row index that accrues interest. In the workbook the
         # Bayes fund is initialised at row 8 (accrues from row 9 -> i=1) while the OU
         # fund is initialised one row later at row 9 (AR9=0, accrues from row 10 -> i=2).
@@ -287,10 +295,22 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             else:
                 sd_ok = (Z[i] == 1 and same_day_exit)
             tgt_ok = (AE[i - 1] == 1) or sd_ok
-            AD[i] = 1 if ((tgt_ok and H[i] >= AB[i]) or held) else 0
+            # price stop: level below the CURRENT position's entry; a same-day touch of
+            # the level is provably after the fill (the fill was the first touch of bp)
+            ps_level = (buy_px * (1 - price_stop)
+                        if (price_stop is not None and buy_px is not None
+                            and (AE[i - 1] == 1 or Z[i] == 1)) else None)
+            ps_hit = ps_level is not None and L[i] <= ps_level + 1e-12
+            AD[i] = 1 if ((tgt_ok and H[i] >= AB[i]) or held or ps_hit) else 0
             # actual sale price
             if AD[i] == 1:
-                AC[i] = O[i] if (held and H[i] < AB[i]) else AB[i]
+                if ps_hit:                      # pessimistic: the stop wins ties
+                    ps_exits += 1
+                    if tgt_ok and H[i] >= AB[i]:
+                        ps_ambig += 1
+                    AC[i] = O[i] if O[i] <= ps_level else ps_level
+                else:
+                    AC[i] = O[i] if (held and H[i] < AB[i]) else AB[i]
             else:
                 AC[i] = None
             # hold flag
@@ -302,7 +322,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             AV[i] = dates[i] if Z[i] == 1 else (AV[i - 1] if AE[i - 1] == 1 else None)
         stops = sum(1 for i in range(N) if AD[i] == 1 and AC[i] is not None and AC[i] < AB[i])
         return dict(Y=Y, AA=AA, AB=AB, AC=AC, AD=AD, AE=AE, Z=Z, AV=AV, stops=stops,
-                    interest=sum(AQ), AP=AP, AQ=AQ, AO=AO, AN=AN)
+                    interest=sum(AQ), AP=AP, AQ=AQ, AO=AO, AN=AN,
+                    ps_exits=ps_exits, ps_ambig=ps_ambig)
 
     pm_b, pm_o = prem_mult if prem_mult is not None else (None, None)
     t1 = run_tranche(X,  p.premium, p.capital * p.bayes_pct,        interest_start=1,
