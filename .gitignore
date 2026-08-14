@@ -28,3 +28,4 @@ premarket_study/halfweek_sessions.pkl
 
 # workbook-derived parameter extract (9-stock live)
 premarket_study/params_9stock.json
+premarket_study/heur_symmetric_out.json

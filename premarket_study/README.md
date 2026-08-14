@@ -347,3 +347,32 @@ first-half fit; Bayes/OU on deployed params. Correlations are pairwise daily sle
   −6.2% in Jun–Jul 26; Bayes+heuristic 50/50 **70.3%** / 15.8% / −3.5%; thirds 74.8% / 17.2%;
   heuristic-only 50.0% / 17.3%. The swap costs ~17pp for ~2pp less drawdown; the third-sleeve
   version is pure dilution. Book-level corr(heuristic book, deployed book) = 0.68.
+
+## Like-for-like: both methods refit on the first half only (`heuristic_symmetric.py`)
+
+The last asymmetry removed: Bayes+OU refitted on [0:2025-05-23] under the identical robust
+objective / DE / floor / at-open basis as the heuristic, both frozen, both scored on the same
+unseen second half. Deployed (full-sample) Bayes+OU quoted for reference only — it saw the window.
+
+| | heuristic | BO refit | delta | BO deployed* |
+|---|---|---|---|---|
+| TSM | 85.7% | 92.1% | −6.4 | 73.6% |
+| VRT | 80.2% | 67.5% | +12.8 | 150.4% |
+| VST | 31.2% | 22.6% | +8.7 | 29.3% |
+| RKLB | 0.6% | −6.7% | +7.2 | 31.0% |
+| MU | 137.0% | 52.4% | +84.5 | 135.2% |
+| GM | 37.5% | 38.4% | −1.0 | 40.8% |
+| VLO | 57.1% | 52.3% | +4.8 | 133.8% |
+| CF | 2.2% | 31.8% | −29.6 | 51.9% |
+| MRVL | 19.6% | 35.1% | −15.5 | 152.7% |
+
+heuristic wins **5/9**; means heuristic **50.1%** vs BO refit **42.8%** vs BO deployed 88.7%.
+
+- **On an equal data diet the old heuristic is not worse than Bayes+OU** — it edges the refit
+  on count and mean (5 parameters vs 10: less overfitting surface). The incumbent's real
+  advantage on the tested half is the deployed *parameter vector*, not the methodology —
+  the same §3.1 result as always (refitting BO on half the data costs 88.7 → 42.8).
+- MU is the extreme: heuristic 137% vs refit-BO 52%, and it *ties* the deployed vector (135%).
+- TSM is the reverse rarity: the refit BO (92%) beats both the heuristic (86%) and deployed (74%).
+- Decision-relevant comparison stays deployed-vs-heuristic (what runs is the full-sample vector,
+  which transports; see the sleeve-replacement table): incumbent 6/9 and +39pp aggregate.
