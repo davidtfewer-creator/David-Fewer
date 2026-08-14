@@ -274,3 +274,45 @@ degradation). Return cost modest (−3 to −5pp/slice); **C (gentler depths) do
 trades, least cost. Costs: tail ~−20pp worst slice (B mildest); OU hedge softens to corr ~0.19
 under any geometry (deep rungs fire on big down-days when OU also fires). **Adoptable if
 trade-count/robustness is valued over peak absolute return; recommended config C.**
+
+## The old fixed-parameter heuristic, refit with phantom fills controlled (`heuristic_fixed.py`)
+
+The pre-Bayesian §2 heuristic — `B = min(avg(a·(H+L)/2, w·C_prev) + ρ·log10(R_prev), Open,
+(1−c)·Peak)`, exit at `B + π·C_prev` — modelled with today's tranche accounting
+(`heuristic_engine.py`, validated penny-exact against the engine's Bayes tranche) and optimised
+per the house protocol on the nine-name daily book (fit first half to 2025-05-23 on the at-open
+basis, freeze, score second half). Data/params from the uploaded `TradingExcel_9stock_live.xlsx`.
+
+Tested half, annualised. `sd=Y` = the old phantom-inclusive basis; `at-open` = same-day exits
+only where the fill was at the open (phantom-free, verifiable from daily bars); incumbent =
+deployed Bayes+OU on the same at-open basis (full-sample params, so mildly flattered).
+
+| | heur sd=Y | heur at-open | phantom pp | incumbent | gap | corr |
+|---|---|---|---|---|---|---|
+| TSM | 85.7% | **85.7%** | 0.0 | 73.4% | +12.3 | 0.67 |
+| VRT | 123.6% | **80.3%** | 43.4 | 104.7% | −24.4 | 0.51 |
+| VST | 31.2% | **31.2%** | 0.0 | 33.1% | −1.9 | 0.62 |
+| RKLB | 98.2% | **0.5%** | 97.7 | 12.8% | −12.3 | −0.14 |
+| MU | 186.6% | **136.9%** | 49.6 | 48.1% | +88.8 | 0.78 |
+| GM | 67.7% | **37.3%** | 30.4 | 18.5% | +18.7 | 0.60 |
+| VLO | 69.6% | **57.2%** | 12.4 | 74.3% | −17.1 | 0.45 |
+| CF | 2.3% | **2.2%** | 0.0 | 31.9% | −29.7 | 0.06 |
+| MRVL | 49.8% | **19.6%** | 30.2 | 148.1% | −128.5 | 0.57 |
+
+- **Phantoms were a large part of the heuristic's historical appeal**: on the old basis RKLB's
+  tested 98% is essentially all phantom (collapses to 0.5%), MU carries ~50pp, VRT ~43pp,
+  GM/MRVL ~30pp. Zero on TSM/VST/CF.
+- **Honest aggregate: incumbent 60.5%, heuristic 50.1%; incumbent wins 6/9 names** — and the
+  heuristic's fit is fully out-of-sample while the incumbent's params saw the test window, but
+  also boundary-seeking (ρ pinned at −30 on MU/CF, −27 MRVL) with the usual instability tells
+  (CF 67.7% fit → 2.2% tested; RKLB collapse).
+- **ρ's sign flips per name** (`heuristic_binds.py`): fitted positive on TSM/GM (lifts the raw
+  bid above the open so the open floor binds 69–71% of days — the §3.6 clamp again, and at-open
+  fills make same-day exits self-verifying, hence zero phantom) but the formula genuinely binds
+  76–98% of days on the other seven. The ρ·log10(R) cushion is dollar-scaled and inverts its
+  intended role wherever it fits positive.
+- **MU is the outlier worth remembering**: heuristic 136.9% vs incumbent 48.1% on the tested
+  half at the phantom-free floor, corr 0.78 (same trade stream, better timed here). One name,
+  one window — not evidence to switch.
+- **Minute data would matter only where the sd band is wide and the verdict could swing**:
+  RKLB (0.5–98%) and VRT (80–124%); MU already beats the incumbent at the floor.
