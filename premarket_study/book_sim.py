@@ -80,12 +80,17 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
-             date_lo=None, date_hi=None):
+             date_lo=None, date_hi=None, breaker=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
     take in a morning (None = uncapped, the deployed behaviour). date_lo/date_hi
-    restrict the simulated window (policy fitting on one half)."""
+    restrict the simulated window (policy fitting on one half).
+    breaker: (trip, reset, frac) book-level circuit breaker, pooled mode only:
+    when yesterday's book equity sits more than `trip` below its running peak,
+    every morning allocation is multiplied by `frac` (0 = no new entries; resting
+    exits and stops run unchanged) until the drawdown recovers above `reset`.
+    Decided each morning on yesterday's close equity -- strictly ex ante."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -100,8 +105,21 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     fills = 0
     free_days = 0
     sleeve_days = 0
+    bk_peak, bk_tripped, bk_trips, bk_days = capital, False, 0, 0
     prev_d = cal[0]
     for d in cal:
+        # -------- circuit breaker state, from YESTERDAY's close equity
+        if breaker is not None and equity_curve:
+            trip, reset, _ = breaker
+            eq_prev = equity_curve[-1]
+            bk_peak = max(bk_peak, eq_prev)
+            if not bk_tripped and eq_prev < bk_peak * (1 - trip):
+                bk_tripped = True
+                bk_trips += 1
+            elif bk_tripped and eq_prev > bk_peak * (1 - reset):
+                bk_tripped = False
+            if bk_tripped:
+                bk_days += 1
         # -------- interest on cash (calendar-day gap)
         gap = (d - prev_d).days
         if gap and mode == 'pooled':
@@ -128,8 +146,9 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
         free_days += len(active)
         if mode == 'pooled' and active:
             wsum = sum(s['w'] for s in active)
+            bmul = breaker[2] if (breaker is not None and bk_tripped) else 1.0
             for s in active:
-                a = cash * s['w'] / wsum
+                a = cash * s['w'] / wsum * bmul
                 if cap_frac is not None:
                     a = min(a, cap_frac * cash)
                 s['_alloc'] = a
@@ -220,7 +239,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 test=annualise(eq[-1] / eq[cut] - 1, cal, cut, N - 1),
                 maxdd=dd, fills=fills, fills_per_day=fills / N,
                 cash_frac=free_days / sleeve_days if sleeve_days else 0.0,
-                stops=stops, equity=eq, trades=trades)
+                stops=stops, equity=eq, trades=trades,
+                bk_trips=bk_trips, bk_days=bk_days)
 
 
 def report(label, r):
