@@ -140,6 +140,24 @@ the dynamics. Anchor *mixing*, however, lowers the neighbourhood median — do n
 Book drawdown is 39–40% at *every* Bayes/OU split. The sleeve is kept because it earns (88% vs
 Bayes 71%), not because it hedges.
 
+### 3.10 HAR-RV sigma: better forecasts, no better P&L — rejected
+The model's two volatility proxies (daily range H−L in the Kalman noises, AR(1) residual std in
+the OU buffer) were replaced with a HAR forecast built from the 5-minute bars (Corsi regression on
+realised vol, coefficients fitted on the train half only, strictly ex ante, range-equivalent
+scaling). The *forecast* is genuinely better — TSM out-of-sample R² 0.315 vs 0.127 for lag-1 — and
+under the fair train-fit protocol (variant A vs variant A) it wins the tested half 5/9, RKLB by
++60pp. But neither route to deployment survives:
+- **Refit route**: A-HAR never beats the deployed vectors on the tested half (0/9) — same result
+  as every other train-half refit (§3.1).
+- **Drop-in route** (deployed vectors untouched, σ series swapped): worse on the tested half in
+  7/9 names (RKLB −42pp, MRVL −56pp), worse on train almost everywhere.
+The deployed k/φ_L/ψ are co-adapted to the range proxy's *dynamics*, not just its scale: the raw
+range is spiky and yesterday's spike widens today's buffer exactly after shocks, where the
+mean-reverting HAR forecast shrinks back toward normal too fast. The model is not monetising vol
+forecast accuracy; it is monetising the range's contemporaneous link to next-day dip depth.
+Scripts: `har_rv.py`, `har_study.py`; engine hooks `F_series` / `ou_sigma='series'` (mirror
+re-verified exact after the change).
+
 ---
 
 ## 4. Live workbook state and known issues
