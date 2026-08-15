@@ -68,12 +68,15 @@ def wire(in_path, out_path):
     ca.alignment = copy.copy(style_a.alignment)
     cb = notes.cell(
         row=row, column=2,
-        value=('Allocation E5 (flag 1/0) and E6 (amount $) carve a discretionary fund out of the '
-               'cash before it is divided across the sleeves: E7 = MAX(0, B5 - E5*E6) and the '
-               'machine block C25:C42 now divides E7 instead of B5. Flag 0 or amount 0 reproduces '
-               'the old behaviour exactly; the MAX guard means an over-sized carve-out parks the '
-               'book in cash rather than going negative. Discretionary trades themselves live '
-               'outside the workbook.'))
+        value=('Allocation E5 (flag 1/0) and E6 (max discretionary spend $) carve a discretionary '
+               'fund out of the cash before it is divided across the sleeves: E7 = MAX(0, B5 - '
+               'E5*E6) and the machine block C25:C42 divides E7 instead of B5. While the flag is '
+               'on the FULL amount is netted off whether or not it has been spent (conservative: '
+               'after a discretionary buy the account cash B5 is already lower, so the book '
+               'temporarily reserves earmark + spent). Workflow: switch on, trade, sell, switch '
+               'off - all capital returns to the book. Flag 0 or amount 0 reproduces the old '
+               'behaviour exactly; the MAX guard keeps the book from going negative. '
+               'Discretionary trades live outside the workbook.'))
     cb.font = copy.copy(style_b.font)
     cb.alignment = copy.copy(style_b.alignment)
 
