@@ -1,0 +1,405 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[letterspace=180]{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{graphicx}
+
+\definecolor{bcnavy}{RGB}{24,38,68}
+\definecolor{bcgold}{RGB}{198,160,74}
+\definecolor{bcteal}{RGB}{23,110,120}
+\definecolor{bcgrey}{RGB}{95,95,95}
+\definecolor{bcred}{RGB}{160,60,50}
+
+\titleformat{\section}{\bfseries\large\color{bcnavy}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\bfseries\color{bcteal}}{}{0em}{}
+\captionsetup{font={footnotesize},labelformat=empty,textfont={color=bcgrey}}
+\newcommand{\tabnote}[1]{\begin{center}\begin{minipage}{0.92\textwidth}
+  \footnotesize\color{bcgrey}#1\end{minipage}\end{center}}
+\newcommand{\good}[1]{{\color{bcteal}\textbf{#1}}}
+\newcommand{\bad}[1]{{\color{bcred}\textbf{#1}}}
+
+\begin{document}
+
+% ---------------------------------------------------------------- cover
+\begin{titlepage}
+\centering
+\vspace*{3.2cm}
+\includegraphics[width=5cm]{bc_logo.pdf}
+
+\vspace{1.6cm}
+{\color{bcnavy}\rule{7cm}{0.6pt}}
+
+\vspace{0.9cm}
+{\LARGE\bfseries\color{bcnavy} Bear-Market Protection\\[0.15cm] for the Nine-Name Book\par}
+\vspace{0.35cm}
+{\large\color{bcnavy} Three defensive mechanisms priced on real bear data:\\
+the per-stock stop, the book-wide circuit breaker,\\
+and the 200-day moving-average gate\par}
+
+\vspace{0.9cm}
+{\color{bcgold}\rule{7cm}{1.0pt}}
+
+\vspace{1.5cm}
+{\bfseries Bayesian Capital}\\[0.2cm]
+{\color{bcgrey} Systematic Trading Research}\\[0.9cm]
+{\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
+{\color{bcgrey} 15 August 2026}
+\vfill
+\end{titlepage}
+
+% ---------------------------------------------------------------- header
+\begin{center}
+{\Large\bfseries\color{bcnavy} Bear-Market Protection for the Nine-Name Book}\\[0.15cm]
+{\color{bcnavy} per-stock stop $\cdot$ book-wide circuit breaker $\cdot$ 200-day
+moving-average gate}\\[0.25cm]
+{\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
+\;$\bullet$\; book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ RKLB $\cdot$ MU
+$\cdot$ GM $\cdot$ VLO $\cdot$ CF $\cdot$ MRVL \;$\bullet$\; all figures on verified fills}
+\end{center}
+\vspace{0.1cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.5cm}
+
+\section{The question, and the data that finally answers it}
+
+Every result the book stands on was measured between April 2024 and August 2026
+--- a bull market. The strategy buys volatility dips below a trend-following (Bayes)
+or mean-reverting (OU) fair value and sells a quick fixed premium; every panic in
+that sample mean-reverted, so every study rewarded staying fully engaged and
+punished every protective overlay. The one question that sample cannot answer is
+the one that matters most: \textbf{what happens when the trend flattens and
+reverses --- and what should the book do about it?}
+
+This paper answers it with real bear data. Five-minute bars were obtained for all
+nine names covering August 2021 -- June 2023, so the deployed configuration ---
+every parameter exactly as it trades today, fitted only on 2024--26 data --- was
+replayed through calendar 2022, a year in which the book's AI names fell 40--80\%.
+The replay runs on the same verified-fill standard as every other result (a
+same-day round trip is booked only where the 5-minute bars prove the low reached
+the bid before the high reached the target). Three protective mechanisms are then
+priced on both sides: what each \emph{costs} in the 2024--26 bull sample, and what
+each \emph{saves} in the 2022 bear.
+
+\subsection{The unprotected baseline: how the book actually loses}
+
+Nothing in the deployed design resists a sustained downtrend. Both fair-value
+anchors follow the price down with a lag, so the bids keep filling all the way
+down; the ATH cap goes slack immediately (price is far below any peak); the
+50-calendar-day time stop is the only loss-taking exit, so damage arrives in
+50-day quanta at full sleeve size; and the free-sleeve pooling --- worth
+$+2.7$pp in a bull market --- recycles every stop's proceeds into another falling
+name's bid the next morning. Calendar 2022, per name:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+name & buy \& hold 2022 & model 2022 & model max DD & time stops \\
+\midrule
+TSM  & $-42.2\%$ & $-36.2\%$ & 48\% & 8 \\
+VRT  & $-44.0\%$ & $-36.4\%$ & 58\% & 7 \\
+VST  & $+2.0\%$  & \good{$+29.4\%$} & 17\% & 4 \\
+RKLB & $-69.1\%$ & $-69.4\%$ & 71\% & 8 \\
+MU   & $-47.8\%$ & $-38.3\%$ & 42\% & 8 \\
+GM   & $-45.0\%$ & $-31.6\%$ & 43\% & 7 \\
+VLO  & $+64.4\%$ & $+29.1\%$ & 30\% & 3 \\
+CF   & $+20.6\%$ & \good{$+49.0\%$} & 19\% & 3 \\
+MRVL & $-58.6\%$ & $-58.0\%$ & 61\% & 10 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{Deployed 2024--26 parameters driven backwards through Aug 2021 -- Jun 2023;
+verified fills from the 5-minute bars; calendar-2022 window. Note the stop counts:
+3--10 per name in one year, against 1--3 per name across the entire 2.35-year bull
+sample.}
+
+Two structural facts stand out. On falling names the model tracks the decline
+almost one-for-one (RKLB $-69\%$ vs $-69\%$): it stops out, re-enters the next
+dip, and rides the next leg down --- the \emph{re-entry treadmill}. But on the
+names that went sideways-to-up, dip-buying had an excellent year: the model beat
+buy-and-hold by 27pp on VST and 28pp on CF. The diversifiers earned their seats
+in precisely the scenario they were admitted for. At book level (pooled, equal
+weights) the unprotected 2022 outcome is \textbf{$-21.9\%$ with a 28.1\% maximum
+drawdown} --- painful, but survivable, and no deeper than the April 2025 tariff
+episode the live book has already been through.
+
+\section{Mechanism 1: the per-stock stop}
+
+\subsection{What it is}
+
+A stop-loss on each position: exit at $\text{entry} \times (1-f)$ whenever the
+price gets there before the 50-day time stop. Modelled with honest execution:
+filled at the stop level, at the open if the session gaps below it, and if the
+take-profit target and the stop level are touched in the same session the stop
+wins (pessimistic).
+
+\subsection{What it costs in the bull}
+
+Across the 1{,}407 verified round trips of the 2024--26 sample, positions touched
+$-10\%$ below entry 183 times, $-15\%$ 88 times, $-20\%$ 46 times, $-25\%$ 29
+times. Almost every one of those trades \emph{recovered} --- to the target or to a
+far smaller loss at the day-50 open. A stop crystallises the exact trough of
+trades the bull market was about to rescue, and the bill is heavy and
+concentrated in the volatile names:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+ & \multicolumn{2}{c}{full sample, ann.} & \multicolumn{2}{c}{tested half, ann.} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+name & no stop & stop $-20\%$ & no stop & stop $-20\%$ \\
+\midrule
+RKLB & 161.0\% & \bad{104.2\%} & 159.7\% & \bad{97.4\%} \\
+MU   & 65.1\%  & \bad{35.2\%}  & 148.5\% & \bad{82.6\%} \\
+MRVL & 85.1\%  & \bad{52.6\%}  & 191.3\% & \bad{104.6\%} \\
+TSM / VRT / VST & \multicolumn{4}{c}{$-4$ to $-7$pp full-sample} \\
+GM / VLO / CF   & \multicolumn{4}{c}{$\approx$ 0 (0--2 stop exits in 2.35 years)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The ladder is monotone: $-10\%$ is catastrophic, $-25\%$ is nearly free on six
+names. \textbf{Cost of the $-20\%$ stop: double-digit points per year on the AI
+names.}
+
+\subsection{What it saves in the bear}
+
+Very little --- and the replay shows why. A stop alone does not change the bear
+mechanics: the sleeve exits at $-20\%$, the pool hands the capital straight back
+to another falling name's bid, and it stops again. The bleed arrives in $-20\%$
+quanta every few weeks instead of $-40\%$ quanta every 50 days. In the 2022 book
+matrix, adding a $-25\%$ stop on top of the other protections moved the year from
+$-10.2\%$ to $-9.9\%$ --- three tenths of a point. Its one genuine niche is the
+\emph{fast gap crash}, where it caps a position's month at $-20\%$ instead of
+$-45\%$.
+
+\textbf{Verdict: not the armour.} It fires on idiosyncratic accidents (which
+recover), barely helps in a grinding bear (the treadmill continues), and charges
+double-digit rent on the book's best names. At most, a deep $-25\%$ backstop.
+
+\section{Mechanism 2: the book-wide circuit breaker}
+
+\subsection{What it is}
+
+A drawdown rule on total book equity rather than on any single position: when the
+book sits more than 15\% below its running peak (measured each morning on
+yesterday's close, strictly ex ante), reduce every new entry until the drawdown
+recovers above 7.5\%. Held positions and their exits are untouched.
+
+\subsection{The trigger is right\ldots}
+
+The book-level trigger genuinely separates the systematic event from the
+idiosyncratic one. In 2024--26, single positions touched $-20\%$ 46 times without
+ever pushing book drawdown past 10\% --- the other names and the cash sleeves
+absorb single-name accidents. The episodes that \emph{do} move book drawdown are
+the coordinated ones: August 2024 ($-9.5\%$), April 2025 ($-29.2\%$), July 2026
+($-13.1\%$). With six of nine names on the AI factor, a 15\% book drawdown maps
+to roughly a coordinated 20--25\% fall in the AI names --- the event being
+insured. This is the correct trigger \emph{shape}.
+
+\subsection{\ldots but the action is weak, and the reset can trap}
+
+Two design findings from simulation. First, the \textbf{reset trap}: if the
+tripped action is ``stop entirely'' and the release requires equity to recover,
+the rule cannot release itself --- a book sitting in cash cannot earn its way back.
+In the 2024--26 sample that version tripped once (April 2025), stayed tripped 356
+days, missed the entire V-recovery, and turned a 75.8\%/yr book into a 15.5\%/yr
+one. The action must be \emph{half-size, never zero} (the book keeps earning and
+self-releases --- 67 days tripped, cost 4.1pp/yr, max drawdown improved 29.2\%
+$\rightarrow$ 26.0\%), or any full stand-down must release on a market signal,
+never on equity.
+
+Second, the bear result: in 2022 the half-size breaker alone improved the year by
+only $+3.7$pp ($-21.9\% \rightarrow -18.2\%$). Half-sizing new entries neither
+exits held losers nor stops the half-sized treadmill. Worse, \emph{stacked on the
+gate} it subtracts: it half-sizes exactly the diversifier entries that were
+winning the year (gate alone $-2.6\%$; gate $+$ breaker $-10.2\%$).
+
+\textbf{Verdict: right trigger, wrong weapon for a grinding bear.} Its residual
+role is the fast crash the 200dma is too slow to see --- April 2025 tripped it
+within days while price was still above the 200-day line. Keep it as a
+crash-only satellite rule if at all; never stack it on the gate by default.
+
+\section{Mechanism 3: the 200-day moving-average gate}
+
+\subsection{What a 200dma is, exactly}
+
+The 200-day moving average is nothing more than the arithmetic mean of a stock's
+last 200 daily closing prices, recomputed every day:
+\[
+\text{200dma}_t \;=\; \tfrac{1}{200}\textstyle\sum_{k=1}^{200} \text{Close}_{t-k}
+\qquad\text{(one Excel column: } \texttt{=AVERAGE(E}_{t-200}\texttt{:E}_{t-1}\texttt{)).}
+\]
+Two hundred trading days is roughly ten months, so the line is deliberately slow:
+ordinary pullbacks, earnings wobbles and volatility spikes do not drag price
+below it, but in a genuine bear market price crosses under it a few weeks into
+the decline and \emph{stays} under it for months (TSM spent essentially all of
+2022 below its line). It is the most widely used dividing line between a stock
+that is structurally trending up and one that has broken down --- valuable here
+precisely because it is \textbf{directional, not volatility-based}: the book's
+edge lives in volatility (the overlays paper showed every volatility-triggered
+defence fails), so protection has to key on trend.
+
+\subsection{The rule}
+
+Per name, each morning, strictly ex ante: \emph{if yesterday's close is below the
+average of the previous 200 closes, place no new bids in that name today.}
+Exits, targets and stops run untouched. A gated name's capital is not idle ---
+the pooling loop hands it to the ungated names' bids the same morning.
+
+\subsection{What it costs in the bull (2024--26, measured)}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & without gate & with gate & cost \\
+\midrule
+book total return (2.35 yrs) & $+238.7\%$ & $+183.8\%$ & \\
+annualised                   & $\approx 68\%$/yr & $\approx 56\%$/yr & \bad{$\approx 12$pp/yr} \\
+on a €9m book                & ends $\approx$ €30.5m & ends $\approx$ €25.5m & €5m forgone \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The cost is concentrated, not spread: near-free on TSM, VRT, RKLB, MU, VLO and GM
+(3--16\% of days gated), with nearly the whole bill from VST ($49.6\% \rightarrow
+22.6\%$/yr), MRVL ($85.1\% \rightarrow 56.3\%$) and CF ($46.9\% \rightarrow
+31.0\%$) --- names that spent long spells \emph{below} their line while bottoming
+and rallying. That is the gate's inherent weakness: it cannot tell ``recovering
+off the low'' from ``breaking down'' until price crosses back over, and the
+model's fattest fills live in exactly those cheap, hated stretches.
+
+\subsection{What it saves in the bear (2022, measured)}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+ & without gate & with gate \\
+\midrule
+calendar 2022                & \bad{$-21.9\%$} & \good{$-2.6\%$} \\
+on a €9m book                & $-$€1.97m $\rightarrow$ €7.03m & $-$€0.23m $\rightarrow$ €8.77m \\
+maximum drawdown             & 28.1\% & 17.4\% \\
+Jan 2022 -- Jun 2023 total   & $-8.7\%$ & \good{$+7.3\%$} \\
+fills / time stops in 2022   & 406 / 56 & 155 / 25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.98\textwidth]{bear_gate_curves.png}
+\end{center}
+\tabnote{The nine-name pooled book replayed through January 2022 -- June 2023 on
+verified fills, deployed parameters, €9m starting capital: without protection
+(navy) and with the 200dma gate (teal). The dashed line marks the 2022 year-end.}
+
+The gate is not a hard floor --- positions already held when a name crosses under
+its line still play out to target or stop, which is why 17.4\% of drawdown
+remains. What it removes is the re-entry treadmill (fills 406 $\rightarrow$ 155,
+stops 56 $\rightarrow$ 25), and what it adds is rotation: with the six AI names
+gated, the pool concentrated the book's capital into VLO, CF and VST at full size
+--- which the model traded to $+29\%$, $+49\%$ and $+29\%$ that year. The
+$-2.6\%$ is early-leg losses on the AI names largely paid for by a fully-funded
+good year in the diversifiers.
+
+\section{What combination works best}
+
+\subsection{The matrix}
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{2}{c}{calendar 2022} & \multicolumn{2}{c}{Jan 2022 -- Jun 2023} & bull cost \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+config & return & max DD & total & max DD & (2024--26) \\
+\midrule
+nothing                          & $-21.9\%$ & 28.1\% & $-8.7\%$ & 28.1\% & --- \\
+per-stock stop $-20\%$           & \multicolumn{4}{c}{treadmill continues}  & $\sim$10--15pp/yr \\
+breaker 15\%/half                & $-18.2\%$ & 25.3\% & $-8.2\%$ & 25.3\% & 4.1pp/yr \\
+\textbf{200dma gate}             & \good{$-2.6\%$} & \good{17.4\%} & \good{$+7.3\%$} & 17.4\% & $\sim$12pp/yr \\
+gate $+$ breaker                 & $-10.2\%$ & 20.9\% & $-1.1\%$ & 20.9\% & $\sim$16pp/yr \\
+gate $+$ breaker $+$ stop $-25\%$& $-9.9\%$  & 20.4\% & $-0.9\%$ & 20.4\% & $\sim$16pp/yr \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{Pooled book, equal weights, €9m, verified fills. Bull costs measured on
+the 2024--26 sample. Note the anti-synergy: the breaker stacked on the gate makes
+the bear \emph{worse} because it half-sizes the diversifier entries the gate has
+just concentrated capital into.}
+
+\textbf{The answer is the gate, alone.} The mechanisms do not add --- they
+interfere. The stop fires on accidents and charges rent on the best names; the
+breaker's action is too blunt for a grind and sabotages the gate's rotation; the
+gate both stops the treadmill \emph{and} redeploys the capital where the model is
+still earning.
+
+\subsection{Premium versus payout, and the frequency of bears}
+
+The two-sided price of the gate: \textbf{$\sim$12pp/yr of premium in bull years;
+$\sim$19pp and 11pp of drawdown returned in the bear year.} In pure
+expected-value terms that is a losing trade --- US bear markets arrive roughly
+twice a decade, and at that frequency a 12pp annual premium buys back its cost
+only once every several years. Whether to pay it is therefore not a
+return-optimisation question but a risk one, and three considerations argue for
+paying:
+
+\begin{itemize}
+\item \textbf{Drawdown control compounds.} A book that loses 2.6\% instead of
+21.9\% needs no recovery year; the gated path's worst drawdown (17.4\%) is
+comfortably inside what the live book has already survived (29.2\% in April
+2025).
+\item \textbf{The premium is concentrated and known} (three names' recovery
+rallies); the payout arrives precisely when capital is hardest to replace.
+\item \textbf{The alternative defences are worse}, and the volatility-based ones
+are proven counterproductive --- the overlays paper showed the model \emph{earns}
+from stress; only direction can be gated.
+\end{itemize}
+
+\subsection{The role of the diversifiers --- and the honest caveat}
+
+The 2022 rescue had two parents: the gate stopped the bleeding, and the
+diversifiers gave the freed capital somewhere to go. GM, VLO and CF were admitted
+in 2026 partly on correlation grounds; the replay shows the mechanism working
+exactly as intended, with the commodity trio carrying the book through an AI
+winter. The caveat: 2022 happened to pair a growth bear with a commodity bull. In
+a bear where \emph{everything} trades below its 200dma, the gate parks the book
+in cash at interest --- still transformationally better than $-22\%$, but not
+$-2.6\%$ either. The diversifiers are not a guarantee; they are an option the
+gate knows how to exercise when it is there.
+
+\section{Recommendation}
+
+\begin{tcolorbox}[colback=bcgold!8, colframe=bcgold, boxrule=0.8pt,
+  title={\bfseries Adopt}, coltitle=bcnavy]
+\textbf{The 200dma gate, alone,} on all nine names: no new bids in a name whose
+previous close sits below its trailing 200-day average; exits untouched; freed
+capital pools as normal. Implementation is one column and one flag per Model
+sheet ($\approx$ an hour of workbook work). Optionally, retain the circuit
+breaker as a \emph{fast-crash-only} satellite (trip 15\%, action half-size, reset
+on market signal or drawdown recovery --- never full stand-down with an equity
+reset), accepting that it will occasionally cost a V-recovery. Skip the
+per-stock stop.
+\end{tcolorbox}
+
+\vspace{0.4cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.2cm}
+{\footnotesize\color{bcgrey} Basis: bear side --- user-supplied 5-minute bars
+Aug 2021 -- Jun 2023 for all nine names, deployed 2024--26 parameters replayed
+with verified fills, pooled equal-weight book, €9m; bull side --- the standard
+2024--26 verified sample. Interest on idle cash held at the model's 3.14\%/yr
+throughout (understates 2022 cash income). Scripts:
+\texttt{bear\_replay.py}, \texttt{price\_stop\_study.py}, \texttt{book\_sim.py}
+(breaker, price-stop and gate support). Findings recorded in HANDOVER
+\S3.13. Companion paper: \emph{Three Volatility Overlays, Tested and Rejected}
+(14 Aug 2026).}
+
+\end{document}
