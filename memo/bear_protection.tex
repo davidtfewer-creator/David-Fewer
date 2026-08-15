@@ -255,27 +255,64 @@ average of the previous 200 closes, place no new bids in that name today.}
 Exits, targets and stops run untouched. A gated name's capital is not idle ---
 the pooling loop hands it to the ungated names' bids the same morning.
 
-\subsection{What it costs in the bull (2024--26, measured)}
+\subsection{What it costs in the bull (2024--26, measured both ways)}
+
+The cost depends on which construction you measure, and the difference is the
+pooling loop:
 
 \begin{center}
 \begin{tabular}{lccc}
 \toprule
- & without gate & with gate & cost \\
+basis & without gate & with gate & cost \\
 \midrule
-book total return (2.35 yrs) & $+238.7\%$ & $+183.8\%$ & \\
-annualised                   & $\approx 68\%$/yr & $\approx 56\%$/yr & \bad{$\approx 12$pp/yr} \\
-on a €9m book                & ends $\approx$ €30.5m & ends $\approx$ €25.5m & €5m forgone \\
+per-name held (each sleeve keeps its capital) & $\approx 68\%$/yr & $\approx 56\%$/yr & \bad{$\approx 12$pp/yr} \\
+\textbf{pooled (the live loop)}, full sample  & 75.8\%/yr & 75.9\%/yr & \good{$\approx$ 0} \\
+pooled, tested half                           & 110.7\%/yr & 110.8\%/yr & \good{$\approx$ 0} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The cost is concentrated, not spread: near-free on TSM, VRT, RKLB, MU, VLO and GM
-(3--16\% of days gated), with nearly the whole bill from VST ($49.6\% \rightarrow
+Held per name, the bill is real and concentrated in VST ($49.6\% \rightarrow
 22.6\%$/yr), MRVL ($85.1\% \rightarrow 56.3\%$) and CF ($46.9\% \rightarrow
-31.0\%$) --- names that spent long spells \emph{below} their line while bottoming
-and rallying. That is the gate's inherent weakness: it cannot tell ``recovering
-off the low'' from ``breaking down'' until price crosses back over, and the
-model's fattest fills live in exactly those cheap, hated stretches.
+31.0\%$) --- names that spent long spells below their line while bottoming and
+rallying; the gate cannot tell ``recovering off the low'' from ``breaking down''
+until price crosses back over. But the book does not trade the held
+construction: in the live pooled loop, a gated name's capital thickens the
+ungated names' bids the same morning, and over 2024--26 that reallocation
+\textbf{recovered essentially the entire premium}. The gate's true price in the
+live loop is not forgone return --- it is \emph{concentration}: when most names
+are gated at once, the pool piles into the few that are not (see the April 2025
+stress test below).
+
+\subsection{The April 2025 stress test: a fast crash is not the gate's event}
+
+The live sample contains one real crash --- February--April 2025, trough 4~April,
+book drawdown 29.2\%, recovered by mid-June. Replaying it pooled, with and
+without the gate:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & episode drawdown & recovered & full-sample maxDD \\
+\midrule
+without gate & $-29.2\%$ & 16 Jun 2025 & 29.2\% \\
+with gate    & \bad{$-32.1\%$} & \bad{9 Jul 2025} & 32.1\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The gate made the crash slightly \emph{worse}, through the exact mechanism that
+makes it free in the bull: the February--March slide put eight of the nine names
+below their 200dmas by early March, so the pool concentrated the book's capital
+into the one name still above its line --- RKLB, the book's highest-beta name ---
+which the April crash then hit at full concentrated size. The gate also blocked
+the AI names' April rebound fills until they recrossed their lines in mid-May,
+pushing recovery out three weeks. Capping any one sleeve's share of the pool
+fixes the concentration (a 15\% cap holds the episode to $-25.5\%$) but
+reintroduces a real premium ($\approx 10$pp/yr) and damages the 2022 rotation
+($-2.6\% \rightarrow -6.7\%$) --- the cap was tested and not adopted. The honest
+summary: \textbf{the gate is armour against the grinding bear, neutral-to-slightly-negative
+in a V-crash, and free on average.} Fast crashes remain the breaker's event.
 
 \subsection{What it saves in the bear (2022, measured)}
 
@@ -323,17 +360,19 @@ config & return & max DD & total & max DD & (2024--26) \\
 nothing                          & $-21.9\%$ & 28.1\% & $-8.7\%$ & 28.1\% & --- \\
 per-stock stop $-20\%$           & \multicolumn{4}{c}{treadmill continues}  & $\sim$10--15pp/yr \\
 breaker 15\%/half                & $-18.2\%$ & 25.3\% & $-8.2\%$ & 25.3\% & 4.1pp/yr \\
-\textbf{200dma gate}             & \good{$-2.6\%$} & \good{17.4\%} & \good{$+7.3\%$} & 17.4\% & $\sim$12pp/yr \\
-gate $+$ breaker                 & $-10.2\%$ & 20.9\% & $-1.1\%$ & 20.9\% & $\sim$16pp/yr \\
-gate $+$ breaker $+$ stop $-25\%$& $-9.9\%$  & 20.4\% & $-0.9\%$ & 20.4\% & $\sim$16pp/yr \\
+\textbf{200dma gate}             & \good{$-2.6\%$} & \good{17.4\%} & \good{$+7.3\%$} & 17.4\% & \good{$\approx$0 pooled}$^{\dagger}$ \\
+gate $+$ breaker                 & $-10.2\%$ & 20.9\% & $-1.1\%$ & 20.9\% & $\sim$4pp/yr \\
+gate $+$ breaker $+$ stop $-25\%$& $-9.9\%$  & 20.4\% & $-0.9\%$ & 20.4\% & $\sim$4pp/yr \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \tabnote{Pooled book, equal weights, €9m, verified fills. Bull costs measured on
-the 2024--26 sample. Note the anti-synergy: the breaker stacked on the gate makes
-the bear \emph{worse} because it half-sizes the diversifier entries the gate has
-just concentrated capital into.}
+the 2024--26 sample; $^{\dagger}$the gate's pooled cost is $\approx$0 in return
+terms but raises the April 2025 crash drawdown 29.2\% $\rightarrow$ 32.1\%
+(concentration --- see \S4). Note the anti-synergy: the breaker stacked on the
+gate makes the bear \emph{worse} because it half-sizes the diversifier entries
+the gate has just concentrated capital into.}
 
 \textbf{The answer is the gate, alone.} The mechanisms do not add --- they
 interfere. The stop fires on accidents and charges rent on the best names; the
@@ -343,24 +382,31 @@ still earning.
 
 \subsection{Premium versus payout, and the frequency of bears}
 
-The two-sided price of the gate: \textbf{$\sim$12pp/yr of premium in bull years;
-$\sim$19pp and 11pp of drawdown returned in the bear year.} In pure
-expected-value terms that is a losing trade --- US bear markets arrive roughly
-twice a decade, and at that frequency a 12pp annual premium buys back its cost
-only once every several years. Whether to pay it is therefore not a
-return-optimisation question but a risk one, and three considerations argue for
-paying:
+Measured on the held construction the gate looked like classic expensive
+insurance: $\sim$12pp/yr of premium against $\sim$19pp returned in a bear year
+that arrives perhaps twice a decade --- a losing trade in expected value, worth
+paying only for the drawdown control. The pooled measurement changes the
+arithmetic: \textbf{in the loop the book actually trades, the premium is
+approximately zero} (75.8\% vs 75.9\%/yr over 2024--26), because the pooling
+reallocates gated capital instead of idling it. What the gate really costs is
+not return but shape:
 
 \begin{itemize}
-\item \textbf{Drawdown control compounds.} A book that loses 2.6\% instead of
-21.9\% needs no recovery year; the gated path's worst drawdown (17.4\%) is
-comfortably inside what the live book has already survived (29.2\% in April
-2025).
-\item \textbf{The premium is concentrated and known} (three names' recovery
-rallies); the payout arrives precisely when capital is hardest to replace.
-\item \textbf{The alternative defences are worse}, and the volatility-based ones
-are proven counterproductive --- the overlays paper showed the model \emph{earns}
-from stress; only direction can be gated.
+\item \textbf{Concentration episodes in fast crashes.} April 2025: drawdown
+29.2\% $\rightarrow$ 32.1\%, recovery three weeks later. This is the premium,
+paid rarely and in drawdown rather than in return.
+\item \textbf{Dependence on rotation targets.} The near-zero premium and the
+2022 rescue both assume somewhere for gated capital to go. In a bear where
+everything is gated, the book sits in cash at interest --- still
+transformationally better than $-22\%$, but the diversifiers are what turn
+``survive'' into ``flat''.
+\item \textbf{What it buys}: $-21.9\% \rightarrow -2.6\%$ in the replayed bear
+year, max drawdown 28.1\% $\rightarrow$ 17.4\%, and no recovery year needed ---
+delivered precisely when capital is hardest to replace. With the premium at
+approximately zero, insurance this cheap is bought, not debated; the alternative
+defences are worse, and the volatility-based ones are proven counterproductive
+(the overlays paper showed the model \emph{earns} from stress --- only direction
+can be gated).
 \end{itemize}
 
 \subsection{The role of the diversifiers --- and the honest caveat}

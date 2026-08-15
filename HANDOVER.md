@@ -221,6 +221,15 @@ NOT be stacked on top of it. Caveat: 2022's save partly relied on having somewhe
 capital in fewer names (fills fell 406→155 under the gate). Script: `bear_replay.py`; book_sim
 gained `breaker` and `price_stop`.
 
+**Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
+a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
+2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
+idling it. The real price is concentration in fast crashes: Feb–Mar 2025 put 8 of 9 names below
+their 200dmas, the pool piled into RKLB, and the April 2025 episode deepened 29.2%→32.1% with
+recovery pushed 16 Jun→9 Jul. A 15% per-sleeve cap fixes the episode (−25.5%) but costs ~10pp/yr
+and damages the 2022 rotation (−2.6%→−6.7%) — tested, not adopted. Net: gate = grinding-bear
+armour, ≈free on average, slightly negative in a V-crash; fast crashes remain the breaker's event.
+
 ---
 
 ## 4. Live workbook state and known issues
