@@ -80,7 +80,7 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
-             date_lo=None, date_hi=None, breaker=None):
+             date_lo=None, date_hi=None, breaker=None, price_stop=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -90,7 +90,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     when yesterday's book equity sits more than `trip` below its running peak,
     every morning allocation is multiplied by `frac` (0 = no new entries; resting
     exits and stops run unchanged) until the drawdown recovers above `reset`.
-    Decided each morning on yesterday's close equity -- strictly ex ante."""
+    Decided each morning on yesterday's close equity -- strictly ex ante.
+    price_stop: float fraction -- exit a held position at entry_bid*(1-frac) when
+    the day's low reaches it before target or time stop (fill at the level, at the
+    open on a gap through; pessimistic on target ties)."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -162,7 +165,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             H, O = nd['H'][i], nd['O'][i]
             stop = (d - s['entry']).days >= STOP_DAYS
             px = None
-            if H >= s['target'] - 1e-12:
+            ps_level = (s['bid'] * (1 - price_stop)) if price_stop is not None else None
+            if ps_level is not None and nd['L'][i] <= ps_level + 1e-12:
+                px = O if O <= ps_level else ps_level     # stop wins ties, pessimistic
+            elif H >= s['target'] - 1e-12:
                 px = s['target']
             elif stop:
                 px = O
@@ -212,7 +218,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                                        stopped=False))
             else:
                 s.update(holding=True, shares=shares, target=target, entry=d,
-                         cost=cost)
+                         cost=cost, bid=bid)
 
         # -------- mark to market
         mv = 0.0

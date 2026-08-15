@@ -198,6 +198,29 @@ to deployed), α ∈ {0.25..1.0} train-picked and frozen. Result:
 Script: `premium_vol.py`; engine hook `prem_mult` (fill-row premium multipliers per sleeve,
 mirror re-verified exact).
 
+### 3.13 The 2022 bear replay: the gate is the armour, the breaker is not
+User-supplied 5-minute bars Aug 2021 – Jun 2023 for all nine names (`data_bear/`), so the replay
+runs on verified fills with the deployed 2024-26 parameters driven backwards. Per-name calendar
+2022: the model tracks the decline almost 1:1 on the AI names (TSM −36% vs B&H −42%, RKLB −69% vs
+−69%, MRVL −58% vs −59%; 7–10 time stops each) but the 2022 diversifier bull carried VLO +29%,
+CF +49% (beat B&H +21%), VST +29% (B&H +2%). Book level (pooled, equal weights, calendar 2022):
+- unprotected −21.9% (maxDD 28.1% — no worse than the April 2025 episode in the live sample);
+- **200dma gate alone −2.6% (maxDD 17.4%)** — +19.3pp saved; pooling rotated the gated AI
+  capital into the ungated commodity names at full size;
+- breaker 15%/half-size alone −18.2% — +3.7pp only (half-sizing cannot stop held losses in a
+  grind, and it keeps half-entering all the way down);
+- gate + breaker −10.2% — WORSE than gate alone: the breaker half-sizes exactly the diversifier
+  entries that were winning; adding the −25% price stop changes nothing (−9.9%).
+Two-sided pricing of the gate: costs ~12pp/yr in the 2024-26 bull (238.7%→183.8% total),
+saves ~19pp and 11pp of maxDD in the bear year. Expensive in expected-return terms unless bear
+years are frequent; its real product is drawdown control. The breaker's remaining niche is the
+fast crash the 200dma is too slow to see (it fired in April 2025 when the gate barely moved) —
+speeds are complementary, but in a 2022-style grind the gate dominates and the breaker should
+NOT be stacked on top of it. Caveat: 2022's save partly relied on having somewhere to rotate to
+(the commodity bull); an AI-bust bear without a winning sleeve would concentrate the pooled
+capital in fewer names (fills fell 406→155 under the gate). Script: `bear_replay.py`; book_sim
+gained `breaker` and `price_stop`.
+
 ---
 
 ## 4. Live workbook state and known issues
