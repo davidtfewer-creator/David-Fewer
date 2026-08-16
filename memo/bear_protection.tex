@@ -51,7 +51,7 @@ and the 200-day moving-average gate\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 15 August 2026}
+{\color{bcgrey} 15 August 2026 --- gate adopted and wired the same day (\S7)}
 \vfill
 \end{titlepage}
 
@@ -421,19 +421,67 @@ in cash at interest --- still transformationally better than $-22\%$, but not
 $-2.6\%$ either. The diversifiers are not a guarantee; they are an option the
 gate knows how to exercise when it is there.
 
-\section{Recommendation}
+\section{Recommendation --- adopted}
 
 \begin{tcolorbox}[colback=bcgold!8, colframe=bcgold, boxrule=0.8pt,
-  title={\bfseries Adopt}, coltitle=bcnavy]
+  title={\bfseries Adopted 15 August 2026}, coltitle=bcnavy]
 \textbf{The 200dma gate, alone,} on all nine names: no new bids in a name whose
-previous close sits below its trailing 200-day average; exits untouched; freed
-capital pools as normal. Implementation is one column and one flag per Model
-sheet ($\approx$ an hour of workbook work). Optionally, retain the circuit
-breaker as a \emph{fast-crash-only} satellite (trip 15\%, action half-size, reset
-on market signal or drawdown recovery --- never full stand-down with an equity
-reset), accepting that it will occasionally cost a V-recovery. Skip the
-per-stock stop.
+last close sits below its trailing 200-day average; exits untouched; freed
+capital pools as normal. Wired into the live workbook the same day (\S7).
+The circuit breaker is available as a \emph{fast-crash-only} satellite (trip
+15\%, action half-size, reset on market signal or drawdown recovery --- never
+full stand-down with an equity reset) but is not wired; the per-stock stop is
+skipped.
 \end{tcolorbox}
+
+\section{Implementation in the live workbook}
+
+The gate went live in the nine-stock workbook on 15 August 2026. The wiring is
+layout-preserving by construction --- nothing was inserted or moved, so the order
+block, the \texttt{IBKR\_Orders} range and the blotter keep their addresses and
+the execution scripts read exactly what they read before. A full-workbook cell
+diff against the pre-change file confirms every changed cell is an intended one,
+and a Python mirror recomputed every 200dma, gate flag and ATH from the Query
+data.
+
+\subsection{The gate}
+
+\begin{itemize}
+\item \textbf{Active Trading, column N (``200 DMA''):} each order row carries its
+stock's trailing 200-close average, computed directly off the Query close columns
+with a COUNT-anchored window, so it tracks automatically as new rows are pasted
+(expanding window until 200 closes exist).
+\item \textbf{Allocation G25:G42 (``DMA gate''):} a per-sleeve flag --- 1 when the
+stock's last close (Dashboard column B) sits below its 200dma (column N). The
+flag is IFERROR-wrapped to \emph{fail open}: any lookup problem means ``no
+gate'', never a dead sleeve.
+\item \textbf{Allocation F25:F42:} the free-weight formula became
+$E \times (1-\text{Held}) \times (1-\text{Gate})$. A gated sleeve drops out of
+the cash renormalisation exactly like a HOLDING one, so its capital pools into
+the ungated names' bids the same morning --- the mechanism behind the gate's
+$\approx$0 pooled cost.
+\item \textbf{What the scripts see:} a gated sleeve's order row shows Status
+CASH, Tranche fund 0 and Qty 0. The one operational dependency: the order
+script must skip zero-quantity BUY rows.
+\end{itemize}
+
+\subsection{The ATH-trap monitor}
+
+Alongside the gate, Active Trading gained column O (``Sale \% below ATH''):
+$(\text{ATH} - \text{sale})/\text{ATH}$, where the sale price is the row's live
+one --- the calculated target on CASH rows, the actual resting sell on HOLDING
+rows --- and the ATH is Dashboard column L. \textbf{A negative value means the
+sale price sits above the all-time high}: the ATH trap identified in the August
+review, now visible live on every order row. (VLO, whose close sits within
+$\sim$1.3\% of its ATH with a $\sim$4\% OU premium, is the row most likely to
+flag first.)
+
+\subsection{State at adoption}
+
+On the adoption date, one of the nine names opened gated: \textbf{VST} (close
+146.40 against a 200dma of 161.37). Its two sleeves show fund 0 / Qty 0 and its
+cash spreads across the other eight names --- the gate operating as designed, not
+an error. The other eight names sat above their averages.
 
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}
@@ -444,8 +492,9 @@ with verified fills, pooled equal-weight book, €9m; bull side --- the standard
 2024--26 verified sample. Interest on idle cash held at the model's 3.14\%/yr
 throughout (understates 2022 cash income). Scripts:
 \texttt{bear\_replay.py}, \texttt{price\_stop\_study.py}, \texttt{book\_sim.py}
-(breaker, price-stop and gate support). Findings recorded in HANDOVER
-\S3.13. Companion paper: \emph{Three Volatility Overlays, Tested and Rejected}
-(14 Aug 2026).}
+(breaker, price-stop and gate support); workbook wiring
+\texttt{wire\_200dma.py} (re-runnable on any future copy). Findings recorded in
+HANDOVER \S3.13. Companion paper: \emph{Three Volatility Overlays, Tested and
+Rejected} (14 Aug 2026).}
 
 \end{document}
