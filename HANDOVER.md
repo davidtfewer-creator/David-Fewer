@@ -240,6 +240,19 @@ the range but not the profile. Genuine 30%-gate candidates are scarce by constru
 stays at GM/VLO/CF and the book at nine. Data in data_5min/ ({FCX,NEM,UAL,LEN}_5min.xlsx);
 results in fresh_opt_cands.json.
 
+### 3.15 Deep-bid exclusion (manual-intervention proxy): rejected — deep bids are good bids
+User intuition: a bid 6–10% below the previous close "almost definitely won't fill", so exclude
+that sleeve and pool its capital. The diagnostic kills the premise: deep bids fill ~1 day in 5
+(20.1% at 6–8% depth, 18.6% at 8–12%, vs 49.5% at 0–2%) and their fills are the book's better
+trades (median +2.7–2.9% vs +2.2% shallow). The mechanical rule (exclude sleeve when bid <
+prevC×(1−thr), capital pools) tested on the pooled nine-name book: the train-picked threshold
+(6%) LOSES the tested half (110.7%→105.3%); the 4% cell is train +5.6pp / test −0.9pp / maxDD
+−2.4pp — return-neutral at best, not a both-halves win. Consistent with every stress-harvester
+finding: the rare deep fill is the product. Note the tested rule cannot see pre-market
+information; a judgement-based manual exclusion using live tape is neither validated nor refuted
+by this, but the fill-rate numbers warn against the 'won't fill anyway' assumption. book_sim
+gained `deep_excl`.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
