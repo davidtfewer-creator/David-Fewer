@@ -57,6 +57,10 @@ REF = {
     'MRVL': None,
     'SMCI': None,
     'CEG':  None,
+    'FCX':  None,   # Aug 2026 diversifier round (G1: AI-related, 50% gate)
+    'NEM':  None,   # (G1: AI-related, 50% gate)
+    'UAL':  None,   # (G1: AI-related, 50% gate)
+    'LEN':  None,   # (G1: uncorrelated, 30% gate)
 }
 
 AW_BOUNDS = A_BOUNDS + [(30, 150)]              # + ou_W
