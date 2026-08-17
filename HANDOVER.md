@@ -221,6 +221,25 @@ NOT be stacked on top of it. Caveat: 2022's save partly relied on having somewhe
 capital in fewer names (fills fell 406→155 under the gate). Script: `bear_replay.py`; book_sim
 gained `breaker` and `price_stop`.
 
+### 3.14 August diversifier round (FCX/NEM/UAL/LEN): zero admissions — vol IS the AI trade
+Four candidates for the 30%-gate class, all G0-clean (596 sessions, ranges 2.85–3.92%). G1
+reclassified three of them: FCX (AI beta 0.49), UAL (0.43) and NEM (0.27) all trade with the AI
+factor in this sample — copper, airlines, even gold miners — so they face the 50% gate. Verdicts:
+- **LEN declined G2** (the only true uncorrelated, beta 0.09/corr 0.16, but honest fits earn
+  17–20%/yr vs the 30% bar — too quiet to pay the premium);
+- **FCX declined G2/G3** (through-cycle 48.2% < 50%, inverted halves: train 8–19%);
+- **NEM → WATCH LIST** (balanced halves, honest cluster 35–48% — under the 50% bar its 0.27 beta
+  and 0.32 book corr impose, but it would clear a 30% gate easily; re-test end-Q1 2027: admits if
+  new data reclassifies it uncorrelated or lifts the plan through 50%);
+- **UAL declined G5** (variant A clears 50% outright, 56.2/51.9, but B collapses to 12.7% — the
+  fragility floor — and the marginal book test fails: maxDD 29.2→30.8%, April-2025 stress
+  −29.2→−30.8%, tested return flat. Neither out-earns nor de-risks).
+The structural lesson: the model's premium engine needs volatility, and in this era volatility
+itself is AI-correlated — LEN had the correlation profile but not the range, the other three had
+the range but not the profile. Genuine 30%-gate candidates are scarce by construction; the bench
+stays at GM/VLO/CF and the book at nine. Data in data_5min/ ({FCX,NEM,UAL,LEN}_5min.xlsx);
+results in fresh_opt_cands.json.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
