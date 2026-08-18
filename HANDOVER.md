@@ -266,7 +266,11 @@ per-name exemptions taken — that would be selection). 23.9% of sleeve-days exc
 where ten overlays died because it ADDS information the model lacks rather than reshaping the
 harvest. Scripts: `premarket_excl.py`; book_sim gained `excl_fn`. Live implementation: manual at
 09:25 (skip orders with buy < PM×0.96) or an Allocation flag column like the DMA gate; Script 1
-could automate with an IBKR pre-market snapshot.
+could automate with an IBKR pre-market snapshot. Cutoff sensitivity (user needs time for manual
+updates): a 09:00 check keeps most of the edge — train 59.5% (best cell anywhere), TEST
+110.7→118.4 (+7.7pp vs +11.7 at 09:25), full 87.3%, maxDD 25.8% (best) — the 09:00–09:25 window
+carries ~4pp of tested-half edge; 08:30 decays to +/-0 (test 108.0). Adopted operating point:
+09:00 cutoff, 4% threshold, upgrade to 09:25 if Script 1 automates the snapshot.
 
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
