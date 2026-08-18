@@ -81,7 +81,7 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
-             deep_excl=None, excl_fn=None):
+             deep_excl=None, excl_fn=None, bid_fn=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -100,7 +100,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     that day, and its capital pools into the other sleeves (the user's 'this
     trade is not going to happen' exclusion, made mechanical and ex ante).
     excl_fn: callable(name, i, bid) -> truthy to exclude that sleeve's order that
-    morning (generic hook; used for the pre-market-informed exclusion rules)."""
+    morning (generic hook; used for the pre-market-informed exclusion rules).
+    bid_fn: callable(name, i, bid) -> replacement bid (or None to exclude): the
+    adjust-instead-of-exclude variant. A raised bid may sit above the day's open;
+    the fill then executes at the open (limit fills at the better price)."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -152,6 +155,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 paused = True
             if excl_fn is not None and bid is not None and i > 0 and excl_fn(s['name'], i, bid):
                 paused = True
+            if bid_fn is not None and bid is not None and i > 0:
+                bid = bid_fn(s['name'], i, bid)
             s['_i'] = i
             s['_bid'] = None if (paused or bid is None or i == 0) else bid
             if not s['holding']:
@@ -209,7 +214,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             budget = s['_alloc'] if mode == 'pooled' else s['own']
             if budget <= 0:
                 continue
-            shares = budget / (bid + COMM)
+            px = min(bid, nd['O'][i])          # limit above the open fills at the open
+            shares = budget / (px + COMM)
             cost = budget
             target = bid + nd['C'][i - 1] * s['prem']
             if mode == 'pooled':
@@ -218,7 +224,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 s['own'] = 0.0
             fills += 1
             # verified same-day exit
-            if nd['H'][i] >= target - 1e-12 and nd['chk'](i, bid, target):
+            if nd['H'][i] >= target - 1e-12 and nd['chk'](i, px, target):
                 proceeds = shares * (target - COMM)
                 if mode == 'pooled':
                     cash += proceeds

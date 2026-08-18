@@ -270,7 +270,15 @@ could automate with an IBKR pre-market snapshot. Cutoff sensitivity (user needs 
 updates): a 09:00 check keeps most of the edge — train 59.5% (best cell anywhere), TEST
 110.7→118.4 (+7.7pp vs +11.7 at 09:25), full 87.3%, maxDD 25.8% (best) — the 09:00–09:25 window
 carries ~4pp of tested-half edge; 08:30 decays to +/-0 (test 108.0). Adopted operating point:
-09:00 cutoff, 4% threshold, upgrade to 09:25 if Script 1 automates the snapshot.
+09:00 cutoff, 4% threshold, upgrade to 09:25 if Script 1 automates the snapshot. Cutoff is NOT
+monotone (09:15 tests below both 09:00 and 09:25) — cells inside the 09:00–09:25 band differ by
+noise; all twelve cells 09:00+ beat baseline on both halves, 08:30 decays to ≈baseline.
+ADJUST-instead-of-exclude variant (raise the bid to PM−clamp% when triggered, fill at the open
+if the raised limit exceeds it): REJECTED — worse than baseline on both halves at every clamp
+(4%→2%: test 110.7→102.7, DD 32.2%; universal PM−2% clamp: test 92.5%, DD 34.5%). Raising the
+bid overrides the k·σ buffer on exactly the high-vol days it exists for: ~130 extra shallow
+fills into falling names. The manual intervention may VETO an order, never AMEND one. book_sim
+gained `bid_fn` (raised limits fill at the open when the open is lower).
 
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
