@@ -253,6 +253,21 @@ information; a judgement-based manual exclusion using live tape is neither valid
 by this, but the fill-rate numbers warn against the 'won't fill anyway' assumption. book_sim
 gained `deep_excl`.
 
+### 3.16 Pre-market exclusion: ADOPTED-QUALITY EVIDENCE — the first overlay to clear both halves
+The user's manual-intervention rule, re-tested with the missing ingredient (user-supplied
+pre-market 5-minute bars, 04:00–09:25, all nine names, data_pm/). Measured against the 09:25
+pre-market price instead of yesterday's close, the §3.15 picture inverts: bids >4% below PM-last
+fill only 13%/6.6%/4.1%/0% of days (4-6/6-8/8-12/>12% depth) and those fills average ~zero or
+negative — adverse-information days, not harvestable dips. RULE: exclude a sleeve's order when
+bid < PM_last×(1−4%); capital pools as normal. Pooled nine-name book: **train 45.4→53.3%, TEST
+110.7→122.4%, maxDD 29.2→27.5%** — a both-halves win, robust across thresholds 3–12% (a plateau,
+not a spike), gains spread over 7 of 9 names (exception RKLB, whose deep fills stay good; no
+per-name exemptions taken — that would be selection). 23.9% of sleeve-days excluded. It survives
+where ten overlays died because it ADDS information the model lacks rather than reshaping the
+harvest. Scripts: `premarket_excl.py`; book_sim gained `excl_fn`. Live implementation: manual at
+09:25 (skip orders with buy < PM×0.96) or an Allocation flag column like the DMA gate; Script 1
+could automate with an IBKR pre-market snapshot.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
