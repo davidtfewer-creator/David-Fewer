@@ -1,0 +1,292 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[letterspace=180]{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{graphicx}
+
+\definecolor{bcnavy}{RGB}{24,38,68}
+\definecolor{bcgold}{RGB}{198,160,74}
+\definecolor{bcteal}{RGB}{23,110,120}
+\definecolor{bcgrey}{RGB}{95,95,95}
+\definecolor{bcred}{RGB}{160,60,50}
+
+\titleformat{\section}{\bfseries\large\color{bcnavy}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\bfseries\color{bcteal}}{}{0em}{}
+\captionsetup{font={footnotesize},labelformat=empty,textfont={color=bcgrey}}
+\newcommand{\tabnote}[1]{\begin{center}\begin{minipage}{0.92\textwidth}
+  \footnotesize\color{bcgrey}#1\end{minipage}\end{center}}
+\newcommand{\good}[1]{{\color{bcteal}\textbf{#1}}}
+\newcommand{\bad}[1]{{\color{bcred}\textbf{#1}}}
+
+\begin{document}
+
+% ---------------------------------------------------------------- cover
+\begin{titlepage}
+\centering
+\vspace*{3.2cm}
+\includegraphics[width=5cm]{bc_logo.pdf}
+
+\vspace{1.6cm}
+{\color{bcnavy}\rule{7cm}{0.6pt}}
+
+\vspace{0.9cm}
+{\LARGE\bfseries\color{bcnavy} The Pre-Market Rule\par}
+\vspace{0.35cm}
+{\large\color{bcnavy} Making the morning intervention mechanical: what was tried\\
+with pre-market data, what failed, and the one rule that cleared\\
+the tested half --- the first overlay to do so in eleven attempts\par}
+
+\vspace{0.9cm}
+{\color{bcgold}\rule{7cm}{1.0pt}}
+
+\vspace{1.5cm}
+{\bfseries Bayesian Capital}\\[0.2cm]
+{\color{bcgrey} Systematic Trading Research}\\[0.9cm]
+{\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
+{\color{bcgrey} 18 August 2026}
+\vfill
+\end{titlepage}
+
+% ---------------------------------------------------------------- header
+\begin{center}
+{\Large\bfseries\color{bcnavy} The Pre-Market Rule}\\[0.15cm]
+{\color{bcnavy} exclude any order whose buy price sits more than 4\% below the
+pre-market price}\\[0.25cm]
+{\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
+\;$\bullet$\; nine-name book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ RKLB $\cdot$ MU
+$\cdot$ GM $\cdot$ VLO $\cdot$ CF $\cdot$ MRVL \;$\bullet$\; all figures on verified fills}
+\end{center}
+\vspace{0.1cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.5cm}
+
+\section{The idea, and why it deserved a proper test}
+
+Every morning sits a manual window between the model's calculations and the
+orders going in, and some orders are visibly dead on arrival: the model's buy
+price sits far below where the stock is actually trading pre-market ---
+information the model, which sees only completed daily bars, does not have. The
+proposal: exclude those sleeves so their capital spreads across orders that can
+actually fill.
+
+Ten structural overlays had been tested against the deployed book and rejected
+--- refits, HAR volatility, the regime gate, vol-scaled premiums, per-stock
+stops, the circuit breaker as bear armour, and others. This one is different in
+kind: it does not reshape how the model harvests; it \textbf{adds information
+the model lacks}. That distinction turns out to be exactly why it is the first
+overlay to survive.
+
+All results below use the standard basis: verified same-day fills from the
+5-minute bars, deployed parameters untouched, the pooled nine-name book (the
+loop the workbook actually trades), everything split at 23~May~2025 with
+selections made on the train half and verdicts read from the frozen tested
+half.
+
+\section{First attempt: depth against yesterday's close --- rejected}
+
+Without pre-market data, ``the bid is too deep'' can only be measured against
+the previous close. On that measuring stick the intuition fails twice over.
+Bids 6--10\% below the close fill about \textbf{one day in five} --- not
+``almost never'' --- and those fills are the book's \emph{better} trades
+(median $+2.7$ to $+2.9\%$ per fill against $+2.2\%$ for shallow bids): the
+model earns precisely by being on the bid through panic days. Excluding them
+costs money: the train-picked threshold lost the tested half ($110.7\%
+\rightarrow 105.3\%$). The idea looked dead.
+
+\section{Second attempt: depth against the pre-market price --- the picture inverts}
+
+Pre-market 5-minute bars (04:00--09:25) were obtained for all nine names. Depth
+re-measured against the last pre-market print --- the true distance to the
+market that morning --- tells the opposite story:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+bid depth vs pre-market & sleeve-days & fill rate & avg ret / fill & median \\
+\midrule
+0 to $-2\%$      & 3{,}186 & 63.9\% & $+1.65\%$ & $+2.32\%$ \\
+$-2$ to $-4\%$   & 3{,}043 & 23.8\% & $+1.78\%$ & $+2.47\%$ \\
+$-4$ to $-6\%$   & 1{,}346 & 13.1\% & $+0.27\%$ & $+2.51\%$ \\
+$-6$ to $-8\%$   & 604     & 6.6\%  & \bad{$-0.51\%$} & $+2.63\%$ \\
+$-8$ to $-12\%$  & 441     & 4.1\%  & $+0.57\%$ & $+2.68\%$ \\
+beyond $-12\%$   & 133     & \bad{0.0\%} & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Bids more than 4\% below the pre-market price rarely fill --- and the rare
+fills are no longer premium: a stock that is trading \emph{up} pre-market and
+still crashes through a deep bid intraday is a news reversal, not a
+harvestable dip (the specific scenario ``bid $>$6\% below close \emph{and}
+pre-market up $>$1\%'' filled 3.2\% of the time at $-2.11\%$ average). The
+previous close mismeasured the distance; the pre-market price measures it
+correctly. The intuition was right all along --- it was pointed at the wrong
+reference price.
+
+\section{The rule, and the result}
+
+\begin{tcolorbox}[colback=bcteal!6, colframe=bcteal, boxrule=0.8pt,
+  title={\bfseries The pre-market rule}, coltitle=white]
+At the morning check, exclude any sleeve whose buy price sits more than
+\textbf{4\% below the last pre-market print}. Its capital pools into the other
+sleeves' orders as normal. Exits, targets and stops are untouched. Veto only
+--- never re-price (\S6).
+\end{tcolorbox}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & full sample & train half & \textbf{tested half (frozen)} & max DD \\
+\midrule
+baseline            & 75.8\%/yr & 45.4\%/yr & 110.7\%/yr & 29.2\% \\
+rule, 09:25 check   & 85.4\% & 53.3\% & \good{122.4\%} & 27.5\% \\
+rule, 09:00 check   & \good{87.3\%} & \good{59.5\%} & \good{118.4\%} & \good{25.8\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A \textbf{both-halves win} --- the first structural overlay to clear that bar
+in eleven attempts. The checks that ten dead overlays taught us to run:
+
+\begin{itemize}
+\item \textbf{Threshold is a plateau, not a spike.} Every threshold from 3\% to
+12\% beats baseline on the tested half, decaying gracefully; 4\% is the
+train half's pick and holds frozen.
+\item \textbf{Gains are spread}: seven of nine names contribute. The exception
+is RKLB, whose deep fills stay good --- no exemption was taken, because
+per-name exemptions chosen after seeing results is selection.
+\item \textbf{Volume}: the rule fires on $\sim$24\% of sleeve-days --- a daily
+discipline, not an occasional call. Trade counts barely fall (601
+$\rightarrow$ 590 buys/yr): the excluded orders mostly weren't filling anyway.
+\end{itemize}
+
+\section{Where the profit actually comes from}
+
+Per name, on the held construction (each sleeve keeping its own capital), the
+rule is roughly neutral to mildly negative --- RKLB gives up the most (tested
+half $159.7\% \rightarrow 109.8\%$), MU and MRVL some. If exclusion merely
+cancelled orders, it would be a small net loss. \textbf{The entire gain lives
+in the pooling}: an excluded sleeve's capital thickens the other sleeves'
+orders the same morning --- orders that are 3--10$\times$ more likely to fill.
+The honest statement of the rule is not ``these deep orders are bad trades'';
+it is \emph{``this capital is badly parked today --- move it behind orders
+that can fill.''}
+
+\tabnote{Implementation consequence: the exclusion must happen BEFORE the
+Allocation sheet renormalises the cash across free sleeves. Cancelling orders
+after allocations are set gives the per-name columns --- slightly worse than
+doing nothing.}
+
+\section{When to check: the cutoff grid}
+
+The 09:25 check is operationally tight for manual updates. The full grid
+(thresholds 3.5/4/5\% at each cutoff, tested half shown):
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+cutoff & tested half (range) & best train & note \\
+\midrule
+09:25 & 118.4--130.7\% & 53.3\% & tightest window \\
+09:15 & 113.2--120.1\% & 50.2\% & \emph{not} between 09:00 and 09:25 \\
+\textbf{09:00} & 114.3--120.1\% & \good{59.5\%} & best train, best drawdown (25.8\%) \\
+08:30 & 108.0--114.2\% & 58.7\% & the edge of the cliff \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cutoff time is \textbf{not monotone} --- 09:15 tests below both its neighbours
+--- which says the cell-to-cell differences inside the 09:00--09:25 band are
+noise, not signal. What is robust: all twelve cells from 09:00 onward beat
+baseline on both halves and cut the drawdown; 08:30 decays to roughly
+baseline (pre-market prices two-plus hours before the open are stale).
+\textbf{Operating point: the 09:00 check, 4\% threshold} --- the strongest
+train half and drawdown, and a relaxed half-hour for the manual update. If the
+check happens at 09:10 or 09:20 on a given morning, essentially nothing is
+lost.
+
+\section{The variant that failed: adjust instead of exclude}
+
+The natural alternative: rather than pulling a too-deep order, \emph{raise} it
+--- bid at 2\% below the pre-market and keep trading. Tested with honest
+execution (a raised limit above the open fills at the open):
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & full & train & tested half & max DD \\
+\midrule
+baseline                      & 75.8\% & 45.4\% & 110.7\% & 29.2\% \\
+\textbf{exclude} (the rule)   & \good{87.3\%} & \good{59.5\%} & \good{118.4\%} & \good{25.8\%} \\
+adjust: raise to PM$-$1\%     & 67.5\% & 31.0\% & 111.8\% & 32.7\% \\
+adjust: raise to PM$-$2\%     & 70.4\% & 42.0\% & \bad{102.7\%} & 32.2\% \\
+adjust: raise to PM$-$3\%     & 77.0\% & 52.1\% & 104.5\% & 29.9\% \\
+clamp every bid at PM$-$2\%   & \bad{57.1\%} & \bad{26.9\%} & \bad{92.5\%} & \bad{34.5\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Adjustment loses on every metric at every clamp level, with the worst
+drawdowns of the study. The mechanics: when the model bids 4\%+ below the
+market, it is because volatility is high that morning --- the $k\sigma$ buffer
+is demanding a deep discount as compensation for knife risk. Raising the bid
+overrides exactly that discipline: it buys at a 2\% discount on the days the
+model priced entry at 6--10\%, adding $\sim$130 shallow fills into falling
+high-volatility names. Exclusion \emph{respects} the model (``your price is
+right but cannot fill today --- stand down''); adjustment \emph{overrides} it
+(``fill anyway, at a worse price than you asked for'').
+
+\begin{tcolorbox}[colback=bcgold!8, colframe=bcgold, boxrule=0.8pt,
+  title={\bfseries The standing discipline}, coltitle=bcnavy]
+The morning intervention may \textbf{veto} an order. It may never
+\textbf{amend} one.
+\end{tcolorbox}
+
+\section{Why this survived when ten overlays died}
+
+Every rejected overlay tried to make the model smarter about its own
+information --- better volatility forecasts, regime awareness, adaptive
+premiums, protective stops --- and each one damaged the harvest it was trying
+to improve. The pre-market rule (like the one earlier survivor, the MU
+earnings pause) does something categorically different: it brings
+\textbf{information the model cannot see} --- where the stock is trading
+before the open --- and applies it as a conservative veto on capital parking,
+touching no bid, no target, no parameter. The lesson for future proposals is a
+useful filter: \emph{overlays that reshape the harvest die; overlays that add
+information and only veto have a chance.}
+
+\section{Implementation}
+
+Manual, from adoption: at 09:00, compare each order row's buy price to the
+pre-market quote; skip any sleeve whose buy sits more than 4\% below it
+($\text{buy} < \text{PM} \times 0.96$), before the allocation renormalises.
+Structured wiring on request: a flag column in the Allocation machine block
+(as the 200dma gate's column G), so a ticked sleeve drops out of the cash
+renormalisation automatically. Upgrade path: if Script~1 pulls a pre-market
+snapshot from IBKR alongside the OHLC, the flags become formulas, the check
+moves to 09:25, and the tested-half edge rises from $+7.7$pp to $+11.7$pp with
+no other change.
+
+\vspace{0.4cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.2cm}
+{\footnotesize\color{bcgrey} Basis: verified same-day fills from 5-minute
+bars; deployed nine-name configuration, pooled equal-weight book; split
+23~May~2025, train-half selection, frozen tested-half verdicts. Pre-market
+bars 04:00--09:25, Apr 2024 -- Aug 2026, all nine names (coverage 447--597
+days/name; names/days without a pre-market print leave the rule inactive).
+Scripts: \texttt{premarket\_excl.py}; \texttt{book\_sim.py} hooks
+\texttt{excl\_fn} / \texttt{bid\_fn}. Findings recorded in HANDOVER
+\S3.15--3.16. Companion papers: \emph{Three Volatility Overlays, Tested and
+Rejected} (14 Aug); \emph{Bear-Market Protection for the Nine-Name Book}
+(15 Aug).}
+
+\end{document}
