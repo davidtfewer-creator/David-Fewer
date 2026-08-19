@@ -280,6 +280,23 @@ bid overrides the k·σ buffer on exactly the high-vol days it exists for: ~130 
 fills into falling names. The manual intervention may VETO an order, never AMEND one. book_sim
 gained `bid_fn` (raised limits fill at the open when the open is lower).
 
+### 3.17 Midday re-pool (13:00 second allocation session): rejected — afternoon top-ups feed faders
+The natural extension of the pre-market rule: at 13:00, cancel unfilled orders deeper than y below
+the tape, re-admit benched sleeves now within y, re-pool freed cash + provably-morning proceeds as
+a top-up at unchanged model prices. Machinery: midday_sim.py (AM/PM segment index with pure
+within-segment suffix maxima; validation with midday off reproduces book_sim to within 0.6pp).
+The diagnostic confirms the dead capital is real — 35% of live order-days fill before 13:00, only
+3.3% first-fill after, and the afternoon fill curve collapses fast (44.9% within 1% of the 13:00
+tape, 12.5% at 1–2%, 3.6% at 2–3%, ~0 beyond) — but redeploying it fails: the train half picks
+y=5%, which LOSES the frozen tested half (117.8→109.9); the cells with tested-half gains (y=1.5–2%,
+125.7–127.9) lose the train half and blow the drawdown to 32–33% (vs 25.8). No cell wins both
+halves; the re-arm variant is categorically bad (87.6% test). Mechanism: at 09:00 freed capital
+spreads across the whole normal book, but at 13:00 the only orders still fillable belong to names
+FALLING that afternoon — the top-up selectively concentrates capital into late-day faders that
+close near their lows (adverse selection + intraday concentration, the April-2025 effect in daily
+miniature). Dead capital earning interest until tomorrow's diversified morning allocation beats
+funding this afternoon's faders. The morning session is where routing decisions belong.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
