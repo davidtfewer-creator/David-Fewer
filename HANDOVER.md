@@ -240,6 +240,15 @@ the range but not the profile. Genuine 30%-gate candidates are scarce by constru
 stays at GM/VLO/CF and the book at nine. Data in data_5min/ ({FCX,NEM,UAL,LEN}_5min.xlsx);
 results in fresh_opt_cands.json.
 
+### 3.14a AVGO integration check under the pre-market rule (19 Aug): watch list stands
+User considered adding AVGO (acknowledged AI trade) given the new 09:00 rule. AVGO PM data added
+(data_pm/AVGO_pm.xlsx, 598 days). Standalone held basis the rule is neutral-to-slightly-negative
+for AVGO (full 52.7→51.7%, test 56.2→54.6%). Marginal book test WITH the rule: 9-name 118.4%
+test / DD 25.8% vs 10-name 112.4% / 24.8% — minus 6.0pp of tested-half return for 1.0pp of
+drawdown. The PM rule does not touch AVGO's actual weaknesses (fresh-fit fragility: A-variant
+test 21.7%; margin at the gate, not through it). G5 fails as before; the scheduled re-test after
+the Sep and Dec 2026 reports stands, and any future re-test inherits the rule automatically.
+
 ### 3.15 Deep-bid exclusion (manual-intervention proxy): rejected — deep bids are good bids
 User intuition: a bid 6–10% below the previous close "almost definitely won't fill", so exclude
 that sleeve and pool its capital. The diagnostic kills the premise: deep bids fill ~1 day in 5
