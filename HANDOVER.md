@@ -297,6 +297,17 @@ close near their lows (adverse selection + intraday concentration, the April-202
 miniature). Dead capital earning interest until tomorrow's diversified morning allocation beats
 funding this afternoon's faders. The morning session is where routing decisions belong.
 
+### 3.18 Fill-probability-weighted allocation: rejected — equal weights stand (again)
+The continuous version of the pre-market rule: weight surviving sleeves' morning allocations by
+their fill probability given depth vs the 09:00 pre-market price. The train-half curve is strong
+and monotone (>=PM: 96.6%, 0-1%: 80.6%, 1-2%: 50.1%, 2-3%: 30.8%, 3-4%: 24.3%) — yet every
+weighting loses the train half (equal 59.5% vs p_fill 54.4%, sqrt 57.1%, p^2 49.9%); the mild
+tested-half gains (+2.8 to +4.5pp) are the familiar unsanctioned-noise pattern. Why a real curve
+doesn't help: the cost of equal-weighting a low-probability order is one day of idle cash at
+interest (tiny), while weighting concentrates capital into near-the-money shallow-dip fills —
+lower margin per fill, less diversification. The binary veto captures everything the curve has to
+give. Consistent with the book-policy optimisation verdict. book_sim gained `weight_fn`.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of

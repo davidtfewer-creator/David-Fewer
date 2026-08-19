@@ -81,7 +81,7 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
-             deep_excl=None, excl_fn=None, bid_fn=None):
+             deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -103,7 +103,9 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     morning (generic hook; used for the pre-market-informed exclusion rules).
     bid_fn: callable(name, i, bid) -> replacement bid (or None to exclude): the
     adjust-instead-of-exclude variant. A raised bid may sit above the day's open;
-    the fill then executes at the open (limit fills at the better price)."""
+    the fill then executes at the open (limit fills at the better price).
+    weight_fn: callable(name, i, bid) -> per-morning relative weight for the
+    sleeve's allocation (fill-probability weighting); overrides static weights."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -159,16 +161,18 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 bid = bid_fn(s['name'], i, bid)
             s['_i'] = i
             s['_bid'] = None if (paused or bid is None or i == 0) else bid
+            s['_w'] = (weight_fn(s['name'], i, s['_bid'])
+                       if (weight_fn is not None and s['_bid'] is not None) else s['w'])
             if not s['holding']:
                 sleeve_days += 1
                 if s['_bid'] is not None:
                     active.append(s)
         free_days += len(active)
         if mode == 'pooled' and active:
-            wsum = sum(s['w'] for s in active)
+            wsum = sum(s['_w'] for s in active)
             bmul = breaker[2] if (breaker is not None and bk_tripped) else 1.0
             for s in active:
-                a = cash * s['w'] / wsum * bmul
+                a = cash * s['_w'] / wsum * bmul
                 if cap_frac is not None:
                     a = min(a, cap_frac * cash)
                 s['_alloc'] = a
