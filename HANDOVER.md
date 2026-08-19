@@ -240,14 +240,25 @@ the range but not the profile. Genuine 30%-gate candidates are scarce by constru
 stays at GM/VLO/CF and the book at nine. Data in data_5min/ ({FCX,NEM,UAL,LEN}_5min.xlsx);
 results in fresh_opt_cands.json.
 
-### 3.14a AVGO integration check under the pre-market rule (19 Aug): watch list stands
-User considered adding AVGO (acknowledged AI trade) given the new 09:00 rule. AVGO PM data added
-(data_pm/AVGO_pm.xlsx, 598 days). Standalone held basis the rule is neutral-to-slightly-negative
-for AVGO (full 52.7→51.7%, test 56.2→54.6%). Marginal book test WITH the rule: 9-name 118.4%
-test / DD 25.8% vs 10-name 112.4% / 24.8% — minus 6.0pp of tested-half return for 1.0pp of
-drawdown. The PM rule does not touch AVGO's actual weaknesses (fresh-fit fragility: A-variant
-test 21.7%; margin at the gate, not through it). G5 fails as before; the scheduled re-test after
-the Sep and Dec 2026 reports stands, and any future re-test inherits the rule automatically.
+### 3.14a AVGO: re-test scheduled for mid-September 2026 (after the ~4 Sep report)
+User considered adding AVGO (acknowledged AI trade) under the new 09:00 rule; two rounds of
+analysis (19 Aug):
+- **Power-check correction to the June verdict**: AVGO's post-report pause was NOT contradicted
+  by the train half — that half contained only 1 post-report fill (+1.45%) vs the test half's 9
+  fills at −2.25% avg with 3 stops. The pause is reclassified adoptable-with-eyes-open (thin:
+  9 fills, one half) and standalone it lifts AVGO 51.2→64.7% full, 53.7→83.0% test (2-session
+  post-report no-buy; AVGO reports after the close).
+- **But G5 is the binding gate and no pause fixes it**: with the 09:00 rule everywhere and the
+  AVGO pause active, the 10-name book tests 114.0% vs the 9-name book's 118.4% (DD 24.8 vs 25.8)
+  — minus 4.4pp tested-half for 1.0pp of drawdown. Without the pause it is −6.0pp. AVGO
+  re-concentrates the AI factor at below-book-average margin. Fresh-fit fragility stands
+  (A-variant test 21.7%).
+**Agreed plan (user, 19 Aug): wait for the ~4 Sep 2026 report, then re-test** — it adds a tenth
+post-report window to the thin 9-fill pause case. Re-test recipe: refresh AVGO 5-min + PM data
+through ~mid-Sep, re-run the pause decomposition (earnings_pause + the per-half fill counts),
+re-run the marginal book test (book_sim, 09:00 rule both sides, AVGO pause on); admit only if the
+10-name book stops losing to the 9-name book. Data staged: data_5min/AVGO_5min.xlsx,
+data_pm/AVGO_pm.xlsx (598 days); params = fresh_opt_cands.json AVGO reference vec.
 
 ### 3.15 Deep-bid exclusion (manual-intervention proxy): rejected — deep bids are good bids
 User intuition: a bid 6–10% below the previous close "almost definitely won't fill", so exclude
