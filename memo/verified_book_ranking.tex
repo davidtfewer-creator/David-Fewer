@@ -50,7 +50,8 @@ ranking,\\ and what goes into the book\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 9 August 2026 --- section 7 revised 14 August 2026 (MRVL admission)}
+{\color{bcgrey} 9 August 2026 --- \S7 revised 14 August 2026 (MRVL admission) ---
+\S8 added 19 August 2026 (adopted rules; execution-accurate figures)}
 \vfill
 \end{titlepage}
 
@@ -355,6 +356,95 @@ recover --- the single-name risk the eight-name structure dilutes least. Third, 
 and CF share the energy complex (0.41 correlation between them), so the three
 additions contribute nearer two-and-a-half independent names than three.
 
+\section{The book after the August rules --- and the execution-accurate figures}
+
+(Added 19 August 2026.) Two things changed since \S7: a set of structural rules
+was adopted and wired into the live workbook, and an execution fact surfaced
+that shows every figure in this memo to be conservative.
+
+\subsection{Rules adopted since the admissions}
+
+\begin{itemize}
+\item \textbf{The 200dma gate} (bear armour): no new bids in a name whose last
+close sits below its trailing 200-day average; gated capital pools to the other
+sleeves. In the 2022 replay it turns the book's $-21.9\%$ bear year into
+$-2.6\%$; in the pooled 2024--26 loop it is approximately free. Wired
+(Allocation col G); VST opened gated at adoption.
+\item \textbf{The pre-market rule} (09:00, 4\%): no order whose buy price sits
+more than 4\% below the 9:00 pre-market print --- capital pools as normal. The
+first overlay in eleven attempts to improve \emph{both} halves (pooled book,
+train $45.4 \to 59.5\%$, tested half $110.7 \to 118.4\%$/yr). Wired
+(Allocation col H off the new order-block col P); veto only, never re-price.
+\item \textbf{The ATH gate} ($\varepsilon = 0$): every buy additionally capped
+at $\text{ATH} \times (1-\varepsilon) - \text{prev close} \times \text{premium}$,
+so no trade is constructed whose exit needs a print above the all-time high.
+Measured $\approx$free; removes the above-ATH-exit trap. Wired (Dashboard buys;
+$\varepsilon$ in the Gate Variables block).
+\item \textbf{The MU earnings pause} (P3: report week $\pm$ a week): the one
+pause that improved both halves ($+5.2$pp at book level). Adopted in analysis;
+operated manually pending workbook wiring.
+\end{itemize}
+
+\subsection{The execution-accurate correction}
+
+The resting sell is a \emph{limit} order: when a held position gaps up
+overnight and the open exceeds the target, the live fill is the open --- every
+model figure in this memo books it at the target. Measured on the deployed
+book, \textbf{22\% of held-position exits (189 of 843) gapped over their
+targets}, at an average uplift of $+0.7$ to $+2.4\%$ per exit. The live book
+has always earned this; the research engine now counts it. Tested half, held
+basis, by name:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+ & sheet convention & execution-accurate & gap exits / held exits \\
+\midrule
+TSM  &  80.7\% &  98.7\% & 39/129 \\
+VRT  & 157.4\% & 191.7\% & 29/99 \\
+VST  &  46.2\% &  54.1\% & 17/88 \\
+RKLB & 159.7\% & 182.4\% & 19/115 \\
+MU   & 148.5\% & \textbf{194.7\%} & 27/88 \\
+GM   &  56.5\% &  61.8\% & 14/85 \\
+VLO  & 137.9\% & 142.6\% & 9/76 \\
+CF   &  54.7\% &  59.0\% & 4/56 \\
+MRVL & 191.3\% & \textbf{244.5\%} & 31/107 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At book level, pooled, with the adopted rules active:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & full sample & train half & tested half & max DD \\
+\midrule
+sheet convention        & 87.3\%/yr & 59.5\%/yr & 118.4\%/yr & 25.8\% \\
+\textbf{execution-accurate} & \textbf{106.0\%/yr} & \textbf{74.1\%/yr} & \textbf{141.8\%/yr} & 25.5\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{The planning figures in \S7 are left unchanged and should continue to
+anchor expectations --- they are now known to be conservative by roughly this
+margin. The correction is an execution fact, not an edge claim: every A-vs-B
+comparison behind this memo's decisions measured both sides on the same
+(conservative) convention, so no verdict changes. The effect concentrates in
+the long-hold AI names (MU, MRVL, VRT), whose seats it strengthens.}
+
+\subsection{Watch list}
+
+The August diversifier round (FCX, NEM, UAL, LEN) admitted nothing --- the
+structural finding is that names volatile enough to pay the premium are
+AI-correlated in this sample, and the one genuine diversifier (LEN) is too
+quiet to clear the 30\% gate. \textbf{NEM} sits on the watch list (balanced
+35--48\% honest fits against the 50\% gate its 0.27 AI beta imposes; re-test
+end-Q1 2027). \textbf{AVGO} re-tests mid-September 2026, after its
+$\approx$4~September report adds a tenth post-report window to its
+pause case; the admission bar is unchanged --- the ten-name book must stop
+losing to the nine-name book on the tested half.
+
 \vspace{0.5cm}
 {\color{bcnavy}\hrule height 0.8pt}
 \vspace{0.2cm}
@@ -362,7 +452,10 @@ additions contribute nearer two-and-a-half independent names than three.
 \texttt{fresh\_opt.py} (protocol and variants), \texttt{fresh\_opt\_cands.py}
 (candidate sweep), \texttt{rank\_book.py} (ranking), \texttt{rolling\_mle.py} and
 \texttt{mle\_homogeneity.py} (drift study), \texttt{live5\_load.py} (workbook
-mirror check), \texttt{minute\_index.py} (5-minute fill verification). Derived
-data and price extracts are untracked by design.}
+mirror check), \texttt{minute\_index.py} (5-minute fill verification),
+\texttt{bear\_replay.py} (2022 replay), \texttt{premarket\_excl.py} (pre-market
+rule), \texttt{book\_sim.py} (pooled simulator; \texttt{gap\_exit} execution
+correction), \texttt{wire\_*.py} (workbook wiring). Derived data and price
+extracts are untracked by design.}
 
 \end{document}
