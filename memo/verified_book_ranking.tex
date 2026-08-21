@@ -300,38 +300,45 @@ and is not to be planned on.
 admissions, all figures on the verified basis:
 
 \begin{center}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
- & full sample & planning & trades/yr & AI $\beta$ & corr to five-book \\
+ & full sample & planning & \textbf{planning (exec.)} & trades/yr & AI $\beta$ & corr to five-book \\
 \midrule
-TSM  &  56\% &  55\% &  92 & 0.69 & 0.47 \\
-VRT  &  58\% &  65\% &  74 & 1.19 & 0.48 \\
-VST  &  50\% &  60\% &  78 & 0.98 & 0.35 \\
-RKLB & 161\% & 156\% & 118 & 0.79 & 0.94 \\
-MU   &  65\% &  61\% &  57 & 1.14 & 0.59 \\
-GM   &  50\% &  33\% &  61 & 0.17 & 0.24 \\
-VLO  &  64\% &  35\% &  35 & 0.11 & 0.04 \\
-CF   &  47\% &  41\% &  27 & $-0.01$ & $-0.01$ \\
-MRVL &  85\% &  78\% &  57 & 0.95 & 0.22 \\
+TSM  &  56\% &  55\% & \textbf{72\%} &  92 & 0.69 & 0.47 \\
+VRT  &  58\% &  65\% & \textbf{84\%} &  74 & 1.19 & 0.48 \\
+VST  &  50\% &  60\% & \textbf{77\%} &  78 & 0.98 & 0.35 \\
+RKLB & 161\% & 156\% & \textbf{174\%} & 118 & 0.79 & 0.94 \\
+MU   &  65\% &  61\% & \textbf{81\%} &  57 & 1.14 & 0.59 \\
+GM   &  50\% &  33\% & \textbf{36\%} &  61 & 0.17 & 0.24 \\
+VLO  &  64\% &  35\% & \textbf{36\%} &  35 & 0.11 & 0.04 \\
+CF   &  47\% &  41\% & \textbf{44\%} &  27 & $-0.01$ & $-0.01$ \\
+MRVL &  85\% &  78\% & \textbf{106\%} &  57 & 0.95 & 0.22 \\
 \midrule
-\textbf{average / total} & \textbf{71\%} & \textbf{65\%} & \textbf{599} & \textbf{0.67} & \textbf{0.37} \\
+\textbf{average / total} & \textbf{71\%} & \textbf{65\%} & \textbf{79\%} & \textbf{599} & \textbf{0.67} & \textbf{0.37} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \tabnote{\textbf{Full sample} is the measured through-cycle verified return of the
-deployed/reference vector --- it carries that vector's fit lookahead and is a
-measurement, not a target. \textbf{Planning} is the figure to plan on: for the
-incumbents the established planning basis (full-sample less the measured
-out-of-sample haircut, per the book specification); for the additions the June
-unseen-window medians, which the new tested numbers are consistent with. On
-planning figures the nine-name book runs $\approx$\textbf{65\%/yr}; the measured
-held construction over the sample gives 72.1\%/yr (the pooled live loop, 75.8\%). Trades/yr is the average
-verified buy count per year; the bottom row is the book's \emph{total},
-$\approx$599 fills a year, about 2.4 per session across the eighteen sleeves.
-Correlations are measured against the \emph{current five-name} book on the tested
-half, so the incumbents' values partly reflect self-correlation; the candidates'
-values are the clean read.}
+deployed/reference vector on the sheet convention (exits booked at the target) ---
+it carries that vector's fit lookahead and is a measurement, not a target.
+\textbf{Planning} is the original planning basis: for the incumbents full-sample
+less the measured out-of-sample haircut, per the book specification; for the
+additions the June unseen-window medians. \textbf{Planning (exec.)} --- added
+19~August --- restates each plan on the execution-accurate basis (\S8): the
+planning anchor scaled by that name's own measured full-sample gap-exit uplift
+(resting limit sells fill at the open when gapped over; TSM $\times$1.31, VRT
+$\times$1.29, VST $\times$1.28, RKLB $\times$1.12, MU $\times$1.33, GM
+$\times$1.09, VLO $\times$1.03, CF $\times$1.06, MRVL $\times$1.36). No
+re-fitting anywhere --- the same frozen vectors, correctly executed. On
+execution-accurate planning the nine-name book runs
+$\approx$\textbf{79\%/yr} (sheet-convention planning 65\%); the measured pooled
+live loop with the adopted rules gives 106\%/yr full-sample (\S8). Trades/yr is
+the average verified buy count per year; the bottom row is the book's
+\emph{total}, $\approx$599 fills a year, about 2.4 per session across the
+eighteen sleeves. Correlations are measured against the \emph{current
+five-name} book on the tested half, so the incumbents' values partly reflect
+self-correlation; the candidates' values are the clean read.}
 
 \subsection{The book's weighting to the AI trade after admission}
 
@@ -345,7 +352,7 @@ the measured effects remain the June study's: book beta $0.58 \to 0.41$,
 full-sample drawdown $39.3\% \to 29.7\%$, and the Jan--Apr 2025 stress loss
 $-18.7\% \to -11.8\%$ --- with the MRVL admission consciously buying back four
 points of average beta (0.63 $\to$ 0.67) for a nine-name planning average of
-65\%.
+65\% (79\% on the execution-accurate basis).
 
 Three honest qualifications. First, the AI factor remains the book's single
 dominant risk --- the additions scale that risk down by about a third; they do not
@@ -426,12 +433,13 @@ sheet convention        & 87.3\%/yr & 59.5\%/yr & 118.4\%/yr & 25.8\% \\
 \end{tabular}
 \end{center}
 
-\tabnote{The planning figures in \S7 are left unchanged and should continue to
-anchor expectations --- they are now known to be conservative by roughly this
-margin. The correction is an execution fact, not an edge claim: every A-vs-B
-comparison behind this memo's decisions measured both sides on the same
-(conservative) convention, so no verdict changes. The effect concentrates in
-the long-hold AI names (MU, MRVL, VRT), whose seats it strengthens.}
+\tabnote{The \S7 table now carries both planning columns: the original
+sheet-convention plans and the execution-accurate restatement (each name's
+anchor scaled by its own measured full-sample gap-exit uplift), book average
+65\% $\to$ 79\%/yr. The correction is an execution fact, not an edge claim:
+every A-vs-B comparison behind this memo's decisions measured both sides on the
+same (conservative) convention, so no verdict changes. The effect concentrates
+in the long-hold AI names (MU, MRVL, VRT), whose seats it strengthens.}
 
 \subsection{Watch list}
 
