@@ -81,7 +81,8 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
-             deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None):
+             deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
+             gap_exit=False):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -105,7 +106,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     adjust-instead-of-exclude variant. A raised bid may sit above the day's open;
     the fill then executes at the open (limit fills at the better price).
     weight_fn: callable(name, i, bid) -> per-morning relative weight for the
-    sleeve's allocation (fill-probability weighting); overrides static weights."""
+    sleeve's allocation (fill-probability weighting); overrides static weights.
+    gap_exit: True books a held position's target exit at max(target, open) --
+    the resting limit sell was live at the open, so an overnight gap above the
+    target fills at the open. Execution-accuracy correction, default off."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -190,7 +194,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             if ps_level is not None and nd['L'][i] <= ps_level + 1e-12:
                 px = O if O <= ps_level else ps_level     # stop wins ties, pessimistic
             elif H >= s['target'] - 1e-12:
-                px = s['target']
+                px = max(s['target'], O) if gap_exit else s['target']
             elif stop:
                 px = O
             if px is not None:

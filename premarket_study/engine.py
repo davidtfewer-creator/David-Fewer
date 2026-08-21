@@ -59,7 +59,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               cc_up=None, cc_down=None, no_buy=None,
               cap_on_target=False, ath_target_guard=None,
               F_series=None, ou_sig_series=None, k_mult=None,
-              prem_mult=None, price_stop=None) -> Result:
+              prem_mult=None, price_stop=None, gap_exit=False) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -98,6 +98,11 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         vol-scaled-premium study. NOTE: cap_on_target /
                         ath_target_guard cap arithmetic still assumes the fixed
                         premium; do not combine.
+      gap_exit       -> True books a held position's target exit at max(target, open):
+                        the resting limit sell was live at the open, so a gap above
+                        the target fills at the open (better price). Applies only to
+                        positions held from a prior day; same-day round trips place
+                        the sell after the fill. Default False reproduces the sheet.
       price_stop     -> float fraction (e.g. 0.20): a stop-loss at buy_px*(1-frac),
                         firing whenever the day's low reaches it BEFORE the 50-day
                         time stop. Fill at the stop level, or at the open if the
@@ -233,6 +238,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
 
     def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None,
                     pm=None):
+        # gap_exit is read from the enclosing scope
         # cc_up / cc_down: close-conditional premium. On the fill day the target is the usual
         # bid + prevclose*prem. At that day's CLOSE we observe where the stock finished relative
         # to the fill and amend the resting sell for the following days: multiply the premium by
@@ -310,7 +316,12 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         ps_ambig += 1
                     AC[i] = O[i] if O[i] <= ps_level else ps_level
                 else:
-                    AC[i] = O[i] if (held and H[i] < AB[i]) else AB[i]
+                    if held and H[i] < AB[i]:
+                        AC[i] = O[i]
+                    elif gap_exit and AE[i - 1] == 1 and O[i] > AB[i]:
+                        AC[i] = O[i]          # resting limit gapped over at the open
+                    else:
+                        AC[i] = AB[i]
             else:
                 AC[i] = None
             # hold flag

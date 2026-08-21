@@ -260,6 +260,20 @@ re-run the marginal book test (book_sim, 09:00 rule both sides, AVGO pause on); 
 10-name book stops losing to the 9-name book. Data staged: data_5min/AVGO_5min.xlsx,
 data_pm/AVGO_pm.xlsx (598 days); params = fresh_opt_cands.json AVGO reference vec.
 
+### 3.19 Gap-exit correction: the sheet understates the live book by ~20pp/yr (execution fact)
+User observation (19 Aug): the resting SELL is a limit order, so when a held position gaps up
+overnight and the OPEN exceeds the target, the live fill is the open — the model books it at the
+target. Engine/book_sim gained `gap_exit` (held-position target exits book at max(target, open);
+same-day round trips unaffected; default False keeps the sheet convention — mirror re-verified
+exact). Measured on deployed params, verified fills: **189 of 843 held exits (22%) gapped over
+the target**, average uplift +0.7% to +2.4% per exit by name. Book pooled with the live config
+(09:00/4% PM rule): full 87.3→106.0%, train 59.5→74.1%, TEST 118.4→141.8%, maxDD unchanged
+(25.8→25.5). Per-name tested half: MU 148.5→194.7, MRVL 191.3→244.5, VRT 157.4→191.7. This is
+an execution-accuracy correction, not an edge claim: every historical backtest number in this
+file understates the live book accordingly, and all A-vs-B comparisons remain valid because both
+sides were measured on the same (conservative) convention. The workbook Model sheets still book
+target exits at the target — the blotter, which records actual fills, is the truth there.
+
 ### 3.15 Deep-bid exclusion (manual-intervention proxy): rejected — deep bids are good bids
 User intuition: a bid 6–10% below the previous close "almost definitely won't fill", so exclude
 that sleeve and pool its capital. The diagnostic kills the premise: deep bids fill ~1 day in 5
