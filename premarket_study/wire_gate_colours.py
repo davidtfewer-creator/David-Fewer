@@ -14,11 +14,16 @@ import sys
 
 import openpyxl
 from openpyxl.formatting.rule import FormulaRule
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import PatternFill
 
-GREEN = dict(fill=PatternFill('solid', fgColor='C6EFCE'), font=Font(color='006100'))
-ORANGE = dict(fill=PatternFill('solid', fgColor='FFD9B3'), font=Font(color='9C5700'))
-RED = dict(fill=PatternFill('solid', fgColor='FFC7CE'), font=Font(color='9C0006'))
+# NB: conditional-formatting (dxf) fills need BOTH colours set or Excel renders
+# only the font part -- cell backgrounds, no font colouring (user preference).
+def _fill(rgb):
+    return PatternFill(fill_type='solid', start_color=rgb, end_color=rgb, bgColor=rgb)
+
+GREEN = dict(fill=_fill('C6EFCE'))
+ORANGE = dict(fill=_fill('FFD9B3'))
+RED = dict(fill=_fill('FFC7CE'))
 
 
 def wire(in_path, out_path):
@@ -28,8 +33,7 @@ def wire(in_path, out_path):
     assert at['M7'].value is not None            # ATH epsilon lives here
 
     def rule(formula, style):
-        return FormulaRule(formula=[formula], stopIfTrue=True,
-                           fill=style['fill'], font=style['font'])
+        return FormulaRule(formula=[formula], stopIfTrue=True, fill=style['fill'])
 
     at.conditional_formatting.add(
         'N19:N36', rule('AND(ISNUMBER($N19),$J19<=$N19)', RED))
