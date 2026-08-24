@@ -51,7 +51,7 @@ and the 200-day moving-average gate\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 15 August 2026 --- gate adopted and wired the same day (\S7)}
+{\color{bcgrey} 15 August 2026 --- gate adopted and wired the same day (\S7);\\execution-accurate restatement added 19 August (\S8)}
 \vfill
 \end{titlepage}
 
@@ -482,6 +482,41 @@ On the adoption date, one of the nine names opened gated: \textbf{VST} (close
 146.40 against a 200dma of 161.37). Its two sleeves show fund 0 / Qty 0 and its
 cash spreads across the other eight names --- the gate operating as designed, not
 an error. The other eight names sat above their averages.
+
+\section{Execution-accurate restatement (added 19 August)}
+
+After this paper was issued, an execution fact was incorporated into the
+research engine: the resting sell is a \emph{limit} order, so a held position
+that gaps above its target overnight fills at the \emph{open}, not the target
+--- every figure above books it at the target and is therefore conservative
+(22\% of the book's held exits gapped over their targets in 2024--26). The
+replay was re-run on the corrected basis. \textbf{Every conclusion and every
+ordering in this paper is unchanged}; the levels move as follows.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{calendar 2022} & \multicolumn{2}{c}{Jan 2022 -- Jun 2023} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+config (exec.-accurate) & return & max DD & total & max DD \\
+\midrule
+nothing            & $-20.1\%$ & 27.4\% & $-3.3\%$  & 27.4\% \\
+\textbf{200dma gate} & \good{$-1.3\%$} & \good{16.9\%} & \good{$+13.0\%$} & 16.9\% \\
+breaker 15\%/half  & $-16.8\%$ & 24.8\% & $-2.9\%$  & 24.8\% \\
+gate $+$ breaker   & $-9.7\%$  & 20.0\% & $+3.4\%$  & 20.0\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{Compare \S5: the corrections are small in the bear year (a falling
+tape produces few overnight gaps above targets) and favour the gate slightly
+--- its 2022 outcome improves to $-1.3\%$ and its Jan~2022--Jun~2023 total to
+$+13.0\%$. On the bull side (2024--26, no pre-market rule, matching \S4's
+basis) the corrected pooled book runs 91.4\%/yr without the gate and
+93.3\%/yr with it --- the gate's $\approx$zero pooled cost is confirmed and
+now mildly positive --- while the April 2025 concentration episode persists
+unchanged in character ($-28.7\%$ ungated vs $-31.8\%$ gated). The
+recommendation stands exactly as adopted.}
 
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}
