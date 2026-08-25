@@ -96,8 +96,8 @@ name: Bayesian (Kalman) learning + OU mean reversion. Limit bid a
 volatility buffer below fair; fixed premium exit; 50-day stop. Turnover is the
 compounding engine.};
 \node[st, right=1.1cm of s1] (s6) {{\tt 6 } \textbf{Incorporation.} A trading
-company: Irish CT at 12.5\% keeps the compounding inside the vehicle ---
-structure serving the maths.};
+company: profits compound \emph{gross} all year; Irish CT is a single 12.5\%
+year-end payment --- structure serving the maths.};
 \node[st, below=of s6] (s7) {{\tt 7 } \textbf{Honesty \& gates.} Verified fills
 (sheet numbers $\sim$3$\times$ overstated); refitting retired (fails out of
 sample everywhere); one true bug fixed (OU sigma); the G0--G5 admission gates
@@ -191,13 +191,19 @@ engine}: hundreds of verified fills a year at a few percent each, recycled.
 
 \section{Incorporation: structure serving the maths}
 
-Compounding at this cadence is a tax problem before it is anything else. A
-trading company under \textbf{Irish corporation tax at 12.5\%} retains
-87.5~cents of every realised euro for redeployment, against roughly half that
-retention under personal rates --- over years of compounding, the difference
-is not marginal, it is the difference between the strategy working and not.
-Incorporation (with trading badges and IBKR execution) made the vehicle match
-the strategy: realised gains stay in the pot, the pot stays in the market.
+Compounding at this cadence is a tax problem before it is anything else, and
+the corporate structure solves it twice over. First, \textbf{timing}:
+corporation tax is payable after the year end, so every realised gain
+compounds \emph{gross} for the rest of the trading year --- hundreds of round
+trips recycle their full proceeds, and the tax is a single 12.5\% bullet on
+the year's profit, after which the machine restarts. For a strategy whose
+engine is turnover, deferring the drag from every-trade to once-a-year is
+worth real compounding, and it is precisely what makes daily trading
+tax-viable. Second, \textbf{rate}: Irish CT at 12.5\% against roughly half
+retention under personal rates --- over years, the difference between the
+strategy working and not. Incorporation (with trading badges and IBKR
+execution) made the vehicle match the strategy: gains compound untouched all
+year, one payment settles the state, the pot stays in the market.
 
 \section{Honesty and gates: the research discipline}
 
@@ -258,7 +264,8 @@ premiums (the fixed premium is a turnover engine), per-stock price stops
 (right trigger, weak action), a midday re-pool (afternoon capital can only
 chase fallers), fill-probability weighting (equal weights stand), and
 Schwartz--Smith as a third sleeve or OU replacement (all fair-value sleeves
-correlate $\sim$0.85 --- a third estimator is dilution). The meta-lesson,
+correlate $\sim$0.85 --- a third estimator is dilution). Each of the ten is
+dissected in Appendix~A. The meta-lesson,
 earned ten times: \textbf{overlays that reshape the harvest die; overlays
 that add information and only veto have a chance --- and a veto may cancel an
 order, never re-price it.}
@@ -296,6 +303,131 @@ real (verified fills), improved only where evidence survives both halves
 (vetoes, not re-fits), and stress-tested against the regime that hasn't
 happened yet (2022 replay). Each stage was forced by the failure mode of the
 one before it.
+\end{tcolorbox}
+
+\appendix
+\section{Appendix: the ten rejected attempts, one by one}
+
+The three adopted vetoes owe their credibility to what was refused. Every
+proposal below ran the same protocol as everything else in this document:
+verified fills only, any free parameter chosen on the train half and frozen,
+scored on the untouched tested half, adopted only on a both-halves win. Ten
+proposals --- several of them the ``obvious'' improvements a quant reviewer
+would suggest first --- failed that bar, each with a specific, understood
+mechanism. In roughly the order attempted:
+
+\textbf{A1. Parameter re-fitting.} Re-optimise the model's parameters on
+recent data as conditions evolve. The oldest and most repeated failure:
+refitting beat frozen parameters in \textbf{1 of 18} weekly folds and
+\textbf{6 of 40} daily folds, and lost every fresh-protocol comparison since;
+likelihood tests find the price process homogeneous, so the searches were
+fitting noise. \emph{Mechanism:} in-sample flexibility is out-of-sample
+fragility. The standing law --- structural changes can survive; parameter
+searches do not --- is the filter every later proposal passed through.
+
+\textbf{A2. Schwartz--Smith two-factor sleeve.} A richer mean-reversion
+model (short-term deviations around a stochastic long-run level) as a third
+sleeve or an OU replacement. Fails walk-forward on the book (5 of 15 folds);
+and the structural finding is broader: \emph{all} fair-value sleeves
+correlate $\sim$0.85, so a third estimator is dilution, not diversification.
+(Suggestive as a Bayes \emph{replacement} on TSLA only --- selectivity, not
+forecasting --- but not enough to re-admit the name.)
+
+\textbf{A3. HAR realised-volatility sigma.} Replace the day's range and the
+AR(1) residual sigma with a genuinely better volatility forecast built from
+the five-minute bars. The forecast \emph{is} better (out-of-sample $R^2$
+0.315 vs 0.127 for lag-1) --- and the trading is worse: as a drop-in, 7 of 9
+names lose the tested half (RKLB $-42$pp, MRVL $-56$pp); refit, 0 of 9 beat
+deployed. \emph{Mechanism:} the buffers are co-adapted to the range's spiky
+dynamics --- yesterday's shock widens today's buffer exactly after shocks,
+where a mean-reverting forecast shrinks back toward normal too fast. The
+model monetises the range's contemporaneous link to next-day dip depth, not
+forecast accuracy.
+
+\textbf{A4. Volatility-regime gate.} A hidden-Markov detector for the
+stressed regime, pausing or shrinking entries when stress probability is
+high. The diagnostic killed the premise before the overlay could: stressed-%
+regime entries are the \emph{better} trades in 8 of 9 names (MRVL $+3.48\%$
+vs $+1.87\%$ calm; CF $+3.95\%$ vs $+2.37\%$) and carry fewer stops. Pausing
+butchers the tested half (MRVL 191\%$\to$77\%). \emph{Mechanism:} the book's
+edge is buying panic; the stressed state is where it gets paid. Stress is
+the product, not the hazard.
+
+\textbf{A5. Vol-scaled take-profit premium.} The buy side is vol-aware
+($k\sigma$); let the exit premium breathe with entry volatility too. The
+intuition half-survives --- high-$\sigma$ entries really do leave 2--3$\times$
+more headroom above the fixed target --- but harvesting it fails: the train
+half picks $\alpha=0$ (fixed premium) in 7 of 9 names, and the exceptions are
+cautionary tales (RKLB train-picked $\alpha=0.75$ for $+32$pp in sample; the
+frozen test collapsed 160\%$\to$71\%). \emph{Mechanism:} high-$\sigma$ fills
+at the fixed premium exit in 2--6 days; fattening the target converts quick
+recycles into multi-day holds, and the foregone turnover costs more than the
+extra premium collects. The fixed premium is a turnover engine.
+
+\textbf{A6. Per-stock price stops.} Exit at $-20\%$ whenever it arrives
+before the 50-day time stop. In the bull the stop charges double-digit
+points a year on the AI names --- most trades that touch $-20\%$ are rescued
+by day 50, so the stop crystallises troughs. In the replayed 2022 bear it
+buys almost nothing: the proceeds recycle into another falling name's bid
+the next morning and stop again (the \emph{treadmill}); a $-25\%$ stop
+stacked on the other protections moved the year from $-10.2\%$ to $-9.9\%$.
+\emph{Mechanism:} a stop changes when a loss is booked, not whether the
+capital re-enters the decline.
+
+\textbf{A7. The circuit breaker as bear armour.} A book-level trip (equity
+$-15\%$ from peak $\Rightarrow$ half-size entries until recovery). In 2022
+it saves only 3.7pp ($-18.2\%$ vs $-21.9\%$ unprotected) --- half-sizing
+neither exits held losers nor stops the treadmill --- and \emph{stacked on
+the 200dma gate it is worse than the gate alone} ($-10.2\%$ vs $-2.6\%$),
+because it half-sizes exactly the diversifier entries the gate's rotation
+was winning with. \emph{Mechanism:} right trigger, weak action. Its residual
+niche is the fast crash the 200dma is too slow to see (it fired in April
+2025 when the gate barely moved) --- kept as a concept, not stacked.
+
+\textbf{A8. Deep-bid exclusion against the previous close.} Skip orders
+resting 6\%+ below yesterday's close --- ``they almost definitely won't
+fill'' --- and pool the capital. The diagnostic inverted the premise: deep
+bids fill about one day in five, and their fills are the book's
+\emph{better} trades (median $+2.7$--$2.9\%$ vs $+2.2\%$ shallow). The
+train-picked threshold loses the tested half (110.7\%$\to$105.3\%).
+\emph{Mechanism:} yesterday's close is information the model already has.
+The same idea measured against this morning's pre-market print --- which the
+model cannot see --- became the adopted 9:00 rule. The failure and the
+success differ only in whether the veto adds information.
+
+\textbf{A9. The midday re-pool.} A second allocation session at 13:00:
+cancel orders far below the tape, re-pool the freed cash and the morning's
+proceeds. The dead capital is real (35\% of filling orders fill before
+13:00, 3.3\% after) --- but no grid cell wins both halves: the train pick
+loses the test (117.8\%$\to$109.9\%), and the cells that gain on the test
+blow drawdown to 32--33\%. \emph{Mechanism:} at 9:00 freed capital spreads
+across the whole book; by 13:00 the only orders still fillable belong to
+names falling \emph{that afternoon} --- the top-up selectively funds the
+day's faders. Adverse selection in daily miniature.
+
+\textbf{A10. Fill-probability-weighted allocation.} The continuous version
+of the pre-market rule: weight each morning's allocations by fill
+probability given depth versus the 9:00 print. The probability curve is
+real and monotone (from 96.6\% at-the-money to 24.3\% at 3--4\% depth) ---
+yet every weighting loses the train half (equal 59.5\% vs 49.9--57.1\%).
+\emph{Mechanism:} equal-weighting a low-probability order costs one day of
+idle cash at interest; weighting toward near-the-money orders concentrates
+capital into shallow, low-margin fills and gives up diversification. The
+binary veto captures everything the curve has to give.
+
+\begin{tcolorbox}[colback=bcnavy!5, colframe=bcnavy, boxrule=0.8pt,
+  title={\bfseries What the graveyard teaches}, coltitle=white]
+Three regularities cover all ten. \textbf{(i)} Anything that re-shapes how
+the model harvests --- its sigma, its premium, its exits, its sizing ---
+loses, because the deployed mechanism is co-adapted and the ``improvement''
+breaks the adaptation. \textbf{(ii)} Anything justified by a true diagnostic
+can still fail as a policy: the headroom (A5), the dead capital (A9) and the
+fill curve (A10) are all real, and all three overlays lost. Diagnostics
+license a test, never an adoption. \textbf{(iii)} The only survivors add
+information the model cannot see and act by veto --- and even then the veto
+may only \emph{cancel} an order, never amend it: the raise-the-bid variant
+of the pre-market rule lost both halves at every clamp. Ten funerals are why
+the three living rules are trusted.
 \end{tcolorbox}
 
 \vspace{0.4cm}

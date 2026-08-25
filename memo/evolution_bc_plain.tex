@@ -92,8 +92,8 @@ and can't be trusted statistically.};
 gets two models estimating a fair price. Each rests a buy order below fair,
 sells at a small fixed profit, and repeats --- hundreds of trades a year.};
 \node[st, right=1.1cm of s1] (s6) {{\tt 6 } \textbf{The company.} Trade
-inside an Irish company taxed at 12.5\%, so most of every profit stays in the
-pot and keeps compounding.};
+inside an Irish company: profits compound untaxed all year, then one 12.5\%
+tax payment at year end --- and the machine restarts.};
 \node[st, below=of s6] (s7) {{\tt 7 } \textbf{Getting honest.} Minute-level
 data proved our spreadsheet returns were $\sim$3$\times$ too optimistic ---
 fixed. Re-tuning parameters never helped out of sample --- banned. Strict
@@ -186,14 +186,20 @@ quick fixed profits, hundreds of times a year.}
 
 \section{The company: keeping the compounding}
 
-Compounding only works if profits stay in the pot. Realised trading gains
-inside an \textbf{Irish trading company are taxed at 12.5\%} --- so 87.5 cents
-of every euro earned goes straight back to work, versus roughly half under
-personal tax rates. Over years, that difference decides whether compounding
-snowballs or stalls. The company isn't paperwork; it's part of the maths.
+Compounding only works if profits stay in the pot --- and \emph{when} tax is
+paid matters as much as how much. Corporation tax isn't taken out of each
+trade; it's \textbf{one bill at the end of the tax year}. So every profit we
+make in January is still working for us in February, March and December ---
+the full amount, compounding trade after trade. At year end the company pays
+\textbf{12.5\%} of the year's profit in one go, and the machine starts again.
+That timing is a perfect fit for a strategy that trades every day: hundreds of
+small wins compound gross all year instead of being clipped one by one. And
+the rate itself --- 12.5\% versus roughly half under personal taxes --- decides
+over the years whether the snowball grows or stalls. The company isn't
+paperwork; it's part of the maths.
 
-\oneline{At 12.5\% tax, seven-eighths of every profit goes back into the
-machine.}
+\oneline{Profits compound untouched all year; the tax is one 12.5\% bill at
+year end --- then we go again.}
 
 \section{Getting honest}
 
@@ -229,7 +235,8 @@ With parameters frozen, we spent weeks trying to make the models cleverer:
 better volatility forecasts, market-regime detectors, adaptive profit
 targets, stop-losses, and a more sophisticated mean-reversion model
 (Schwartz--Smith). \textbf{All ten failed our tests} --- each one damaged the
-simple harvest it tried to improve.
+simple harvest it tried to improve. (The appendix walks through all ten,
+one by one, with what each taught us.)
 
 What worked was different: moving \emph{capital} more intelligently. Our
 workbook pools each morning's cash across whichever stocks are free to trade
@@ -309,6 +316,100 @@ is re-checkable: every claim reproduces from code and data. And when the
 regime changes, our protection was tested on a real bear market, not a
 story.
 \end{tcolorbox}
+
+\appendix
+\section{Appendix: the ten ideas that didn't make it}
+
+Every idea below sounded sensible --- several are what a professional quant
+would suggest first. Each one was tested the same way: tune it on the first
+half of our data, freeze it, and only believe what it does on the second
+half. All ten failed. Knowing \emph{why} each failed is half of what makes
+the three surviving rules trustworthy --- so here they are, in roughly the
+order we tried them.
+
+\textbf{1. Re-tuning the dials.} \emph{The idea:} markets change, so
+re-optimise the model's settings on recent data. \emph{What happened:}
+re-tuned settings beat the frozen ones in 1 test out of 18 on the weekly
+model and 6 out of 40 on the daily one --- re-tuning almost always made
+things worse on data it hadn't seen. \emph{The lesson:} flexibility in the
+rear-view mirror is fragility out the windscreen. Parameters stay frozen;
+only structural rules can change.
+
+\textbf{2. A fancier mean-reversion model (Schwartz--Smith).} \emph{The
+idea:} replace or supplement our simple mean-reversion model with a more
+sophisticated two-factor one. \emph{What happened:} it lost most of its
+head-to-head tests, and we discovered all our fair-value models agree about
+85\% of the time anyway --- a third opinion that mostly repeats the first
+two adds nothing. \emph{The lesson:} more sophistication is not more
+information.
+
+\textbf{3. A better volatility forecast.} \emph{The idea:} the model uses
+yesterday's price range as its volatility guess; replace it with a genuinely
+superior statistical forecast. \emph{What happened:} the forecast really was
+more accurate --- and the trading got \emph{worse} in 7 stocks out of 9.
+\emph{The lesson:} the model was never using the range as a forecast; it
+uses it as a same-day panic gauge. A smoother, ``better'' number calmed the
+buffers down exactly when they needed to be wide.
+
+\textbf{4. A market-stress detector.} \emph{The idea:} detect when the
+market enters a stressed, high-volatility state and pause buying until it
+calms. \emph{What happened:} the stressed days turned out to be our
+\emph{best} trades in 8 stocks out of 9 --- pausing them would have gutted
+returns. \emph{The lesson:} we are paid for buying panic. Switching off in
+panic is switching off the business.
+
+\textbf{5. Flexible profit targets.} \emph{The idea:} on wilder days,
+ask for a bigger profit before selling --- there's more room. \emph{What
+happened:} the extra room genuinely exists, but waiting for it turned quick
+two-day wins into long, risky holds; in the honest test it lost money
+(one stock's ``improvement'' collapsed from 160\% to 71\%). \emph{The
+lesson:} the small fixed profit target is the engine of the whole machine
+--- it keeps the money moving.
+
+\textbf{6. Stop-losses on each stock.} \emph{The idea:} sell anything down
+20\% rather than wait for the 50-day exit. \emph{What happened:} in the
+bull market it cost double-digit points a year, because most trades that
+touch $-20\%$ recover; in the 2022 bear it saved almost nothing, because
+the freed cash just bought the next falling stock the following morning.
+\emph{The lesson:} a stop-loss changes when you book a loss, not whether
+your capital walks back into the decline.
+
+\textbf{7. The book-wide circuit breaker.} \emph{The idea:} if the whole
+book falls 15\%, halve the size of every new trade until it recovers.
+\emph{What happened:} in the 2022 replay it saved less than 4 points on its
+own --- and combined with our trend rule it made things \emph{worse},
+because it halved exactly the boring-stock trades that were saving the
+year. \emph{The lesson:} right alarm, wrong response. (It stays on the
+shelf for one scenario: a crash too fast for the trend rule to see.)
+
+\textbf{8. Skipping ``hopeless'' orders using yesterday's close.} \emph{The
+idea:} an order 6\%+ below yesterday's close will almost never fill, so
+cancel it and use the money elsewhere. \emph{What happened:} those orders
+fill about one day in five, and when they do they're our \emph{best}
+trades. \emph{The lesson:} yesterday's close is information the model
+already has. The same idea re-built on the \emph{pre-market price} --- which
+the model can't see --- became the 9am rule that passed every test. One
+ingredient changed: new information.
+
+\textbf{9. A second allocation round at lunchtime.} \emph{The idea:} by
+1pm, lots of orders have either filled or clearly won't; re-pool the idle
+cash and redeploy it for the afternoon. \emph{What happened:} the idle cash
+is real, but redeploying it lost the honest test --- because by 1pm the only
+orders still cheap enough to fill belong to stocks falling \emph{that
+afternoon}. The top-up systematically funded the day's losers. \emph{The
+lesson:} idle cash earning overnight interest beats chasing the afternoon's
+faders. Routing decisions belong to the morning.
+
+\textbf{10. Weighting capital by fill probability.} \emph{The idea:} instead
+of the 9am rule's yes/no, give more money to orders likely to fill and less
+to long shots. \emph{What happened:} the probabilities were measurably real,
+and every version of the weighting still lost. \emph{The lesson:} a long
+shot only costs one day of idle cash, while tilting money toward the
+likely fills crowds it into the shallowest, least profitable dips. The
+simple yes/no veto already captures everything the probabilities know.
+
+\oneline{Ten sensible ideas, one honest test each, ten funerals --- and
+that's exactly why we trust the three rules that survived.}
 
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}
