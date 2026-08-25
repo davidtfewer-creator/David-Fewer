@@ -232,6 +232,27 @@ Script~2 simply finds no order to place for the gated name. Every rule
 adopted since --- the 200dma gate, the ATH $\varepsilon$-gate, the 9:00
 pre-market rule --- deployed without a line of execution code changing (the
 pre-market rule asks only that Script~1 also fetch the 9:00 print).
+
+The obvious challenge --- \emph{why not code the brain in Python too?} ---
+has a deliberate answer, in three parts. \textbf{(i) Supervision needs
+visible state.} Every fair value, buffer, gate flag and allocation is a live
+cell: before the open, the operator can trace any order back to its inputs
+in seconds and see at a glance that the day's state is sane. A Python
+process holds the same state invisibly --- supervising it means reading logs
+and trusting them. \textbf{(ii) Two independent implementations catch what
+one cannot.} All research runs on a Python replica of the workbook that is
+re-verified against the live sheets, cell for cell, before every study.
+Production in Excel and research in Python continuously cross-check each
+other; were the live model Python as well, the checker and the thing being
+checked would be the same code, and a specification error could sit
+invisible in both. \textbf{(iii) Change control is cell-sized.} A new rule
+deploys as one formula in one named cell --- inspectable, diffable,
+reversible in a single edit, with no software release and no restart risk to
+resting orders. That is why each adopted gate was wired in an afternoon.
+The corollary is that the scripts stay deliberately dumb so that failure is
+loud: an empty price cell is unmissable; a wrong branch buried in a monolith
+is not.
+
 Automation also enforces the strategy's actual edge. The edge is discipline
 and turnover (\S3); a machine placing identical orders identically every
 morning, immune to the operator's mood and the day's headlines, is that

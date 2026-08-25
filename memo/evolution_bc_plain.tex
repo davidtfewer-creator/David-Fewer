@@ -227,6 +227,24 @@ automation protects the strategy's real edge, which was never prediction
 but \emph{discipline}: the same orders, placed the same way, every single
 day, whatever the mood or the headlines.
 
+If you're asked \emph{``why keep the model in Excel --- why not write the
+whole thing in Python?''}, that was a deliberate choice, for three reasons.
+First, \textbf{you can watch a spreadsheet think}: every price, buffer and
+gate flag is on screen, so before the market opens a human can trace any
+order back to its inputs in seconds and see that the day looks sane. A
+program holds all of that invisibly --- supervising it means trusting logs.
+Second, \textbf{two independent versions catch mistakes that one can't}:
+all our research runs on a Python re-implementation of the workbook that is
+checked against the live sheets cell by cell, so production and research
+constantly cross-check each other. If the live model were Python too, the
+checker and the thing being checked would be the same code, and a single
+bug could hide in both. Third, \textbf{changes stay small and safe}: a new
+rule is one formula in one cell --- you can read it, test it and undo it in
+a single edit, with no software release in between and no risk to the
+orders already resting at the broker. The programs we did write are
+deliberately simple, so when something breaks it breaks \emph{visibly} ---
+an empty cell, not a quietly wrong number.
+
 \oneline{One program feeds the spreadsheet, the spreadsheet does the
 thinking, one program places the orders --- discipline by machine, and new
 rules slot straight in.}
