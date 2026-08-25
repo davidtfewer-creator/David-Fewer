@@ -58,7 +58,7 @@ evidence kept and killed along the way\par}
 % ---------------------------------------------------------------- header
 \begin{center}
 {\Large\bfseries\color{bcnavy} The Evolution of Bayesian Capital}\\[0.15cm]
-{\color{bcnavy} nine stages, each forced by the last}\\[0.25cm]
+{\color{bcnavy} ten stages, each forced by the last}\\[0.25cm]
 {\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
 \;$\bullet$\; current book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ RKLB $\cdot$ MU
 $\cdot$ GM $\cdot$ VLO $\cdot$ CF $\cdot$ MRVL}
@@ -98,16 +98,20 @@ compounding engine.};
 \node[st, right=1.1cm of s1] (s6) {{\tt 6 } \textbf{Incorporation.} A trading
 company: profits compound \emph{gross} all year; Irish CT is a single 12.5\%
 year-end payment --- structure serving the maths.};
-\node[st, below=of s6] (s7) {{\tt 7 } \textbf{Honesty \& gates.} Verified fills
+\node[st, below=of s6] (s6a) {{\tt 7 } \textbf{Automation.} Python wraps the
+workbook: Script 1 feeds prices and cash in each morning; Script 2 places the
+limit orders at IBKR. Discipline by machine --- and every later gate deploys
+as a cell, not code.};
+\node[st, below=of s6a] (s7) {{\tt 8 } \textbf{Honesty \& gates.} Verified fills
 (sheet numbers $\sim$3$\times$ overstated); refitting retired (fails out of
 sample everywhere); one true bug fixed (OU sigma); the G0--G5 admission gates
 --- 50\% AI / 30\% uncorrelated.};
-\node[st, below=of s7] (s8) {{\tt 8 } \textbf{Beyond parameters.} The pool is
+\node[st, below=of s7] (s8) {{\tt 9 } \textbf{Beyond parameters.} The pool is
 the machine: gated capital redeploys. Adopted vetoes --- 200dma gate (bear
 armour), ATH $\varepsilon$-gate, 9:00 pre-market rule. Ten overlays tried and
 killed; Schwartz--Smith rejected. Rule: add information and veto; never
 re-price.};
-\node[st, below=of s8] (s9) {{\tt 9 } \textbf{The book, stress-tested.} Nine
+\node[st, below=of s8] (s9) {{\tt 10 } \textbf{The book, stress-tested.} Nine
 names, equal weights, frozen parameters. 2022 replay: unprotected $-20\%$,
 gated $-1.3\%$ --- diversifiers earn their place. Execution-accurate planning
 79\%/yr; pooled live loop $\sim$106\%/yr.};
@@ -120,7 +124,8 @@ reproducible from the repository.};
 \draw[arr] (s3) -- (s4);
 \draw[arr] (s4) -- (s5);
 \draw[arr] (s5.east) .. controls +(1.0,0) and +(-0.4,-1.2) .. (s6.west);
-\draw[arr] (s6) -- (s7);
+\draw[arr] (s6) -- (s6a);
+\draw[arr] (s6a) -- (s7);
 \draw[arr] (s7) -- (s8);
 \draw[arr] (s8) -- (s9);
 \draw[arr] (s9) -- (s10);
@@ -139,7 +144,7 @@ identical to the capital's because they are the same pocket.
 
 That framing did real work later: it is why every subsequent decision was
 judged on measured net returns rather than narrative, and why the research
-culture became adversarial to its own ideas (\S8).
+culture became adversarial to its own ideas (\S9).
 
 \section{The thesis: trade volatility, not fundamentals}
 
@@ -204,6 +209,33 @@ retention under personal rates --- over years, the difference between the
 strategy working and not. Incorporation (with trading badges and IBKR
 execution) made the vehicle match the strategy: gains compound untouched all
 year, one payment settles the state, the pot stays in the market.
+
+\section{Automation: Python around the workbook}
+
+The daily machine is eighteen sleeves computing, placing and booking orders
+every single morning --- at that cadence, manual operation is a labour
+problem and, worse, a discipline problem. The solution wraps the Excel
+workbook in \textbf{two Python scripts against Interactive Brokers}.
+\textbf{Script~1} pulls each morning's prices and the account's cash into
+the workbook, driving every sleeve's calculation; \textbf{Script~2} reads
+the resulting order grid and places the day's resting limit orders at the
+broker before the open. The operator's job shifts from keying orders to
+supervising a machine.
+
+The design choice that mattered was keeping the intelligence and the
+plumbing apart: \textbf{the workbook stays the brain and the scripts stay
+dumb pipes}. Fair values, buffers, the pooled allocation --- all of it lives
+in cells the scripts merely read. That is what later made the gates
+seamless: a veto is implemented as an allocation flag inside the workbook,
+the pool redistributes the gated sleeve's capital across the survivors, and
+Script~2 simply finds no order to place for the gated name. Every rule
+adopted since --- the 200dma gate, the ATH $\varepsilon$-gate, the 9:00
+pre-market rule --- deployed without a line of execution code changing (the
+pre-market rule asks only that Script~1 also fetch the 9:00 print).
+Automation also enforces the strategy's actual edge. The edge is discipline
+and turnover (\S3); a machine placing identical orders identically every
+morning, immune to the operator's mood and the day's headlines, is that
+discipline made literal.
 
 \section{Honesty and gates: the research discipline}
 
@@ -298,11 +330,12 @@ full-sample ($\approx$142\%/yr on the tested half) at unchanged drawdown.
   title={\bfseries The thought process, compressed}, coltitle=bcnavy]
 Trade the thing you can be paid for (volatility), in the names that carry it
 (the AI trade), on the clock that compounds (daily), inside the structure
-that keeps the compounding (12.5\% CT), measured on the only basis that is
-real (verified fills), improved only where evidence survives both halves
-(vetoes, not re-fits), and stress-tested against the regime that hasn't
-happened yet (2022 replay). Each stage was forced by the failure mode of the
-one before it.
+that keeps the compounding (12.5\% CT), by the hand that never wavers
+(Python around the workbook, orders resting at IBKR before the open),
+measured on the only basis that is real (verified fills), improved only
+where evidence survives both halves (vetoes, not re-fits), and stress-tested
+against the regime that hasn't happened yet (2022 replay). Each stage was
+forced by the failure mode of the one before it.
 \end{tcolorbox}
 
 \appendix

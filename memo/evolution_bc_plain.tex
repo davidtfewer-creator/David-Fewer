@@ -94,15 +94,19 @@ sells at a small fixed profit, and repeats --- hundreds of trades a year.};
 \node[st, right=1.1cm of s1] (s6) {{\tt 6 } \textbf{The company.} Trade
 inside an Irish company: profits compound untaxed all year, then one 12.5\%
 tax payment at year end --- and the machine restarts.};
-\node[st, below=of s6] (s7) {{\tt 7 } \textbf{Getting honest.} Minute-level
+\node[st, below=of s6] (s6a) {{\tt 7 } \textbf{The robot.} Two Python
+programs run the trading day: one feeds prices into the workbook, one sends
+the orders to the broker. No typing, no emotion --- and new rules slot
+straight in.};
+\node[st, below=of s6a] (s7) {{\tt 8 } \textbf{Getting honest.} Minute-level
 data proved our spreadsheet returns were $\sim$3$\times$ too optimistic ---
 fixed. Re-tuning parameters never helped out of sample --- banned. Strict
 entry rules for new stocks.};
-\node[st, below=of s7] (s8) {{\tt 8 } \textbf{Smarter capital, not smarter
+\node[st, below=of s7] (s8) {{\tt 9 } \textbf{Smarter capital, not smarter
 models.} Ten clever model upgrades all failed our tests. What worked: simple
 rules that skip orders that shouldn't exist, letting that money back other
 orders the same morning.};
-\node[st, below=of s8] (s9) {{\tt 9 } \textbf{The stress test.} We replayed
+\node[st, below=of s8] (s9) {{\tt 10 } \textbf{The stress test.} We replayed
 the exact book through the 2022 bear market: unprotected it lost 20\%; with
 our trend rule it roughly broke even. The boring stocks saved the year.};
 \node[fin, below=of s9] (s10) {\textbf{Today.} Nine stocks, all rules live in
@@ -114,7 +118,8 @@ basis --- and every claim reproducible from the code.};
 \draw[arr] (s3) -- (s4);
 \draw[arr] (s4) -- (s5);
 \draw[arr] (s5.east) .. controls +(1.0,0) and +(-0.4,-1.2) .. (s6.west);
-\draw[arr] (s6) -- (s7);
+\draw[arr] (s6) -- (s6a);
+\draw[arr] (s6a) -- (s7);
 \draw[arr] (s7) -- (s8);
 \draw[arr] (s8) -- (s9);
 \draw[arr] (s9) -- (s10);
@@ -200,6 +205,31 @@ paperwork; it's part of the maths.
 
 \oneline{Profits compound untouched all year; the tax is one 12.5\% bill at
 year end --- then we go again.}
+
+\section{The robot: automating the trading day}
+
+Hundreds of trades a year across nine stocks is too much to run by hand ---
+and hand-run trading invites typos, missed mornings and second thoughts. So
+the daily machine is operated by \textbf{two small Python programs} wrapped
+around the workbook. Every morning the first fetches the latest prices and
+the account's cash into the workbook, which then computes each stock's buy
+order for the day. The second reads those orders and places them with the
+broker (Interactive Brokers) as resting limit orders before the market
+opens. A human supervises; a machine executes.
+
+This did more than save labour. It made every later ``stand down'' rule
+effortless to run: each rule lives as a simple flag inside the workbook, a
+gated stock's money is automatically re-spread across the others, and the
+ordering program simply finds nothing to send for that stock. When we later
+adopted the trend rule and the 9am pre-market rule, nothing about the
+execution had to change --- the robot just obeyed the new cells. And
+automation protects the strategy's real edge, which was never prediction
+but \emph{discipline}: the same orders, placed the same way, every single
+day, whatever the mood or the headlines.
+
+\oneline{One program feeds the spreadsheet, the spreadsheet does the
+thinking, one program places the orders --- discipline by machine, and new
+rules slot straight in.}
 
 \section{Getting honest}
 
