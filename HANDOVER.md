@@ -419,6 +419,38 @@ Verdict: nothing to adopt (no both-halves win, no drawdown product). SD 10%/R5 i
 future regime ever argues for an automated kill-switch; the machinery stays in book_sim.
 Rejection #13.
 
+### 3.23 Breadth-conditional 200dma gate: RECOMMENDED UPGRADE — gate on the bear, not the name
+User observation from live trading (26 Aug): VST sits below its 200dma, gated while recovering —
+the per-name gate may be taxing recoverable single-name drawdowns. Proposal (user's): fire the
+gate only when SEVERAL names breach at once. Rule tested (`breadth_gate.py`): a name below its
+own 200dma is gated ONLY when >=K of the nine are below theirs that morning; K=1 = deployed gate.
+- **Diagnostic confirms the intuition**: 2024-26 breach-days are mostly ISOLATED (193 days with
+  1 name below, 171 with 2, vs 60 with >=5 — the April episode). The 384 forgone entries on
+  isolated days (breadth<3) averaged **+2.35% (median +2.54%, only 21/384 losers)** — good
+  trades the per-name gate throws away. VST alone: 195 gated days, 129 forgone entries.
+- **2024-26 (pooled, PM rule both sides)**: per-name gate 87.5/59.4/119.0, maxDD 32.2 (April
+  concentration). Breadth K>=4: 89.8/64.6/117.3, DD 25.8. K>=5 (=K>=6): **93.4/71.1/117.4, DD
+  21.7** — the April episode goes 32.2 → 25.8 (K4) → 21.7 (K5): breadth-conditioning FIXES the
+  gate's known concentration blind spot (it only gates during the acute broad phase, not the
+  long single-name run-up/recovery tails that starved the pool).
+- **2022 (the gate's reason to exist)**: K=2,3,4 IDENTICAL to per-name (−2.6%, DD 17.4 — the
+  bear is a breadth event: 144 days with 6 names below). K=5 actually better (−0.4%, DD 16.1).
+  **K=6 falls off the cliff (−12.6%, DD 23.2)** — 2022's plateau was exactly 6-below (the three
+  diversifiers held), so K=6 forfeits the early-decline protection. The protection boundary is
+  K<=5.
+- **Recommendation: adopt breadth-conditional with K=4** (margin-of-safety choice: identical
+  2022 protection with two names of headroom against a future bear where one more diversifier
+  holds up; fixes April to 25.8; train +5.2pp vs per-name at test −1.7pp ≈ noise). K=5 is the
+  performance choice (best everywhere in sample: train +11.7, DD 21.7, 2022 −0.4) but sits one
+  step from the 2022 cliff. Live state at sample end (2026-08-03): breadth 3 (VRT, VST, RKLB
+  below) — under either K, VST trades now, which is the user's live issue resolved.
+- Test-half return is −1.1 to −1.7pp vs the alternatives everywhere in the grid — within noise;
+  the gate is a PROTECTION overlay and the comparison that matters is drawdown dominance at
+  ≈zero return cost, which K=4/5 deliver on both regimes.
+Workbook wiring (offered, not yet applied): a breadth-count cell (COUNTIF of names with prev
+close < 200dma) + K in the Gate Variables block; Allocation gate flags become
+(own breach)*(count>=K). No script-read cells move.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
