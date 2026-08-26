@@ -447,9 +447,12 @@ own 200dma is gated ONLY when >=K of the nine are below theirs that morning; K=1
 - Test-half return is −1.1 to −1.7pp vs the alternatives everywhere in the grid — within noise;
   the gate is a PROTECTION overlay and the comparison that matters is drawdown dominance at
   ≈zero return cost, which K=4/5 deliver on both regimes.
-Workbook wiring (offered, not yet applied): a breadth-count cell (COUNTIF of names with prev
-close < 200dma) + K in the Gate Variables block; Allocation gate flags become
-(own breach)*(count>=K). No script-read cells move.
+Workbook wiring APPLIED (26 Aug, `wire_breadth_gate.py`, delivered as
+TradingExcel_9stock_breadth.xlsx): AT M8 = K (4, label L8, explanation N8); Allocation G43 =
+breadth count (sum of the nine Bayes-row breach flags; G25:G42 stay the RAW per-name flags);
+F25:F42 = E*(1-D)*(1-G*($G$43>='Active Trading'!$M$8))*(1-H). Blank M8 fails CLOSED to the old
+per-name gate. Notes gained an UPDATE — 26 AUGUST 2026 section. Cell-diff verified exact; no
+script-read cells moved. Live state at delivery: breadth 2 (VST, RKLB below) — gate unarmed.
 
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
