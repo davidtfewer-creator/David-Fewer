@@ -366,6 +366,31 @@ morning panics and keeps the adverse tail. Even with the marketable-limit benefi
 fill at the better cutoff tape when it undercuts the bid) they lose. Rejection #11 for
 harvest-reshaping overlays; resting from the open at the open-capped bid stands.
 
+### 3.21 Holding-saturation halt (no new bids when the book wakes >=70-80% held): rejected — being held is not distress
+User proposal (26 Aug): halt NEW entries for the day when the book is 70-80% holding (existing
+positions and exits unchanged). Tested on the pooled nine-name book, live config (09:00/4% PM
+rule both sides), strictly ex ante on yesterday's close state (`hold_halt_study.py`; book_sim
+gained `hold_halt=(thr, basis)` with basis 'cap' = held MV/equity or 'sleeve' = held/18, plus an
+always-on `frac_series` recording and `cost` in trade dicts; baseline reproduced 87.3/59.5/118.4
+exactly).
+- **Diagnostic 1 — saturation is the normal state, not an event**: the book wakes >=70% held
+  (capital) on 43% of mornings (>=70% of sleeves: 22%). A 70% halt would switch off 200 of 587
+  trading days.
+- **Diagnostic 2 — the premise dies**: completed-trade returns by held fraction on the ENTRY
+  morning are flat — avg 1.6-2.1%, median ~2.25% in every bucket, stop rates 2-5% with no
+  gradient. Entries made on 85-100%-held mornings average +2.14%, among the best buckets. The
+  held fraction carries no information about next-trade quality; a heavily-held book is the
+  machine working, not the machine in trouble.
+- **Intervention — every cell loses both halves**: user's cells cap>=70%: train 59.5→47.8, test
+  118.4→103.5; cap>=80%: 53.2/113.6. Lower thresholds buy some drawdown (cap>=50%: DD 25.8→20.0)
+  at −15pp train/−28pp test — expensive risk control the 200dma gate already provides ~free.
+  sleeve>=90% is a 9-day no-op (±0.1pp).
+Mechanism: in the pooled loop a saturated morning is usually mid-bull (dips filled, targets
+pending), and the marginal cash entry on those mornings earns the same premium as any other. The
+concentration hazard (all cash into the last free sleeve) is real in fast crashes but is not a
+per-trade-return effect, and the halt pays a permanent bull toll to address it — same verdict
+shape as the breaker (§3.13). Rejection #12; the pool stays always-on.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of

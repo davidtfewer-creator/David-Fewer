@@ -82,7 +82,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
-             gap_exit=False):
+             gap_exit=False, hold_halt=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -109,7 +109,13 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     sleeve's allocation (fill-probability weighting); overrides static weights.
     gap_exit: True books a held position's target exit at max(target, open) --
     the resting limit sell was live at the open, so an overnight gap above the
-    target fills at the open. Execution-accuracy correction, default off."""
+    target fills at the open. Execution-accuracy correction, default off.
+    hold_halt: (thr, basis) -- the holding-saturation halt: when the book woke up
+    with at least `thr` of itself already holding (basis 'cap': held market value
+    / equity at yesterday's close; 'sleeve': held sleeves / all sleeves), no new
+    bids are placed that day. Resting exits, targets and stops run unchanged.
+    Strictly ex ante (yesterday's close state). The per-morning fractions are
+    always recorded in the result's frac_series for diagnostics."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -125,8 +131,21 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     free_days = 0
     sleeve_days = 0
     bk_peak, bk_tripped, bk_trips, bk_days = capital, False, 0, 0
+    prev_mv = 0.0
+    hh_days = 0
+    frac_series = []
     prev_d = cal[0]
     for d in cal:
+        # -------- holding-saturation state, from YESTERDAY's close
+        cap_frac_h = (prev_mv / equity_curve[-1]) if (equity_curve and equity_curve[-1] > 0) else 0.0
+        slv_frac_h = sum(1 for s in sleeves if s['holding']) / n
+        frac_series.append((cap_frac_h, slv_frac_h))
+        halted = False
+        if hold_halt is not None:
+            thr, basis = hold_halt
+            halted = (cap_frac_h if basis == 'cap' else slv_frac_h) >= thr
+            if halted:
+                hh_days += 1
         # -------- circuit breaker state, from YESTERDAY's close equity
         if breaker is not None and equity_curve:
             trip, reset, _ = breaker
@@ -155,7 +174,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             nd = data[s['name']]
             i = nd['idx'][d]
             bid = nd[s['bids']][i]
-            paused = no_buy and d in no_buy.get(s['name'], ())
+            paused = (no_buy and d in no_buy.get(s['name'], ())) or halted
             if (deep_excl is not None and bid is not None and i > 0
                     and bid < nd['C'][i - 1] * (1 - deep_excl)):
                 paused = True
@@ -206,7 +225,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
                                        entry=s['entry'], exit=d,
-                                       pnl=proceeds - s['cost'],
+                                       pnl=proceeds - s['cost'], cost=s['cost'],
                                        stopped=(px < s['target'] - 1e-12)))
                 s.update(holding=False, shares=0.0, target=None, entry=None)
 
@@ -241,7 +260,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
                                        entry=d, exit=d, pnl=proceeds - cost,
-                                       stopped=False))
+                                       cost=cost, stopped=False))
             else:
                 s.update(holding=True, shares=shares, target=target, entry=d,
                          cost=cost, bid=bid)
@@ -255,6 +274,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             elif mode == 'captive':
                 mv += s['own']
         equity_curve.append((cash if mode == 'pooled' else 0.0) + mv)
+        prev_mv = mv
 
     eq = equity_curve
     N = len(cal)
@@ -272,7 +292,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 maxdd=dd, fills=fills, fills_per_day=fills / N,
                 cash_frac=free_days / sleeve_days if sleeve_days else 0.0,
                 stops=stops, equity=eq, trades=trades,
-                bk_trips=bk_trips, bk_days=bk_days)
+                bk_trips=bk_trips, bk_days=bk_days,
+                hh_days=hh_days, frac_series=frac_series)
 
 
 def report(label, r):
