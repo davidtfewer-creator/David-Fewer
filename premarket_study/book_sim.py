@@ -82,7 +82,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
-             gap_exit=False, hold_halt=None):
+             gap_exit=False, hold_halt=None, intraday_sd=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -115,7 +115,23 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     / equity at yesterday's close; 'sleeve': held sleeves / all sleeves), no new
     bids are placed that day. Resting exits, targets and stops run unchanged.
     Strictly ex ante (yesterday's close state). The per-morning fractions are
-    always recorded in the result's frac_series for diagnostics."""
+    always recorded in the result's frac_series for diagnostics.
+    intraday_sd: (trip, reset, R) -- the fast-crash stand-down, an intraday
+    book-equity watcher only automation can operate. Reference = max of the last
+    R daily close equities (a ROLLING peak: in a slow grind it decays and the
+    rule re-arms instead of staying tripped for months -- the daily breaker's
+    2022 failure). Each un-tripped day the intraday equity path (morning cash +
+    held positions marked at each 5-minute bar open) is compared with
+    ref*(1-trip); the first bar at/below it is the trigger: bids whose first
+    touch comes at a LATER bar are cancelled (touch at or before the trigger bar
+    still fills -- pessimistic for the rule), and no new bids are placed on
+    following days until a close recovers above ref*(1-reset). Resting exits,
+    targets and stops run unchanged; veto only, nothing is re-priced. Requires
+    data[name]['bars'] = {date: (times_min, bar_opens, bar_lows)}. The intraday
+    path ignores same-day fills and exits (held book dominates; new crash-day
+    fills would only make the real trigger EARLIER, so measured benefit is
+    conservative). Names/days without bars fall back to the daily fill rule and
+    are counted in sd_nobars."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -134,6 +150,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     prev_mv = 0.0
     hh_days = 0
     frac_series = []
+    sd_tripped, sd_trips, sd_days, sd_nobars = False, 0, 0, 0
+    sd_closes = []          # last R daily close equities (rolling reference)
     prev_d = cal[0]
     for d in cal:
         # -------- holding-saturation state, from YESTERDAY's close
@@ -200,6 +218,44 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     a = min(a, cap_frac * cash)
                 s['_alloc'] = a
 
+        # -------- intraday fast-crash stand-down: today's trigger time (if any)
+        sd_tau = None
+        if intraday_sd is not None:
+            assert mode == 'pooled', 'intraday_sd requires pooled mode'
+            sd_trip, sd_reset, sd_R = intraday_sd
+            if sd_tripped:
+                sd_days += 1
+            else:
+                ref = max(sd_closes) if sd_closes else capital
+                thresh = ref * (1 - sd_trip)
+                held = [s for s in sleeves if s['holding']]
+                shares = {}
+                for s in held:
+                    shares[s['name']] = shares.get(s['name'], 0.0) + s['shares']
+                px = {nm: data[nm]['O'][data[nm]['idx'][d]] for nm in shares}
+                mv = sum(shares[nm] * px[nm] for nm in shares)
+                if cash + mv <= thresh:
+                    sd_tau = 0                      # gapped through at the open
+                else:
+                    ev = []
+                    for nm in shares:
+                        bars = data[nm].get('bars', {}).get(d)
+                        if bars is None:
+                            continue
+                        tm, bo, _ = bars
+                        for j in range(len(tm)):
+                            ev.append((tm[j], nm, bo[j]))
+                    ev.sort(key=lambda e: e[0])
+                    for t_, nm, bpx in ev:
+                        mv += shares[nm] * (bpx - px[nm])
+                        px[nm] = bpx
+                        if cash + mv <= thresh:
+                            sd_tau = t_
+                            break
+                if sd_tau is not None:
+                    sd_tripped = True
+                    sd_trips += 1
+
         # -------- exits on positions held from before today
         for s in sleeves:
             if not s['holding'] or s['entry'] == d:
@@ -238,6 +294,18 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             bid = s['_bid']
             if nd['L'][i] > bid + 1e-12:
                 continue
+            if intraday_sd is not None and sd_tripped:
+                if sd_tau is None:
+                    continue                    # halted from a prior day
+                bars = nd.get('bars', {}).get(d)
+                if bars is None:
+                    sd_nobars += 1              # cannot time it: fill stands
+                else:
+                    tm, _, bl = bars
+                    touch = next((tm[j] for j in range(len(bl))
+                                  if bl[j] <= bid + 1e-12), None)
+                    if touch is None or touch > sd_tau:
+                        continue                # touched only after the trigger
             budget = s['_alloc'] if mode == 'pooled' else s['own']
             if budget <= 0:
                 continue
@@ -275,6 +343,12 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 mv += s['own']
         equity_curve.append((cash if mode == 'pooled' else 0.0) + mv)
         prev_mv = mv
+        if intraday_sd is not None:
+            sd_closes.append(equity_curve[-1])
+            if len(sd_closes) > intraday_sd[2]:
+                sd_closes.pop(0)
+            if sd_tripped and equity_curve[-1] > max(sd_closes) * (1 - intraday_sd[1]):
+                sd_tripped = False
 
     eq = equity_curve
     N = len(cal)
@@ -293,7 +367,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 cash_frac=free_days / sleeve_days if sleeve_days else 0.0,
                 stops=stops, equity=eq, trades=trades,
                 bk_trips=bk_trips, bk_days=bk_days,
-                hh_days=hh_days, frac_series=frac_series)
+                hh_days=hh_days, frac_series=frac_series,
+                sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars)
 
 
 def report(label, r):

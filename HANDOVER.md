@@ -391,6 +391,34 @@ concentration hazard (all cash into the last free sleeve) is real in fast crashe
 per-trade-return effect, and the halt pays a permanent bull toll to address it — same verdict
 shape as the breaker (§3.13). Rejection #12; the pool stays always-on.
 
+### 3.22 Intraday fast-crash stand-down: right breaker design, but entry vetoes cannot protect inventory — not adopted
+The automation-only candidate from the 26 Aug idea round, built and tested (`fast_crash_sd.py`;
+book_sim gained `intraday_sd=(trip, reset, R)` + per-day 5-min `bars`). Design fixes the daily
+breaker's 2022 failure by construction: reference = max of the last R daily close equities (a
+ROLLING peak that decays in a grind, so the rule re-arms instead of staying tripped for months);
+trigger = first 5-min bar where morning cash + held book (marked at bar opens) <= ref×(1−trip);
+action = cancel bids not yet touched (touch at/before the trigger bar still fills — pessimistic
+for the rule); reset when a close recovers above ref×(1−reset). Strictly ex ante, veto-only.
+Invariance: PM-rule baseline and the full §3.13 2022 matrix reproduce exactly.
+- **The design goal is achieved**: stacked on the 200dma gate in 2022, SD 10%/R5 is IDENTICAL to
+  the gate alone (−2.6%, 17.4% DD; SD 8% costs only 0.9pp) — no trace of the daily breaker's
+  anti-synergy (gate+breaker −10.2%). The rolling reference is the right breaker architecture.
+- **But it protects nothing**: April 2025 episode DD is unchanged at every trip level (25.8→
+  25.8–26.1 alone; 32.2→31.5 on the gate — the concentration blind spot stands); 2022 alone
+  −22.1/−22.3 vs −21.9 unprotected. Only SD 10%/R10 moves DD (25.8→23.1) and it pays −3.7pp
+  train / −0.7pp test for it. No cell wins anything.
+- **Mechanism — the negative result that settles the family**: a fast crash damages the book
+  through held inventory marked down and overnight gaps, neither of which an ENTRY veto can
+  touch. Cancelling crash-day bids saves only the marginal new entries, and §3.21's diagnostic
+  already showed those are ordinary trades. Inventory is protected only by exits (price stops —
+  rejected, §3.13) or sizing caps (15% sleeve cap — tested, costly, §3.13 addendum). April-class
+  V-drops are the residual cost of holding the book; the samples say they are survivable and
+  recover in weeks.
+Verdict: nothing to adopt (no both-halves win, no drawdown product). SD 10%/R5 is ~free
+(train −0.3pp, test −0.6pp, 3 trips/6 halt days in 2.4 years) and is the correct template if a
+future regime ever argues for an automated kill-switch; the machinery stays in book_sim.
+Rejection #13.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
