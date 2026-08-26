@@ -59,7 +59,8 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               cc_up=None, cc_down=None, no_buy=None,
               cap_on_target=False, ath_target_guard=None,
               F_series=None, ou_sig_series=None, k_mult=None,
-              prem_mult=None, price_stop=None, gap_exit=False) -> Result:
+              prem_mult=None, price_stop=None, gap_exit=False,
+              entry_low=None, entry_tape=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -103,6 +104,18 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         the target fills at the open (better price). Applies only to
                         positions held from a prior day; same-day round trips place
                         the sell after the fill. Default False reproduces the sheet.
+      entry_low[i]   -> low used for the ENTRY-touch test only (default L[i], the
+                        session low). The delayed-entry study passes the post-cutoff
+                        low so the bid only counts as filled if touched after the
+                        cutoff; rows with None fall back to L[i]; float('inf')
+                        forbids entry. Exits, stops and every other use of L are
+                        untouched.
+      entry_tape[i]  -> tape price at the moment the order is placed (the delayed-
+                        entry study passes the first post-cutoff bar's open). If the
+                        tape already sits below the bid the limit is marketable and
+                        the fill books at the tape, not the bid: fill px =
+                        min(bid, entry_tape[i]); the take-profit target is set off
+                        the actual fill px. None rows book at the bid (deployed).
       price_stop     -> float fraction (e.g. 0.20): a stop-loss at buy_px*(1-frac),
                         firing whenever the day's low reaches it BEFORE the 50-day
                         time stop. Fill at the stop level, or at the open if the
@@ -265,13 +278,20 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             # fund
             Y[i] = ((AA[i - 1] * (AC[i - 1] - p.comm)) if AD[i - 1] == 1 else Y[i - 1]) + AQ[i]
             bp = buy_price[i]
-            # buy flag: not holding & low reached the bid
-            Z[i] = 1 if (AE[i - 1] == 0 and bp is not None and L[i] <= bp) else 0
-            AA[i] = (Y[i] / (bp + p.comm)) if Z[i] == 1 else (AA[i - 1] if AE[i - 1] == 1 else 0.0)
+            # buy flag: not holding & low reached the bid (entry_low may restrict
+            # the touch test to a post-cutoff window; default is the session low)
+            el = L[i] if (entry_low is None or entry_low[i] is None) else entry_low[i]
+            Z[i] = 1 if (AE[i - 1] == 0 and bp is not None and el <= bp) else 0
+            # fill price: the bid, unless the tape at order placement already sat
+            # below it (marketable limit fills at the tape)
+            px = bp
+            if Z[i] == 1 and entry_tape is not None and entry_tape[i] is not None:
+                px = min(bp, entry_tape[i])
+            AA[i] = (Y[i] / (px + p.comm)) if Z[i] == 1 else (AA[i - 1] if AE[i - 1] == 1 else 0.0)
             if Z[i] == 1:
-                buy_px = bp
+                buy_px = px
                 prem_amt = C[i - 1] * prem * (1.0 if (pm is None or pm[i] is None) else pm[i])
-                AB[i] = bp + prem_amt
+                AB[i] = px + prem_amt
                 adjusted = not cc                      # pending amendment at tonight's close
             elif AE[i - 1] == 1:
                 if not adjusted:

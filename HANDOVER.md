@@ -342,6 +342,30 @@ interest (tiny), while weighting concentrates capital into near-the-money shallo
 lower margin per fill, less diversification. The binary veto captures everything the curve has to
 give. Consistent with the book-policy optimisation verdict. book_sim gained `weight_fn`.
 
+### 3.20 Delayed entry (trade 2h after the open, open as the model signal): rejected — the morning IS the harvest
+User proposal (26 Aug): place the order ~2 hours after the open, using the opening price as the
+model signal. Decomposed and tested per name on verified fills, deployed params, both halves
+(`delayed_entry.py`; engine gained `entry_low` / `entry_tape` — entry-touch restricted to a
+post-cutoff window, marketable fill at the cutoff tape when it sits below the bid, target set off
+the actual fill px; before/after snapshot EXACT MATCH on all nine names).
+- **The diagnostic settles it before the backtest does**: 56–80% of ALL verified fills
+  (book-wide ~72%) first-touch the bid before 10:30; only 6–21% after 13:00. The model is a
+  morning-dip harvester — the first hour is the product.
+- **Delay-only (2h)**: book average full 70.8→50.1%, train 40.1→23.9%, test 114.8→83.7%; buys
+  −20–30% per name; test-better in 1/9 (VST, whose train collapses 53.4→1.3%). 1h and 3h no
+  better — there is no good cutoff, the curve is bad everywhere.
+- **Open-as-signal only** (OU anchored on today's open, Bayes fair nudged toward it,
+  g∈{0.25,0.5,1.0}, no delay): every gain loses the book average on both halves (best cell
+  g=0.25: test 92.7% vs 114.8%). The bid already caps at the open (min(fair−kW, O)) — the
+  open's information is already in the order; letting it MOVE the bid re-prices the harvest
+  with parameters co-adapted to the prev-close anchor (same failure as HAR σ, §3.10).
+- **Combined (2h + signal)**: worst of all (45.4/19.2/78.5).
+Mechanism is the midday-re-pool one in miniature (§3.17): what is still cheap at 11:30 is
+disproportionately a name falling that afternoon — the delayed order forfeits the recovered
+morning panics and keeps the adverse tail. Even with the marketable-limit benefit (the variants
+fill at the better cutoff tape when it undercuts the bid) they lose. Rejection #11 for
+harvest-reshaping overlays; resting from the open at the open-capped bid stands.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
