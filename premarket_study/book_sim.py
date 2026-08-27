@@ -82,7 +82,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
-             gap_exit=False, hold_halt=None, intraday_sd=None):
+             gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -131,7 +131,12 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     path ignores same-day fills and exits (held book dominates; new crash-day
     fills would only make the real trigger EARLIER, so measured benefit is
     conservative). Names/days without bars fall back to the daily fill rule and
-    are counted in sd_nobars."""
+    are counted in sd_nobars.
+    week_end_exit: 'profit' -- a position still open at the last trading day of
+    an ISO week (target unmet, no stop) is sold at that day's CLOSE when
+    profitable net of both commissions. Applies to same-week and older holds
+    alike; the close follows any intraday fill so ordering is provable. None
+    (default) reproduces hold-to-target. Exit count in we_exits."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -152,6 +157,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     frac_series = []
     sd_tripped, sd_trips, sd_days, sd_nobars = False, 0, 0, 0
     sd_closes = []          # last R daily close equities (rolling reference)
+    we_exits = 0
+    wk_end = {cal[j]: (j < len(cal) - 1
+                       and cal[j].isocalendar()[:2] != cal[j + 1].isocalendar()[:2])
+              for j in range(len(cal))}
     prev_d = cal[0]
     for d in cal:
         # -------- holding-saturation state, from YESTERDAY's close
@@ -333,6 +342,27 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 s.update(holding=True, shares=shares, target=target, entry=d,
                          cost=cost, bid=bid)
 
+        # -------- week-end profit exit: open positions in profit sell at the close
+        if week_end_exit == 'profit' and wk_end[d]:
+            for s in sleeves:
+                if not s['holding']:
+                    continue
+                nd = data[s['name']]
+                c = nd['C'][s['_i']]
+                if s['shares'] * (c - COMM) > s['cost']:
+                    proceeds = s['shares'] * (c - COMM)
+                    if mode == 'pooled':
+                        cash += proceeds
+                    else:
+                        s['own'] = proceeds
+                    we_exits += 1
+                    if collect_trades:
+                        trades.append(dict(name=s['name'], kind=s['kind'],
+                                           entry=s['entry'], exit=d,
+                                           pnl=proceeds - s['cost'], cost=s['cost'],
+                                           stopped=False))
+                    s.update(holding=False, shares=0.0, target=None, entry=None)
+
         # -------- mark to market
         mv = 0.0
         for s in sleeves:
@@ -368,7 +398,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 stops=stops, equity=eq, trades=trades,
                 bk_trips=bk_trips, bk_days=bk_days,
                 hh_days=hh_days, frac_series=frac_series,
-                sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars)
+                sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars,
+                we_exits=we_exits)
 
 
 def report(label, r):

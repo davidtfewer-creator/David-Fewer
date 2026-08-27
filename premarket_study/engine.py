@@ -60,7 +60,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
               cap_on_target=False, ath_target_guard=None,
               F_series=None, ou_sig_series=None, k_mult=None,
               prem_mult=None, price_stop=None, gap_exit=False,
-              entry_low=None, entry_tape=None) -> Result:
+              entry_low=None, entry_tape=None, week_end_exit=None) -> Result:
     """
     dates: list[date]; O/H/L/C: list[float]. All length N, aligned.
 
@@ -116,6 +116,13 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         the fill books at the tape, not the bid: fill px =
                         min(bid, entry_tape[i]); the take-profit target is set off
                         the actual fill px. None rows book at the bid (deployed).
+      week_end_exit  -> 'profit': a position still open at the last trading day
+                        of an ISO week (target not reached, no stop) is sold at
+                        that day's CLOSE if the sale is profitable net of both
+                        commissions (close - comm > fill + comm). Applies to
+                        positions bought that week and to older holds alike
+                        (the close is after any intraday fill, so ordering is
+                        provable). None (default) reproduces hold-to-target.
       price_stop     -> float fraction (e.g. 0.20): a stop-loss at buy_px*(1-frac),
                         firing whenever the day's low reaches it BEFORE the 50-day
                         time stop. Fill at the stop level, or at the open if the
@@ -248,6 +255,9 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         if i == N - 1 or dates[i].month != dates[i + 1].month:
             AO[i] = 1
     AN = [1] + [(dates[i] - dates[i - 1]).days for i in range(1, N)]
+    # last trading day of each ISO week (sample's final row excluded: nothing follows)
+    wk_end = [i < N - 1 and dates[i].isocalendar()[:2] != dates[i + 1].isocalendar()[:2]
+              for i in range(N)]
 
     def run_tranche(buy_price, prem, init_fund, interest_start=1, cc_up=None, cc_down=None,
                     pm=None):
@@ -259,7 +269,7 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
         # known before the amendment takes effect. None/None reproduces the fixed-premium model.
         cc = cc_up is not None and cc_down is not None
         buy_px = None; prem_amt = None; adjusted = True
-        ps_exits = 0; ps_ambig = 0
+        ps_exits = 0; ps_ambig = 0; we_exits = 0; we_rows = set()
         # interest_start: first row index that accrues interest. In the workbook the
         # Bayes fund is initialised at row 8 (accrues from row 9 -> i=1) while the OU
         # fund is initialised one row later at row 9 (AR9=0, accrues from row 10 -> i=2).
@@ -349,12 +359,21 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                 AE[i] = 0 if AD[i] == 1 else 1
             else:
                 AE[i] = 1 if (Z[i] == 1 and AD[i] == 0) else 0
+            # week-end profit exit: still open at a week-end close, in profit -> sell at the close
+            if (week_end_exit == 'profit' and wk_end[i] and AE[i] == 1
+                    and C[i] - p.comm > buy_px + p.comm):
+                AD[i] = 1
+                AC[i] = C[i]
+                AE[i] = 0
+                we_exits += 1
+                we_rows.add(i)
             # buy date
             AV[i] = dates[i] if Z[i] == 1 else (AV[i - 1] if AE[i - 1] == 1 else None)
-        stops = sum(1 for i in range(N) if AD[i] == 1 and AC[i] is not None and AC[i] < AB[i])
+        stops = sum(1 for i in range(N) if AD[i] == 1 and AC[i] is not None
+                    and AC[i] < AB[i] and i not in we_rows)
         return dict(Y=Y, AA=AA, AB=AB, AC=AC, AD=AD, AE=AE, Z=Z, AV=AV, stops=stops,
                     interest=sum(AQ), AP=AP, AQ=AQ, AO=AO, AN=AN,
-                    ps_exits=ps_exits, ps_ambig=ps_ambig)
+                    ps_exits=ps_exits, ps_ambig=ps_ambig, we_exits=we_exits)
 
     pm_b, pm_o = prem_mult if prem_mult is not None else (None, None)
     t1 = run_tranche(X,  p.premium, p.capital * p.bayes_pct,        interest_start=1,

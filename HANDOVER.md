@@ -454,6 +454,28 @@ F25:F42 = E*(1-D)*(1-G*($G$43>='Active Trading'!$M$8))*(1-H). Blank M8 fails CLO
 per-name gate. Notes gained an UPDATE — 26 AUGUST 2026 section. Cell-diff verified exact; no
 script-read cells moved. Live state at delivery: breadth 2 (VST, RKLB below) — gate unarmed.
 
+### 3.24 Week-end profit exit (sell in-profit open positions at the Friday close): rejected — the weekend hold is paid for
+User proposal (26 Aug): a position that hasn't reached its target but stands in profit at the
+Friday close sells at that close instead of carrying into next week. Tested per name and pooled
+(`weekly_close.py`; engine + book_sim gained `week_end_exit='profit'` — sell at the week-end
+close when close−comm > fill+comm, same-week and older holds alike; defaults reproduce
+hold-to-target, book baseline invariance asserted in-run).
+- **The diagnostic kills it**: 216 (position × Friday) observations open and in profit at a
+  Friday close. Profit then: avg +1.34% (med +1.06%). The same position's final outcome: avg
+  +2.97% (med +3.30%) — **the eventual exit beat the Friday close in 94% of cases, at a median
+  5 further days**. The tail the rule insures against is small: only 6.0% eventually
+  time-stopped (avg final −8.06%). Expected value of continuing to hold ≈ +1.5pp per position;
+  the weekend gap risk is, on this sample, income (consistent with §3.19 — 22% of held exits
+  GAP OVER their targets, and Friday sales pre-empt exactly those).
+- **Intervention**: per name mixed and small (CF −15pp full — its slow high-premium trades are
+  butchered; TSM/MRVL ±2); pooled book with the live config LOSES BOTH HALVES: full 87.3→79.3%,
+  train 59.5→54.0%, test 118.4→107.2%, maxDD worse 25.8→27.3%, 213 week-end sales. Freed Monday
+  capital does not come close to replacing the forfeited premium.
+Mechanism: this is the vol-scaled-premium lesson (§3.12) mirrored — that one fattened targets
+and lost to foregone turnover; this one truncates targets and loses the premium margin. The
+fixed premium held to target IS the calibrated harvest; exits reshaped in either direction die.
+Rejection #14.
+
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
 2024-26: 75.8%→75.9% full, 110.7%→110.8% test — pooling reallocates gated capital instead of
