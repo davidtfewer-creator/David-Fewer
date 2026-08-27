@@ -51,7 +51,8 @@ ranking,\\ and what goes into the book\par}
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
 {\color{bcgrey} 9 August 2026 --- \S7 revised 14 August 2026 (MRVL admission) ---
-\S8 added 19 August 2026 (adopted rules; execution-accurate figures)}
+\S8 added 19 August 2026 (adopted rules; execution-accurate figures) ---
+\S8 revised 26 August 2026 (the 200dma gate becomes breadth-conditional)}
 \vfill
 \end{titlepage}
 
@@ -372,11 +373,21 @@ that shows every figure in this memo to be conservative.
 \subsection{Rules adopted since the admissions}
 
 \begin{itemize}
-\item \textbf{The 200dma gate} (bear armour): no new bids in a name whose last
-close sits below its trailing 200-day average; gated capital pools to the other
-sleeves. In the 2022 replay it turns the book's $-21.9\%$ bear year into
-$-2.6\%$; in the pooled 2024--26 loop it is approximately free. Wired
-(Allocation col G); VST opened gated at adoption.
+\item \textbf{The 200dma gate --- breadth-conditional since 26 August} (bear
+armour): a name whose last close sits below its trailing 200-day average places
+no new bids, \emph{but only when at least $K{=}4$ of the nine names are below
+theirs at once} --- an isolated breach (a name recovering from its own drawdown)
+trades normally. Gated capital pools to the other sleeves. The 2022 rescue is
+preserved exactly under the breadth form ($-21.9\% \to -2.6\%$; that bear ran
+with six names below at once), the pooled 2024--26 cost stays $\approx$0, and
+breadth-conditioning removes the per-name form's April-2025 concentration
+penalty (book max drawdown $32.2\% \to 25.8\%$) while reclaiming the
+isolated-breach trades it taxed (384 forgone entries averaging $+2.35\%$ ---
+VST's gated recovery was the live tell). Wired: raw per-name flags in
+Allocation col G, breadth count in G43, $K$ in Active Trading M8 (blank fails
+\emph{closed} to the per-name gate). VST opened gated at the 15~August
+adoption; under the breadth form it trades again (live breadth 2 at the
+26~August wiring). Full detail: bear-protection paper \S9.
 \item \textbf{The pre-market rule} (09:00, 4\%): no order whose buy price sits
 more than 4\% below the 9:00 pre-market print --- capital pools as normal. The
 first overlay in eleven attempts to improve \emph{both} halves (pooled book,
@@ -462,7 +473,8 @@ losing to the nine-name book on the tested half.
 \texttt{mle\_homogeneity.py} (drift study), \texttt{live5\_load.py} (workbook
 mirror check), \texttt{minute\_index.py} (5-minute fill verification),
 \texttt{bear\_replay.py} (2022 replay), \texttt{premarket\_excl.py} (pre-market
-rule), \texttt{book\_sim.py} (pooled simulator; \texttt{gap\_exit} execution
+rule), \texttt{breadth\_gate.py} (breadth-conditional gate),
+\texttt{book\_sim.py} (pooled simulator; \texttt{gap\_exit} execution
 correction), \texttt{wire\_*.py} (workbook wiring). Derived data and price
 extracts are untracked by design.}
 
