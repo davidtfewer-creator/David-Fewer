@@ -475,6 +475,23 @@ Meta: calendar vetoes as a class now read 1 adopted / 10 rejected-or-unneeded �
 (MU) was found by following a name-specific adverse drift, not by pausing around events per se.
 Event-adjacent volatility keeps being the product, not the hazard (§3.11, §3.20).
 
+### 3.26 Pre-market breadth veto: premise dead at the diagnostic — broad panic mornings are the BEST mornings
+Entry-side sweep item (26 Aug, `pm_breadth_diag.py`): should a BOOK-WIDE adverse pre-market
+morning (many 09:00 prints down vs yesterday's close) veto the day's entries beyond the per-name
+4% rule? Diagnostic on the pooled baseline's completed trades, bucketed by that morning's
+adverse breadth (coverage >= 6 names, median 9):
+- At >=2%-down breadth, per-trade returns rise MONOTONICALLY with breadth: 0 names down +1.72%
+  (4% stops) → 6–9 names down **+2.46% with a 1% stop rate — the best bucket in the table**.
+  At >=3%: breadth 3–9 gives +2.31% with 1 stop in 186 trades.
+- The weakest bucket anywhere is 1–2 names down >=3% (+1.10%, 14 stops in 249): the
+  IDIOSYNCRATIC single-name gap-down is the adverse-information case — and that is exactly what
+  the per-name 4% rule already vetoes; these are its <=4% survivors.
+Mechanism: a coordinated gap-down that still leaves a bid within 4% of the tape is a book-wide
+panic that mean-reverts — the harvest (same shape as the regime gate §3.11 and the bellwether
+veto §3.25, now on overnight information). Breadth is bear-armour information on the 200-DAY
+horizon (§3.23) and harvest information on the OVERNIGHT horizon. No intervention run — a
+breadth veto would delete the book's best conditional bucket. Rejection #16.
+
 ### 3.24 Week-end profit exit (sell in-profit open positions at the Friday close): rejected — the weekend hold is paid for
 User proposal (26 Aug): a position that hasn't reached its target but stands in profit at the
 Friday close sells at that close instead of carrying into next week. Tested per name and pooled
