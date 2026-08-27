@@ -474,7 +474,11 @@ hold-to-target, book baseline invariance asserted in-run).
 Mechanism: this is the vol-scaled-premium lesson (§3.12) mirrored — that one fattened targets
 and lost to foregone turnover; this one truncates targets and loses the premium margin. The
 fixed premium held to target IS the calibrated harvest; exits reshaped in either direction die.
-Rejection #14.
+Rejection #14. ADDENDUM (same day): restricted to the diversifiers only (user follow-up) it still
+loses both halves — CF+VLO+GM-only 55.4/110.6 vs baseline 59.5/118.4 (DD worse); singly, CF-only
+and GM-only lose both halves and VLO-only shows the familiar train-up/test-down noise pattern
+(62.6/115.9). The freed Monday capital never replaces the forfeited premium, on any subset
+(weekly_close_divers.json).
 
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
