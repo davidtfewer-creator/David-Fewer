@@ -454,6 +454,27 @@ F25:F42 = E*(1-D)*(1-G*($G$43>='Active Trading'!$M$8))*(1-H). Blank M8 fails CLO
 per-name gate. Notes gained an UPDATE — 26 AUGUST 2026 section. Cell-diff verified exact; no
 script-read cells moved. Live state at delivery: breadth 2 (VST, RKLB below) — gate unarmed.
 
+### 3.25 The complete earnings map: MU's pause is idiosyncratic, not a family — cross-name veto rejected
+Two calendar studies (26 Aug, `earnings_map.py`; GM/VLO/CF report dates added to
+`earnings_pause.EARNINGS`, gap-validated with the known pre-market-reporter caveat).
+- **Part 1 — per-name pauses, the seven untested names** (TSM, VRT, VST, RKLB, GM, VLO, CF;
+  P1/P2/P3 grids, both halves): **zero both-halves winners**. Near-earnings entries are as good
+  as or better than away-entries in most names (VRT +2.4–2.5% all three report buckets vs +1.38%
+  away, zero stops; RKLB likewise; TSM flat-positive). VLO and CF show weak 'week after' buckets
+  (−0.3%, −1.0%) on tiny n (8, 3) and every pause intervention still loses both halves. TRAP
+  NOTED: VST P2 shows train 53.4→99.9 with test 58.1→37.8 — textbook inverted halves, do not
+  adopt. Standing state: **MU P3 remains the only earnings pause in the book** (its post-report
+  drift is idiosyncratically adverse); AVGO pending its ~4 Sep report (§3.14a).
+- **Part 2 — cross-name bellwether veto** (no new AI-six bids for 1–2 sessions after NVDA /
+  NVDA+AVGO reports): the diagnostic kills it — AI-six entries in the two sessions after an NVDA
+  report average **+2.10%** (vs +1.67% elsewhere) and after AVGO **+2.38% with zero stops**.
+  Bellwether-night dips are premium harvest (the MRVL pattern generalises to the complex). The
+  pooled intervention confirms: every cell loses the tested half (118.4→107.1–112.5), train flat
+  to worse. Rejection #15.
+Meta: calendar vetoes as a class now read 1 adopted / 10 rejected-or-unneeded — the adopted one
+(MU) was found by following a name-specific adverse drift, not by pausing around events per se.
+Event-adjacent volatility keeps being the product, not the hazard (§3.11, §3.20).
+
 ### 3.24 Week-end profit exit (sell in-profit open positions at the Friday close): rejected — the weekend hold is paid for
 User proposal (26 Aug): a position that hasn't reached its target but stands in profit at the
 Friday close sells at that close instead of carrying into next week. Tested per name and pooled
