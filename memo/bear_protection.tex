@@ -51,7 +51,7 @@ and the 200-day moving-average gate\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 15 August 2026 --- gate adopted and wired the same day (\S7);\\execution-accurate restatement added 19 August (\S8)}
+{\color{bcgrey} 15 August 2026 --- gate adopted and wired the same day (\S7);\\execution-accurate restatement added 19 August (\S8);\\breadth upgrade adopted and wired 26 August (\S9)}
 \vfill
 \end{titlepage}
 
@@ -518,6 +518,98 @@ now mildly positive --- while the April 2025 concentration episode persists
 unchanged in character ($-28.7\%$ ungated vs $-31.8\%$ gated). The
 recommendation stands exactly as adopted.}
 
+\section{The breadth upgrade: gate on the bear, not the name (added 26 August)}
+
+\subsection{The live observation that prompted it}
+
+Eleven days into live operation the gate showed its one designed-in cost in
+real time: \textbf{VST sat below its 200dma while recovering from its own
+drawdown, gated} --- and visibly missing the recovery fills the model exists to
+harvest. The gate was built against 2022, where the \emph{book} broke down; a
+lone name below its line is usually not that event. The question (the user's):
+should the gate fire only when \emph{several} names breach at once --- breadth
+as the bear signal?
+
+\subsection{The rule, and the diagnostic that justifies it}
+
+Per name, each morning, strictly ex ante: \emph{a stock below its own 200dma is
+gated only when at least $K$ of the nine names are below theirs}. $K{=}1$
+reproduces the per-name gate of \S4.
+
+The 2024--26 sample splits exactly the way the intuition says it should.
+Breaches are overwhelmingly \textbf{isolated}: 193 days with exactly one name
+below its line and 171 with two, against only 60 days at breadth ${\ge}5$ (the
+April 2025 episode). And the trades the per-name gate refused on those isolated
+days were \emph{good} trades: reconstructing all 384 forgone entries at breadth
+$<3$ and following each to its exit, they averaged \good{$+2.35\%$} (median
+$+2.54\%$, 21 losers of 384) --- ordinary harvest, taxed. VST alone accounts for
+195 gated days and 129 of those forgone entries. In 2022, by contrast, breadth
+\emph{was} the event: 144 trading days had six names below their lines at once.
+
+\subsection{Both regimes, priced}
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{3}{c}{2024--26 (pooled, live config)} & \multicolumn{2}{c}{calendar 2022} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+config & train & test & max DD & return & max DD \\
+\midrule
+no gate            & 59.5\% & 118.4\% & 25.8\% & $-21.9\%$ & 28.1\% \\
+per-name gate (\S4) & 59.4\% & 119.0\% & \bad{32.2\%} & \good{$-2.6\%$} & 17.4\% \\
+\textbf{breadth $K{=}4$} & \good{64.6\%} & 117.3\% & \good{25.8\%} & \good{$-2.6\%$} & 17.4\% \\
+breadth $K{=}5$    & 71.1\% & 117.4\% & 21.7\% & \good{$-0.4\%$} & 16.1\% \\
+breadth $K{=}6$    & 71.1\% & 117.4\% & 21.7\% & \bad{$-12.6\%$} & 23.2\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{2024--26 on the live configuration (9:00/4\% pre-market rule active on
+both sides, sheet exit convention), both halves of the standard split; the
+max-DD column is dominated by the April 2025 episode. 2022 as in \S5 (no
+pre-market data exists pre-2024). Orderings, not levels, carry between bases.}
+
+Three facts decide it. \textbf{First, the 2022 protection is fully preserved
+through $K{=}4$} --- identical to the per-name gate to the decimal, because the
+real bear was a breadth event. \textbf{Second, breadth-conditioning fixes the
+April 2025 concentration penalty of \S4}: the per-name gate spent the long
+single-name run-up and recovery tails starving the pool (drawdown 25.8\%
+$\rightarrow$ 32.2\%); the breadth gate fires only during the acute broad phase
+and the episode returns to 25.8\% at $K{=}4$ (21.7\% at $K{=}5$). \textbf{Third,
+the protection boundary is $K \le 5$}: 2022's plateau was exactly six names
+below (the three diversifiers held up), so $K{=}6$ forfeits the early-decline
+protection ($-12.6\%$) --- a cliff, not a slope.
+
+\subsection{Choosing K, and the adoption}
+
+$K{=}5$ is the best cell everywhere in sample but sits one step from that
+cliff: a future bear in which one more diversifier holds up would peak at
+breadth five and $K{=}5$ would catch it with no margin. $K{=}4$ keeps
+\textbf{two names of headroom}, retains the full 2022 save, removes the April
+concentration penalty, and collects $+5.2$pp of train-half return against a
+$-1.7$pp tested-half difference that is within noise --- and since the gate's
+product is drawdown control, drawdown dominance at $\approx$zero return cost is
+the deciding comparison.
+
+\begin{tcolorbox}[colback=bcgold!8, colframe=bcgold, boxrule=0.8pt,
+  title={\bfseries Adopted 26 August 2026 --- the gate becomes breadth-conditional, $K=4$},
+  coltitle=bcnavy]
+A stock below its own 200-day average is gated \textbf{only when at least four
+of the nine names are below theirs}. An isolated breach --- a name recovering
+from its own drawdown --- trades normally. Wired the same day
+(\texttt{wire\_breadth\_gate.py}, cell-diff verified): Active Trading M8 holds
+$K$ (Gate Variables block); Allocation G43 counts the names currently below
+(column G keeps the raw per-name flags); F25:F42 apply the gate as
+$\text{breach} \times (\text{G43} \ge K)$. A blank M8 \emph{fails closed} to
+the per-name gate --- the failure direction is more protection, never less.
+Column N's traffic lights are unchanged: red still means ``below its own
+line''; whether red is \emph{enforced} is read by comparing G43 with M8.
+\end{tcolorbox}
+
+At wiring, the live state was breadth 2 (VST and RKLB below): the gate stood
+unarmed and both names' recovery bids went back into the morning allocation ---
+the exact leak the observation identified, closed.
+
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}
 \vspace{0.2cm}
@@ -527,9 +619,10 @@ with verified fills, pooled equal-weight book, €9m; bull side --- the standard
 2024--26 verified sample. Interest on idle cash held at the model's 3.14\%/yr
 throughout (understates 2022 cash income). Scripts:
 \texttt{bear\_replay.py}, \texttt{price\_stop\_study.py}, \texttt{book\_sim.py}
-(breaker, price-stop and gate support); workbook wiring
-\texttt{wire\_200dma.py} (re-runnable on any future copy). Findings recorded in
-HANDOVER \S3.13. Companion paper: \emph{Three Volatility Overlays, Tested and
+(breaker, price-stop and gate support), \texttt{breadth\_gate.py} (\S9);
+workbook wiring \texttt{wire\_200dma.py} and \texttt{wire\_breadth\_gate.py}
+(re-runnable on any future copy). Findings recorded in HANDOVER \S3.13 and
+\S3.23. Companion paper: \emph{Three Volatility Overlays, Tested and
 Rejected} (14 Aug 2026).}
 
 \end{document}
