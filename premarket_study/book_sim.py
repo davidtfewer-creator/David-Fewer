@@ -137,9 +137,11 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     profitable net of both commissions. Applies to same-week and older holds
     alike; the close follows any intraday fill so ordering is provable.
     'profit_skip1' spares each position its FIRST week-end (only prior-week
-    entries sell). Pass a collection of names to apply 'profit' to those names
-    only, or (mode, names) to combine. None (default) reproduces
-    hold-to-target. Exit count in we_exits."""
+    entries sell). 'half_prem' fires the week-end sale only when the close has
+    captured at least half the position's premium (close >= (bid+target)/2).
+    Pass a collection of names to apply 'profit' to those names only, or
+    (mode, names) to combine. None (default) reproduces hold-to-target. Exit
+    count in we_exits."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -362,6 +364,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     continue
                 nd = data[s['name']]
                 c = nd['C'][s['_i']]
+                if we_mode == 'half_prem' and c < (s['bid'] + s['target']) / 2:
+                    continue
                 if s['shares'] * (c - COMM) > s['cost']:
                     proceeds = s['shares'] * (c - COMM)
                     if mode == 'pooled':

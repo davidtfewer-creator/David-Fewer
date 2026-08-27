@@ -484,7 +484,16 @@ a position is spared its first week-end, only prior-week entries sell) also lose
 The age-split diagnostic explains why no Friday works: positions in profit at their SECOND-or-later
 Friday go on to beat that close in 92% of cases (avg +3.57% final vs +1.58% then) — even more
 in-the-money than first-Friday holds. There is no Friday at which the in-profit book is better
-sold than held (weekly_close_skip1.json).
+sold than held (weekly_close_skip1.json). ADDENDUM 3 — half-premium variants, both readings
+(half_premium.json): (A) halving the TAKE-PROFIT TARGET itself (resting sell at bid + prem/2,
+prem_mult hook / halved sleeve prem) is the family's worst cell — pooled full 87.3→69.4, train
+59.5→44.2, test 118.4→97.5 despite 44% more fills (1363→1960; DD 25.8→21.7 is the one gain);
+8 of 9 names lose full-sample. Doubling turnover at half margin does not clear the same
+commissions/recycling bar — the FITTED premium level is load-bearing, not just its fixedness.
+(B) The Friday sale gated on having captured >= half the premium (week_end_exit='half_prem')
+still loses both halves (56.8/113.9, DD worse, 60 sales) — a subset of the §3.24 sales, all still
+value-destroying. Exit family closed: no early-exit rule at any threshold or timing beats the
+fixed premium held to target.
 
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over
