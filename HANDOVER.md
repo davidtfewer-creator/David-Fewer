@@ -478,7 +478,13 @@ Rejection #14. ADDENDUM (same day): restricted to the diversifiers only (user fo
 loses both halves — CF+VLO+GM-only 55.4/110.6 vs baseline 59.5/118.4 (DD worse); singly, CF-only
 and GM-only lose both halves and VLO-only shows the familiar train-up/test-down noise pattern
 (62.6/115.9). The freed Monday capital never replaces the forfeited premium, on any subset
-(weekly_close_divers.json).
+(weekly_close_divers.json). ADDENDUM 2: holding to the FOLLOWING Friday instead ('profit_skip1' —
+a position is spared its first week-end, only prior-week entries sell) also loses both halves
+(train 59.5→55.4, test 118.4→115.5, DD 25.8→27.3, 63 forced sales; diversifier-scoped identical).
+The age-split diagnostic explains why no Friday works: positions in profit at their SECOND-or-later
+Friday go on to beat that close in 92% of cases (avg +3.57% final vs +1.58% then) — even more
+in-the-money than first-Friday holds. There is no Friday at which the in-profit book is better
+sold than held (weekly_close_skip1.json).
 
 **Pooled-cost revision + April 2025 stress test (15 Aug).** The ~12pp/yr bull cost of the gate is
 a held-construction number. In the POOLED loop (the one the book trades) the gate is free over

@@ -122,7 +122,9 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
                         commissions (close - comm > fill + comm). Applies to
                         positions bought that week and to older holds alike
                         (the close is after any intraday fill, so ordering is
-                        provable). None (default) reproduces hold-to-target.
+                        provable). 'profit_skip1': same, but a position is spared
+                        its FIRST week-end -- only positions bought in an earlier
+                        ISO week sell. None (default) reproduces hold-to-target.
       price_stop     -> float fraction (e.g. 0.20): a stop-loss at buy_px*(1-frac),
                         firing whenever the day's low reaches it BEFORE the 50-day
                         time stop. Fill at the stop level, or at the open if the
@@ -360,7 +362,11 @@ def run_model(dates, O, H, L, C, p: Params, ou_sigma='level',
             else:
                 AE[i] = 1 if (Z[i] == 1 and AD[i] == 0) else 0
             # week-end profit exit: still open at a week-end close, in profit -> sell at the close
-            if (week_end_exit == 'profit' and wk_end[i] and AE[i] == 1
+            # ('profit_skip1' spares a position its first week-end: only prior-week entries sell)
+            if (week_end_exit in ('profit', 'profit_skip1') and wk_end[i] and AE[i] == 1
+                    and (week_end_exit == 'profit'
+                         or (AE[i - 1] == 1 and AV[i - 1] is not None
+                             and AV[i - 1].isocalendar()[:2] != dates[i].isocalendar()[:2]))
                     and C[i] - p.comm > buy_px + p.comm):
                 AD[i] = 1
                 AC[i] = C[i]

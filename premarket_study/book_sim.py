@@ -135,9 +135,11 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     week_end_exit: 'profit' -- a position still open at the last trading day of
     an ISO week (target unmet, no stop) is sold at that day's CLOSE when
     profitable net of both commissions. Applies to same-week and older holds
-    alike; the close follows any intraday fill so ordering is provable. Pass a
-    collection of names instead to apply the rule to those names only. None
-    (default) reproduces hold-to-target. Exit count in we_exits."""
+    alike; the close follows any intraday fill so ordering is provable.
+    'profit_skip1' spares each position its FIRST week-end (only prior-week
+    entries sell). Pass a collection of names to apply 'profit' to those names
+    only, or (mode, names) to combine. None (default) reproduces
+    hold-to-target. Exit count in we_exits."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -345,9 +347,18 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
 
         # -------- week-end profit exit: open positions in profit sell at the close
         if week_end_exit is not None and wk_end[d]:
-            we_names = None if isinstance(week_end_exit, str) else set(week_end_exit)
+            if isinstance(week_end_exit, str):
+                we_mode, we_names = week_end_exit, None
+            elif (len(week_end_exit) == 2 and isinstance(week_end_exit[0], str)
+                  and not isinstance(week_end_exit[1], str)):
+                we_mode, we_names = week_end_exit[0], set(week_end_exit[1])
+            else:
+                we_mode, we_names = 'profit', set(week_end_exit)
             for s in sleeves:
                 if not s['holding'] or (we_names is not None and s['name'] not in we_names):
+                    continue
+                if (we_mode == 'profit_skip1'
+                        and s['entry'].isocalendar()[:2] == d.isocalendar()[:2]):
                     continue
                 nd = data[s['name']]
                 c = nd['C'][s['_i']]
