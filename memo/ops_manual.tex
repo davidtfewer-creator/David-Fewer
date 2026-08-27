@@ -1,0 +1,327 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[letterspace=180]{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+\definecolor{bcnavy}{RGB}{24,38,68}
+\definecolor{bcgold}{RGB}{198,160,74}
+\definecolor{bcteal}{RGB}{23,110,120}
+\definecolor{bcgrey}{RGB}{95,95,95}
+\definecolor{bcred}{RGB}{160,60,50}
+
+\titleformat{\section}{\bfseries\large\color{bcnavy}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\bfseries\color{bcteal}}{}{0em}{}
+\captionsetup{font={footnotesize},labelformat=empty,textfont={color=bcgrey}}
+\newcommand{\tabnote}[1]{\begin{center}\begin{minipage}{0.92\textwidth}
+  \footnotesize\color{bcgrey}#1\end{minipage}\end{center}}
+\newlist{checklist}{itemize}{1}
+\setlist[checklist]{label=$\square$, leftmargin=1.6em, itemsep=2pt, topsep=2pt}
+
+\begin{document}
+
+% ---------------------------------------------------------------- cover
+\begin{titlepage}
+\centering
+\vspace*{3.2cm}
+\includegraphics[width=5cm]{bc_logo.pdf}
+
+\vspace{1.6cm}
+{\color{bcnavy}\rule{7cm}{0.6pt}}
+
+\vspace{0.9cm}
+{\LARGE\bfseries\color{bcnavy} Book Operations Manual\par}
+\vspace{0.35cm}
+{\large\color{bcnavy} The maintenance schedule for the live nine-name book:\\
+daily runbook, the Sunday package, monthly and quarterly reviews,\\
+the watch-list protocol, alarms, and change control\par}
+
+\vspace{0.9cm}
+{\color{bcgold}\rule{7cm}{1.0pt}}
+
+\vspace{1.5cm}
+{\bfseries Bayesian Capital}\\[0.2cm]
+{\color{bcgrey} Systematic Trading Research}\\[0.9cm]
+{\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
+{\color{bcgrey} 27 August 2026 --- version 1}
+\vfill
+\end{titlepage}
+
+% ---------------------------------------------------------------- header
+\begin{center}
+{\Large\bfseries\color{bcnavy} Book Operations Manual}\\[0.15cm]
+{\color{bcnavy} run the machine; measure against plan; change only through the gates}\\[0.25cm]
+{\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
+\;$\bullet$\; book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ RKLB $\cdot$ MU
+$\cdot$ GM $\cdot$ VLO $\cdot$ CF $\cdot$ MRVL}
+\end{center}
+\vspace{0.1cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.4cm}
+
+\section{Purpose and operating principles}
+
+The book has crossed from research project to operating asset. This manual is
+the standing schedule for running it: what is checked, at what cadence, by
+whom, against what number, and what may --- and may not --- be changed in
+response. Three principles govern everything below.
+
+\textbf{Cadence matches statistical power.} The book makes $\approx$599
+verified fills a year --- about 2.4 per session, roughly five per name per
+month. Daily returns are noise; monthly per-name returns are noise; a
+\emph{quarter} is the first horizon at which a per-name verdict means
+anything. The schedule is built so that no one is ever staring at a number
+that cannot support a decision.
+
+\textbf{The biggest risk to this book is a well-intentioned reaction.}
+Sixteen tested proposals have died on the standard protocol; the survivors
+are three wired vetoes and one manual pause. History says the harvest is
+robust and the operator's improvements are usually not. Nothing in daily or
+weekly operation authorises a change to prices, parameters or rules ---
+change happens only through \S9.
+
+\textbf{Execution truth lives in the blotter.} The models predict; the
+blotter records what actually happened. Reconciling the two is not
+bookkeeping --- it is how the gap-exit correction ($\sim$20pp/yr of
+already-earned money) was found, and the weekly reconciliation exists to
+find the next one.
+
+\section{The machine being operated}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+component & standing state \\
+\midrule
+book & nine names, two sleeves each, equal weights, parameters frozen \\
+Script 1 (morning) & pulls prices and cash into the workbook (9:00 pre-market col P when wired) \\
+Script 2 (morning) & places the day's resting limit orders at IBKR from the order block \\
+breadth DMA gate & own close $<$ 200dma \emph{and} $\ge K{=}4$ names below (AT M8; count Alloc G43) \\
+pre-market rule & no order with Buy@ $>4\%$ below the 9:00 print (AT M6; flags Alloc col H) \\
+ATH gate & no buy whose exit needs a print above ATH ($\varepsilon$ in AT M7) \\
+MU pause (manual) & no new MU bids, report week $\pm$ one week --- \S4 keeps it on the calendar \\
+discretionary carve-out & Alloc E5 flag / E6 amount; discretionary log at AT T41:AF241 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Planning basis} (execution-accurate, 19 Aug 2026): book
+$\approx$\textbf{79\%/yr} on per-name planning anchors; the pooled live-loop
+measurement with all rules is $\approx$106\%/yr. Expected activity:
+$\approx$599 fills/yr, $\approx$20 time-stops/yr. These are the reference
+numbers every review below compares against.
+
+\section{Daily runbook (market days, $\approx$10 minutes, David)}
+
+\begin{checklist}
+\item Script 1 ran; Query/Feed dates advanced; no \texttt{\#N/A} in the order block.
+\item Pre-market column P populated (once Script 1 is upgraded); Gate
+      Variables intact (M6 $=$ 0.04, M7 $=$ 0, M8 $=$ 4).
+\item Breadth count (Alloc G43) plausible against the traffic lights in col N.
+\item Script 2 ran; order count and prices at IBKR match the order block;
+      zero-quantity BUY rows skipped; MU bids withheld if the pause window is
+      active.
+\item End of day: fills entered in the blotter; any manual action recorded in
+      the discretionary log with one line of reason.
+\end{checklist}
+
+That is the whole daily job. \textbf{Do not review returns daily.} The only
+daily triggers for action are the alarms in \S8.
+
+\section{The Sunday package (weekly, 2--3 hours, interns)}
+
+Markets are closed on Sunday: nothing in this package can touch a live order,
+which is what makes it delegable. Standing order of work:
+
+\begin{checklist}
+\item \textbf{Reconcile} (45--60 min): IBKR activity statement vs the
+      blotter --- every fill, fee, dividend and cash movement. Discrepancies
+      are logged, not fixed silently; unexplained items escalate (\S8).
+\item \textbf{The weekly one-pager} (30 min once tooled): book equity vs the
+      79\%/yr plan line; fills and stops this week by name; which gates fired
+      (DMA breadth days, PM vetoes, ATH caps binding); MU pause status; open
+      positions and their ages against the 50-day stop.
+\item \textbf{Archive the data} (20 min): export the week's 5-minute bars
+      (regular hours \emph{and} pre-market) for all book and watch-list
+      names into the standard folders
+      (\texttt{data\_5min/TICKER\_5min.xlsx},
+      \texttt{data\_pm/TICKER\_pm.xlsx}). The archive is why the 2022 replay
+      and the pre-market rule were possible; it only exists if it is kept.
+\item \textbf{Watch-list update} (20 min): run the frozen watch-list vectors
+      over the new week's data; append would-be fills to each candidate's
+      paper track (\S7).
+\item \textbf{Coming week} (10 min): earnings-calendar sync run (or check
+      the Friday automation did); confirm whether an MU pause window opens.
+\end{checklist}
+
+If Sunday hours are not available, items 2 and 4 are scripted and the
+package compresses to under an hour: reconcile, glance at the generated
+one-pager, archive.
+
+\section{Monthly review (first Sunday of the month, $+$1 hour)}
+
+\begin{checklist}
+\item \textbf{Book vs plan, with bands}: trailing three-month book return
+      (annualised, from the blotter) against the 79\%/yr plan. Judge it only
+      against pre-agreed tolerance bands derived from the verified
+      backtest's own monthly dispersion --- inside the bands, \emph{no
+      action and no narrative}. (Bands to be computed and appended to this
+      manual as Appendix A.)
+\item \textbf{Activity pace}: fills and stops vs the $\approx$599/yr and
+      $\approx$20/yr references. A collapse in fill count is a structural
+      alarm even when returns look fine --- it means the bids stopped being
+      touched.
+\item \textbf{Execution audit}: the month's live fills vs engine-predicted
+      fills (prices and dates). Persistent one-sided gaps are exactly how
+      the gap-exit money was found; the next discrepancy of that class is
+      worth more than any overlay.
+\item \textbf{Interest and cash}: idle-cash interest credited vs expected;
+      discretionary carve-out netting still correct if the flag was used.
+\end{checklist}
+
+\section{The quarterly review (Sep / Dec / Mar / Jun, half a day)}
+
+The only forum with authority over composition. Agenda:
+
+\begin{enumerate}[leftmargin=1.6em, itemsep=2pt]
+\item \textbf{Per-name verdicts.} Each name's trailing two quarters
+      (annualised, verified from the blotter) against its planning anchor
+      and its \emph{observed range} (the span of its train/test-half
+      returns --- the honest ``any year lands somewhere in here''). A name
+      is flagged only when persistently below \emph{both} its plan and the
+      bottom of its range.
+\item \textbf{Composition.} Flagged names join the funding-source list (VST
+      has carried that flag since August). Removals and additions go through
+      the marginal book test --- a name must out-earn or de-risk the book it
+      joins --- never through sentiment. Additions come only from the watch
+      list (\S7).
+\item \textbf{Scheduled re-tests.} Standing diary: \textbf{AVGO} September
+      2026 (post-report, tenth pause window; admission bar: the ten-name
+      book must stop losing to the nine-name book on the tested half);
+      \textbf{NEM} end-Q1 2027 (admits if reclassified uncorrelated or the
+      plan clears 50\%).
+\item \textbf{Rules integrity.} Cell-diff the live workbook against the
+      reference copy: gates wired, script-read ranges unmoved, Gate
+      Variables correct. Any drift is restored from reference, not patched.
+\item \textbf{Research queue.} New ideas proposed this quarter are listed
+      with their information source and their nearest dead relative from the
+      rejection ledger, then prioritised. Testing happens outside the review
+      through the standard protocol.
+\end{enumerate}
+
+\section{The watch-list protocol}
+
+The admission problem is that fresh parameter fits do not transport ---
+backtest evidence for a new name is always the weakest evidence. The watch
+list converts \emph{time} into the evidence money can trust:
+
+\begin{enumerate}[leftmargin=1.6em, itemsep=2pt]
+\item \textbf{Admission to the list} (any time): candidate passes G0--G2 ---
+      clean verifiable data, classification (AI-linked face the 50\% planning
+      gate, uncorrelated 30\%), and an honest half-sample fit that clears its
+      gate bar on the backtest.
+\item \textbf{Freeze.} The reference vector is frozen on admission day and
+      recorded. It is never re-fitted while the name is on the list --- the
+      entire value of the list is that every subsequent week is genuinely
+      out of sample.
+\item \textbf{Paper-track.} Each Sunday the frozen vector runs over the
+      week's archived data; would-be fills, exits and stops accumulate in
+      the candidate's track record.
+\item \textbf{Graduation} (quarterly review only): \emph{forward} paper
+      performance clears the name's gate bar over at least two quarters,
+      \emph{and} the marginal book test passes with the live rules on both
+      sides. Both or neither.
+\item \textbf{Capacity.} The list holds at most five names (each one costs
+      weekly archiving). Current bench: \textbf{AVGO} (re-test scheduled),
+      \textbf{NEM} (watch-listed Aug 2026). A screening round to fill the
+      remaining seats feeds the Q4 review.
+\end{enumerate}
+
+\section{Alarms and escalation}
+
+\begin{tcolorbox}[colback=bcred!6, colframe=bcred, boxrule=0.8pt,
+  title={\bfseries Act today (David, before next open)}, coltitle=white]
+A script failed and orders are unplaced or unknown $\cdot$ a fill exists
+with no corresponding order (or vice versa) $\cdot$ workbook gate cells
+show errors or a script-read range moved $\cdot$ IBKR cash does not
+reconcile to the blotter. Response: stop placing new orders until the state
+is understood; resting exits stay working (they protect positions). Fix the
+plumbing, never the strategy, under time pressure.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=bcnavy!5, colframe=bcnavy, boxrule=0.8pt,
+  title={\bfseries Note and wait for the scheduled review}, coltitle=white]
+A losing week or month inside the bands $\cdot$ a name gated by the breadth
+rule $\cdot$ a cluster of time-stops in a falling tape $\cdot$ an April-style
+drawdown. The 2022 replay and the April 2025 episode are the evidence that
+the wired rules handle these without help. The one discretionary instrument
+that exists is the carve-out (Alloc E5/E6) --- deliberate, logged, and
+outside the model's capital. There is no ``manual de-risking'' inside the
+model's sleeves.
+\end{tcolorbox}
+
+\section{Change control}
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+\item \textbf{Workbook edits}: only against a saved reference copy, verified
+      by full-workbook cell-diff (the wiring scripts are re-runnable);
+      script-read ranges (\texttt{A18:J36}, \texttt{IBKR\_Orders}, blotter)
+      never move.
+\item \textbf{Strategy changes}: every proposal --- however small --- goes
+      through the standard protocol: verified fills, train-half choice,
+      frozen tested half, adopted only on a both-halves win (protection
+      rules may instead win on drawdown dominance at $\approx$zero return
+      cost, the breadth-gate standard). Vetoes may cancel an order, never
+      re-price it.
+\item \textbf{Parameters}: frozen. Re-fitting is not a maintenance activity
+      --- it failed 1/18, 6/40 and every fresh-protocol comparison since.
+      A specification \emph{bug} (the OU-sigma class) is fixed on
+      discovery; a fit is never chased.
+\item \textbf{Records}: every adopted change lands in HANDOVER and the
+      relevant paper the same day, with the reproduction script in the
+      repository.
+\end{itemize}
+
+\section{Calendar of responsibilities}
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+cadence & when & owner & content \\
+\midrule
+daily     & market days, am + close & David & \S3 runbook, alarms only \\
+weekly    & Sunday, 2--3 h          & interns & \S4 package (reconcile, one-pager, archive, watch list) \\
+monthly   & first Sunday, $+$1 h    & interns $+$ David & \S5 (bands, pace, execution audit) \\
+quarterly & Sep / Dec / Mar / Jun   & all & \S6 review (composition authority) \\
+annual    & tax year end            & David & CT bullet payment; the machine restarts (evolution doc \S7) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{Standing diary entries: AVGO re-test September 2026; NEM re-test
+end-Q1 2027; intern Sunday availability to be confirmed --- if unavailable,
+\S4 items 2 and 4 run scripted and the package folds into $\sim$1 hour on
+Saturday. Pending tooling: the one-pager generator, the watch-list
+paper-tracker, and Appendix A (monthly tolerance bands derived from the
+verified backtest).}
+
+\vspace{0.4cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.2cm}
+{\footnotesize\color{bcgrey} Companion documents: \emph{The Evolution of
+Bayesian Capital} (both editions, 25--26 Aug); \emph{Verified Book Ranking}
+(9--26 Aug); \emph{Bear-Market Protection} (15--26 Aug); \emph{The
+Pre-Market Rule} (18 Aug); \emph{Three Volatility Overlays} (14 Aug).
+Reference numbers herein: HANDOVER \S2--\S3; reproduction from
+\texttt{premarket\_study/} and \texttt{ops/}.}
+
+\end{document}
