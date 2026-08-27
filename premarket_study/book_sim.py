@@ -135,7 +135,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     week_end_exit: 'profit' -- a position still open at the last trading day of
     an ISO week (target unmet, no stop) is sold at that day's CLOSE when
     profitable net of both commissions. Applies to same-week and older holds
-    alike; the close follows any intraday fill so ordering is provable. None
+    alike; the close follows any intraday fill so ordering is provable. Pass a
+    collection of names instead to apply the rule to those names only. None
     (default) reproduces hold-to-target. Exit count in we_exits."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
@@ -343,9 +344,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                          cost=cost, bid=bid)
 
         # -------- week-end profit exit: open positions in profit sell at the close
-        if week_end_exit == 'profit' and wk_end[d]:
+        if week_end_exit is not None and wk_end[d]:
+            we_names = None if isinstance(week_end_exit, str) else set(week_end_exit)
             for s in sleeves:
-                if not s['holding']:
+                if not s['holding'] or (we_names is not None and s['name'] not in we_names):
                     continue
                 nd = data[s['name']]
                 c = nd['C'][s['_i']]
