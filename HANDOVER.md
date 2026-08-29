@@ -492,6 +492,32 @@ veto §3.25, now on overnight information). Breadth is bear-armour information o
 horizon (§3.23) and harvest information on the OVERNIGHT horizon. No intervention run — a
 breadth veto would delete the book's best conditional bucket. Rejection #16.
 
+### 3.27 Premia at book level (pooled objective): diagnostic confirms CF is the pool's most expensive patience — intervention still fails, premia stand
+User question (29 Aug): the per-name premia were fitted with captive capital; under pooling, the
+opportunity cost of a held-day is the POOL's marginal return, which the isolation fit never saw —
+should the slow diversifiers (CF 4.66/5.91% premia) exit earlier for the book's sake? This is a
+NEW objective (never searched: book_policy_opt covered weights/ATH-eps/cap only), tested in
+`premia_at_book.py` on the live config.
+- **Diagnostic — yield per invested dollar-day (pooled baseline trades)**: CF is the book's
+  lowest at **0.186%/dollar-day** (57 trades, median hold 12d, best per-trade margin +3.12%) vs
+  book 0.306%, RKLB 0.476%, MU 0.431%; VLO 0.269%, GM 0.272%. The user's suspicion is factually
+  right: CF's held capital earns ~40% less per dollar-day than the pool average.
+- **Intervention — diversifier premium multipliers {0.5,0.65,0.8,1.0}³, both-directions
+  book-policy protocol**: fit-train picks CF×0.8/VLO×0.5 (+0.6pp in sample) and LOSES the unseen
+  half (116.7→115.2); fit-test picks the baseline outright (no cell beats 1.0 in sample).
+  Directions disagree → no adoption. CF-only ladder, no picking: every reduction loses BOTH
+  halves (×0.8: 59.6/116.1 vs 59.5/116.7; ×0.5: 58.1/115.7).
+- **Mechanism**: the diagnostic's 0.306%/dd book average is the AVERAGE yield, not the marginal
+  one. Freed CF capital does not create new trades — it thickens the pool's existing orders, so
+  its redeployment earns the margin, not the average, while CF's forfeited premium (the book's
+  best per-trade margin) is lost with certainty. Same shape as fill-prob weighting (§3.18) and
+  the exit family (§3.24): the pool prices slow capital far more cheaply than intuition does,
+  because next morning's diversified allocation is always waiting for it.
+Verdict: the isolation-fitted premia are also the book-optimal premia within measurable
+resolution; CF's patience is expensive per dollar-day and still worth it. Rejection #17. (Note:
+windowed sims restart capital at the split, so this study's test-half baseline reads 116.7 vs
+the full-path 118.4 — internally consistent A/B throughout.)
+
 ### 3.24 Week-end profit exit (sell in-profit open positions at the Friday close): rejected — the weekend hold is paid for
 User proposal (26 Aug): a position that hasn't reached its target but stands in profit at the
 Friday close sells at that close instead of carrying into next week. Tested per name and pooled
