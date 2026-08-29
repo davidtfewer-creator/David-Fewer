@@ -52,7 +52,8 @@ the watch-list protocol, alarms, and change control\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 27 August 2026 --- version 1}
+{\color{bcgrey} 27 August 2026 --- version 1.1 (29 Aug: Performance tab wired
+into the weekly and monthly checks)}
 \vfill
 \end{titlepage}
 
@@ -110,6 +111,7 @@ pre-market rule & no order with Buy@ $>4\%$ below the 9:00 print (AT M6; flags A
 ATH gate & no buy whose exit needs a print above ATH ($\varepsilon$ in AT M7) \\
 MU pause (manual) & no new MU bids, report week $\pm$ one week --- \S4 keeps it on the calendar \\
 discretionary carve-out & Alloc E5 flag / E6 amount; discretionary log at AT T41:AF241 \\
+Performance tab & weekly actual (AT col P) vs the compounding target; assumptions in C4/C5 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -150,6 +152,12 @@ which is what makes it delegable. Standing order of work:
       79\%/yr plan line; fills and stops this week by name; which gates fired
       (DMA breadth days, PM vetoes, ATH caps binding); MU pause status; open
       positions and their ages against the 50-day stop.
+\item \textbf{Performance-tab check} (5 min): confirm the week's row filled
+      (week ending, actual P\&L from AT col P --- blotter plus any closed
+      discretionary trades) and that the cumulative-actual line updated on the
+      chart. This is a \emph{recording} check, not a judgement: a single
+      week's gap to the target line is noise by construction. The tab's
+      verdicts are read monthly (\S5).
 \item \textbf{Archive the data} (20 min): export the week's 5-minute bars
       (regular hours \emph{and} pre-market) for all book and watch-list
       names into the standard folders
@@ -170,12 +178,17 @@ one-pager, archive.
 \section{Monthly review (first Sunday of the month, $+$1 hour)}
 
 \begin{checklist}
-\item \textbf{Book vs plan, with bands}: trailing three-month book return
-      (annualised, from the blotter) against the 79\%/yr plan. Judge it only
-      against pre-agreed tolerance bands derived from the verified
-      backtest's own monthly dispersion --- inside the bands, \emph{no
-      action and no narrative}. (Bands to be computed and appended to this
-      manual as Appendix A.)
+\item \textbf{Book vs plan --- the Performance tab}: the standing instrument
+      is the workbook's Performance sheet (between Notes and Allocation):
+      weekly actual P\&L against a target compounding at 80\%/yr from
+      \$6{,}150{,}000 starting capital (assumptions editable in C4/C5), with
+      cumulative lines charted. Read the \emph{cumulative} gap
+      (column G / the chart), never a single week; the weekly increments are
+      noise by construction. Judge the gap only against pre-agreed tolerance
+      bands derived from the verified backtest's own dispersion --- inside
+      the bands, \emph{no action and no narrative}. (Bands to be computed
+      and appended to this manual as Appendix A.) Changing the target
+      assumptions is a quarterly-review decision, not a monthly one.
 \item \textbf{Activity pace}: fills and stops vs the $\approx$599/yr and
       $\approx$20/yr references. A collapse in fill count is a structural
       alarm even when returns look fine --- it means the bids stopped being
