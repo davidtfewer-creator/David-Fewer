@@ -52,8 +52,8 @@ the watch-list protocol, alarms, and change control\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 27 August 2026 --- version 1.1 (29 Aug: Performance tab wired
-into the weekly and monthly checks)}
+{\color{bcgrey} 27 August 2026 --- version 1.2 (29 Aug: Performance tab wired
+into the weekly and monthly checks; 1 Sep: one-pager generator delivered)}
 \vfill
 \end{titlepage}
 
@@ -148,10 +148,19 @@ which is what makes it delegable. Standing order of work:
 \item \textbf{Reconcile} (45--60 min): IBKR activity statement vs the
       blotter --- every fill, fee, dividend and cash movement. Discrepancies
       are logged, not fixed silently; unexplained items escalate (\S8).
-\item \textbf{The weekly one-pager} (30 min once tooled): book equity vs the
-      79\%/yr plan line; fills and stops this week by name; which gates fired
-      (DMA breadth days, PM vetoes, ATH caps binding); MU pause status; open
-      positions and their ages against the 50-day stop.
+\item \textbf{The weekly one-pager} (10 min, tooled): run
+      \texttt{python weekly\_onepager.py <workbook>.xlsx} against the saved
+      workbook --- it writes a one-page HTML report beside it. Contents: book
+      equity vs the plan line (Performance-tab assumptions); fills, exits and
+      stops this week by name; DMA breadth count for each day of the week
+      with gate-armed days marked; ATH proximity (cap territory); MU pause
+      status (from the next-earnings date in Active Trading G11 --- keep it
+      filled); open positions and their ages against the 50-day stop; a hold
+      tracker; and data-quality checks (Query freshness, missing closes,
+      blotter integrity). The intern's job is \emph{reading} it --- losing
+      exits and stop-due flags are the items that escalate. PM vetoes are not
+      on it: the sheet keeps no 9:00 history, so those are checked live on
+      the morning run.
 \item \textbf{Performance-tab check} (5 min): confirm the week's row filled
       (week ending, actual P\&L from AT col P --- blotter plus any closed
       discretionary trades) and that the cumulative-actual line updated on the
@@ -323,9 +332,10 @@ annual    & tax year end            & David & CT bullet payment; the machine res
 \tabnote{Standing diary entries: AVGO re-test September 2026; NEM re-test
 end-Q1 2027; intern Sunday availability to be confirmed --- if unavailable,
 \S4 items 2 and 4 run scripted and the package folds into $\sim$1 hour on
-Saturday. Pending tooling: the one-pager generator, the watch-list
-paper-tracker, and Appendix A (monthly tolerance bands derived from the
-verified backtest).}
+Saturday. Tooling: the one-pager generator is delivered
+(\texttt{weekly\_onepager.py}, \S4). Pending: the watch-list paper-tracker
+and Appendix A (monthly tolerance bands derived from the verified
+backtest).}
 
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}
