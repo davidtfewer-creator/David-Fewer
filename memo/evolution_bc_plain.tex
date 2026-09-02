@@ -107,7 +107,7 @@ models.} Ten clever model upgrades all failed our tests. What worked: simple
 rules that skip orders that shouldn't exist, letting that money back other
 orders the same morning.};
 \node[st, below=of s8] (s9) {{\tt 10 } \textbf{The stress test.} We replayed
-the exact book through the 2022 bear market: unprotected it lost 20\%; with
+the exact book through the 2022 bear market: unprotected it lost 14\%; with
 our trend rule it roughly broke even. The boring stocks saved the year.};
 \node[fin, below=of s9] (s10) {\textbf{Today.} Nine stocks, all rules live in
 the trading workbook, honest expectation $\approx$74\%/yr on the cautious
@@ -316,8 +316,8 @@ rules, backed by pooled capital, are what actually worked.}
 Everything above was measured in a bull market. So we obtained minute-level
 data for 2021--2023 and replayed today's exact book through the
 \textbf{2022 bear market} --- a year our AI names fell 40--80\%. Unprotected,
-the book lost about 20\% (painful, survivable). With the trend rule active it
-lost about 1\% --- because the money that stopped chasing falling AI stocks
+the book lost about 14\% (painful, survivable). With the trend rule active it
+finished slightly \emph{up} --- because the money that stopped chasing falling AI stocks
 was automatically redeployed into the ``boring'' stocks (GM, Valero, CF),
 which had a great year. The diversifiers, admitted for exactly this scenario,
 earned their place.
@@ -338,7 +338,7 @@ credit the weakest half of that measurement --- 74\%). The fuller simulation
 of the live setup measures around 88\%; we treat that as the ceiling
 reference, not the target.
 
-\oneline{We replayed 2022: unprotected minus twenty, with our rules roughly
+\oneline{We replayed 2022: unprotected minus fourteen, with our rules slightly
 flat --- and our real-world executions are better than our models assumed.}
 
 \section{If you're asked\ldots}
@@ -357,7 +357,7 @@ that improve \emph{both} halves independently get adopted. Ten of thirteen
 proposals died by that rule.
 
 \textbf{``What happens in a crash?''} --- We replayed our exact book through
-2022: minus 20\% unprotected, roughly flat with the 200-day trend rule that
+2022: minus 14\% unprotected, slightly up with the 200-day trend rule that
 now runs live, because gated capital rotates into the non-AI names. The known
 weak spot is a very fast crash, which the trend rule is too slow to see ---
 that's a bounded, understood risk.

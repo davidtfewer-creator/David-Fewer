@@ -631,24 +631,60 @@ current roster. The concentration channel identified in \S6 --- the pool
 crowds the last names standing --- is roster-independent and survives. On the
 2024--26 sample the current book's maximum drawdown is 24.7\%.
 
-\textbf{What is pending.} A 2022 replay of the \emph{current} roster needs
-AVGO 5-minute bars for Aug 2021 -- Jun 2023 (same Box format as the other
-names); the re-run is queued on that data. The unverified expectation, stated
-for the record and to be tested: AVGO's public-record 2022 drawdown (roughly
-$-40\%$) is materially shallower than the $-69\%$ the replay charged the
-fourth slot (\S1), so the unprotected 2022 result should soften, while the
-gated result should remain near flat since the gate's save came from the
-diversifiers.
+\textbf{The replay of the current roster (run 2 September 2026).} AVGO
+5-minute bars arrived (Sep 2021 -- Jun 2023; September is the earliest
+available, giving 83 warm-up sessions before calendar 2022 against the
+incumbents' $\sim$90 --- AVGO's OU sleeve, $W{=}113$, comes live around
+mid-February 2022 either way). Both rosters were pushed through the identical
+machinery in the same run; the earlier roster \emph{reproduces its published
+calendar-2022 numbers exactly} ($-21.9\%$ unprotected, 28.1\% drawdown), so
+the comparison is clean. AVGO per name on its reference parameters, verified
+fills: buy-and-hold $-15.7\%$ over 2022, the model $-3.6\%$/yr with 7
+time-stops on 56 buys --- against the $-69\%$ the replay charged the fourth
+slot before (\S1).
+
+At book level, calendar 2022, pooled equal weights:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{calendar 2022 (total)} & \multicolumn{2}{c}{Jan 2022 -- Jun 2023 (total)} \\
+config & earlier roster & \textbf{current} & earlier roster & \textbf{current} \\
+\midrule
+nothing                    & $-21.9\%$ & $\mathbf{-13.8\%}$ & $-8.7\%$ & $\mathbf{+0.8\%}$ \\
+200dma gate, per name      & $-2.6\%$  & $-1.5\%$           & $+7.3\%$ & $+12.3\%$ \\
+\textbf{breadth gate $K{=}4$ (adopted)} & $-2.6\%$ & $\mathbf{+1.7\%}$ & $+7.8\%$ & $\mathbf{+17.8\%}$ \\
+gate $+$ breaker           & $-10.2\%$ & $-3.5\%$           & $-1.1\%$ & $+10.0\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{Current-roster maximum drawdowns: 23.7\% unprotected, 15.7\% under
+the breadth gate (earlier roster: 28.1\% / 17.4\%). Fills and stop counts are
+within a few percent of the earlier roster's.}
+
+Three findings. First, the expectation above is confirmed and the caveat
+retires: \textbf{the current book, unprotected, loses $-13.8\%$ in calendar
+2022; under the adopted breadth gate it finishes \emph{up} $+1.7\%$}, and
+makes $+17.8\%$ over the full Jan 2022 -- Jun 2023 span. Second, on this
+roster the breadth condition no longer merely preserves the per-name gate's
+save --- it \emph{beats} it ($+1.7$ vs $-1.5$ in 2022; $+17.8$ vs $+12.3$
+full-span): the \S9 mechanism at work, a recovering fourth slot trading
+through isolated breaches the per-name gate would have blocked. Third, the
+breaker overlays still subtract, exactly as \S6 found --- the adopted
+configuration (breadth gate, no breaker) remains the right one in the bear
+sample too.
 
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}
 \vspace{0.2cm}
 {\footnotesize\color{bcgrey} Basis: bear side --- user-supplied 5-minute bars
-Aug 2021 -- Jun 2023 for all nine names, deployed 2024--26 parameters replayed
-with verified fills, pooled equal-weight book, €9m; bull side --- the standard
-2024--26 verified sample. Interest on idle cash held at the model's 3.14\%/yr
+Aug 2021 -- Jun 2023 (AVGO: Sep 2021 -- Jun 2023, added 2 Sep 2026), deployed
+2024--26 parameters replayed with verified fills, pooled equal-weight book,
+€9m; bull side --- the standard 2024--26 verified sample. Interest on idle cash held at the model's 3.14\%/yr
 throughout (understates 2022 cash income). Scripts:
-\texttt{bear\_replay.py}, \texttt{price\_stop\_study.py}, \texttt{book\_sim.py}
+\texttt{bear\_replay.py}, \texttt{bear\_replay\_avgo.py} (current-roster
+re-run), \texttt{price\_stop\_study.py}, \texttt{book\_sim.py}
 (breaker, price-stop and gate support), \texttt{breadth\_gate.py} (\S9);
 workbook wiring \texttt{wire\_200dma.py} and \texttt{wire\_breadth\_gate.py}
 (re-runnable on any future copy). Findings recorded in HANDOVER \S3.13 and

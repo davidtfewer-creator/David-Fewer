@@ -591,8 +591,7 @@ reproduced exactly as the invariance check); maxDD improves 25.8→24.7; fills ~
 62 trades/yr, AI β 0.74, corr 0.31; averages 59/53/**66** exec, β 0.66, corr 0.30; §7 marked
 superseded; watch-list text re-cast), evolution docs ×2 (roster, flowchart s9/s10, dated
 composition paragraphs; plain edition explains the risk call), bear paper §10 composition note
-(machinery slot-based and carries over; 2022 replay/April-2025 are RKLB-era measurements; re-run
-queued on AVGO Aug21–Jun23 5-min bars), ops manual v1.3 (planning basis 66%/yr, Performance-tab
+(machinery slot-based and carries over; 2022 replay/April-2025 are RKLB-era measurements), ops manual v1.3 (planning basis 66%/yr, Performance-tab
 66%, AVGO diary entry now in-book post-report check, watch bench = NEM only), one-pager
 HIST_HOLD/roster. **Planned overall book return: ≈74%/yr** — construction SETTLED same day (user challenge:
 "surely the plan should include any pooling uplift" — correct; gap exits and pooling are both
@@ -609,6 +608,18 @@ not comparable across the 2-Sep boundary. Workbook plan wired: wire_plan_update.
 0.80 or the interim 0.66) sets C5=0.74 + generic chart title + Notes changelog
 (TradingExcel_9stock_avgo_v3.xlsx delivered); pre-2-Sep performance is judged against the old
 plan, after against 74%. Ranking memo §9 carries the tier definitions; ops manual v1.4.
+
+**3.28b — 2022 bear replay of the CURRENT roster (2 Sep, user supplied AVGO Sep21–Jun23 5-min).**
+`bear_replay_avgo.py` / `bear_avgo.json`; data_bear/AVGO_5min.xlsx (83 warm-up sessions before 2022
+vs incumbents' ~90; AVGO OU W=113 live ~mid-Feb 2022). Earlier roster REPRODUCES published numbers
+exactly (−21.9% unprotected 2022, DD 28.1; gate −2.6). AVGO per name 2022: B&H −15.7%, model
+−3.6%/yr, DD 28.9, 7 stops / 56 buys (vs RKLB's −69% row). CURRENT book calendar 2022: unprotected
+−13.8% (DD 23.7); per-name gate −1.5; **breadth K=4 (adopted) +1.7% (DD 15.7)**; gate+breaker −3.5
+(breaker still subtracts). Full span Jan22–Jun23 totals: nothing +0.8, per-name gate +12.3,
+**breadth +17.8**. NEW finding: on this roster breadth BEATS the per-name gate in the bear (was
+merely save-preserving with RKLB) — recovering fourth slot trades through isolated breaches.
+Papers updated: bear §10 results table + footer; evolution docs' 2022 claims re-cast to
+current-roster numbers (−14% unprotected / gated +2%).
 
 **3.28a — AVGO 2-day post-print pause, tested (2 Sep), NOT adoptable yet.** The 66% plan includes
 gap exits by construction (exec-accurate = anchors × per-name gap-exit uplift; AVGO ×1.17) but
