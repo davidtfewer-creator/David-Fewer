@@ -609,6 +609,23 @@ not comparable across the 2-Sep boundary. Workbook plan wired: wire_plan_update.
 (TradingExcel_9stock_avgo_v3.xlsx delivered); pre-2-Sep performance is judged against the old
 plan, after against 74%. Ranking memo §9 carries the tier definitions; ops manual v1.4.
 
+**3.28c — Stop autopsy (3 Sep, user: "I don't like the number of stops — causal patterns?").**
+`stop_autopsy.py`/`.json`. Pooled current-roster baseline (72.4, PM rule): 1,228 trades, 47 stops
+(20.1/yr, 3.8% of trades), drag −$6.0m vs +$23.2m book P&L. DECOMPOSITION: (1) Feb–Mar 2025 fast
+crash = 13 stops/−$2.4m across six names — the documented gate blind spot, breaker tested and
+subtracts; not diagnosable at entry. (2) Report-adjacency = the ONE per-trade discriminator: 38%
+of stops entered within 7d of that name's report vs 21% of other trades (~1.8×); 18 stops/−$2.8m
+(8 overlap the crash). The LIVE MU pause (manual, not in baseline) catches ALL FOUR MU stops
+(−$235k) → live expected ≈18.4/yr. Blanket own-report pauses DON'T follow: earnings map showed
+report-adjacent entries are net GOOD for VRT/MRVL/TSM etc.; per-name pauses failed adoption
+(#15, §3.28a AVGO single-episode). (3) Residual = 24 stops/−$2.0m (~10/yr, avg −$85k), spread
+across all names/months, entry tape indistinguishable from winners (prior-5d +3.65% vs +3.78%,
+vs-20d-high −1.7 vs −1.9, below-own-dma 17% vs 16%) — the flat tax of the buy-the-dip entry
+style. AFTER the stop: 68% recover to entry and 55% to the original target within 50 further
+sessions — trough-crystallising confirmed, but stop_days is fitted/frozen and the stop memo
+showed the alternatives are worse. NO new rule proposed; nothing here clears the bar the earlier
+tests didn't already fail.
+
 **3.28b — 2022 bear replay of the CURRENT roster (2 Sep, user supplied AVGO Sep21–Jun23 5-min).**
 `bear_replay_avgo.py` / `bear_avgo.json`; data_bear/AVGO_5min.xlsx (83 warm-up sessions before 2022
 vs incumbents' ~90; AVGO OU W=113 live ~mid-Feb 2022). Earlier roster REPRODUCES published numbers
