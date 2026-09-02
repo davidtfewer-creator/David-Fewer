@@ -61,7 +61,7 @@ and the 200-day moving-average gate\par}
 {\color{bcnavy} per-stock stop $\cdot$ book-wide circuit breaker $\cdot$ 200-day
 moving-average gate}\\[0.25cm]
 {\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
-\;$\bullet$\; book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ RKLB $\cdot$ MU
+\;$\bullet$\; book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ AVGO $\cdot$ MU
 $\cdot$ GM $\cdot$ VLO $\cdot$ CF $\cdot$ MRVL \;$\bullet$\; all figures on verified fills}
 \end{center}
 \vspace{0.1cm}
@@ -609,6 +609,39 @@ line''; whether red is \emph{enforced} is read by comparing G43 with M8.
 At wiring, the live state was breadth 2 (VST and RKLB below): the gate stood
 unarmed and both names' recovery bids went back into the morning allocation ---
 the exact leak the observation identified, closed.
+
+\section{Composition note: RKLB out, AVGO in (2 September 2026)}
+
+AVGO replaced RKLB in the book on 2 September 2026 --- a risk decision by the
+principal (SpaceX-linked performance, binary launch events), recorded in full
+in the ranking memo. What it means for this paper:
+
+\textbf{The machinery carries over untouched.} Every mechanism here is
+book-level and name-agnostic: the 50-day stop, the circuit breaker, the
+per-name 200dma test and the breadth condition are wired by \emph{slot}, not
+by ticker. Allocation G43 counts whichever nine names occupy the slots, so
+AVGO's breach flag entered the breadth count the moment it entered the book;
+$K{=}4$ and the fail-closed direction are unchanged. Nothing in \S1--\S9
+needed rewiring.
+
+\textbf{The measurements are of the RKLB-era book.} The 2022 replay table
+(\S1), the protection matrix (\S6) and the April 2025 stress reading are
+measurements of the roster that included RKLB --- including the episode where
+the pooled loop concentrated into RKLB as the one name still above its line
+(\S6). That concentration \emph{channel} survives the swap (the pool will
+always crowd the last names standing); its worst actor does not. On the
+2024--26 sample the swapped book's maximum drawdown improves 25.8\% $\to$
+24.7\%.
+
+\textbf{What is pending.} A 2022 replay of the \emph{current} roster needs
+AVGO 5-minute bars for Aug 2021 -- Jun 2023 (same Box format as the other
+nine); the re-run is queued on that data. The unverified expectation, stated
+for the record and to be tested, is that the swap softens the unprotected
+2022 result --- AVGO's public-record 2022 drawdown was materially shallower
+than RKLB's (roughly $-40\%$ against $-80\%$) --- while the gated result
+should remain near flat since the gate's save came from the diversifiers.
+Until that replay runs, the 2022 numbers in this paper stand as evidence for
+the \emph{mechanisms}, not as forecasts for the current roster.
 
 \vspace{0.4cm}
 {\color{bcnavy}\hrule height 0.8pt}

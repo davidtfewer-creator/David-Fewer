@@ -584,9 +584,20 @@ C14 ann-return 1.15→0.51; Performance hold refs AVGO 6.5 d (144 trades, 39% sa
 5.9→6.5. Feed AVGO pulls from Query by INDEX so the chain self-updates. User had already renamed
 Feed/Model sheets and rewired Dashboard row 7 / Alloc row 14 / order rows 25–26.
 **New pooled baseline (AVGO in RKLB's slot, live config): full 72.4 / train 43.9 / test 104.9**
-(was 87.3/59.5/118.4) — RKLB was the book's yield engine (0.476%/dollar-day); carry these as the
-reference numbers in the documentation re-cast, which is still TO DO (evolution docs, bear paper,
-ranking memo, ops manual, one-pager HIST_HOLD — the last already updated). Left alone by design:
+sheet-convention (was 87.3/59.5/118.4), **88.5 / 56.4 / 125.4 exec-accurate** (was 106.0/74.1/141.8,
+reproduced exactly as the invariance check); maxDD improves 25.8→24.7; fills ~531/yr pooled
+(~543 captive-sum), stops ~20/yr unchanged. **Documentation re-cast DONE (2 Sep):** ranking memo
+§9 (new nine-name table: AVGO row full 53 / planning 51 / exec 60 via ×1.17 gap-exit uplift,
+62 trades/yr, AI β 0.74, corr 0.31; averages 59/53/**66** exec, β 0.66, corr 0.30; §7 marked
+superseded; watch-list text re-cast), evolution docs ×2 (roster, flowchart s9/s10, dated
+composition paragraphs; plain edition explains the risk call), bear paper §10 composition note
+(machinery slot-based and carries over; 2022 replay/April-2025 are RKLB-era measurements; re-run
+queued on AVGO Aug21–Jun23 5-min bars), ops manual v1.3 (planning basis 66%/yr, Performance-tab
+66%, AVGO diary entry now in-book post-report check, watch bench = NEM only), one-pager
+HIST_HOLD/roster. **Planned overall book return: ≈66%/yr execution-accurate (sheet 53%)** — same
+construction as the old 79/65. Workbook plan wired: wire_plan_update.py sets Performance C5
+0.80→0.66 + generic chart title + Notes changelog (TradingExcel_9stock_avgo_v2.xlsx delivered);
+pre-2-Sep performance is judged against the old plan, after against 66%. Left alone by design:
 historical RKLB blotter rows (P&L stays in the weekly log; per-stock funds row 10 now shows AVGO),
 the OPEN discretionary RKLB position (manual book). Scripts 1/2: sheet layout and every address
 unchanged — the only script edit is the ticker string RKLB→AVGO where they carry a ticker list;

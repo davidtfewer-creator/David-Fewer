@@ -52,8 +52,9 @@ the watch-list protocol, alarms, and change control\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 27 August 2026 --- version 1.2 (29 Aug: Performance tab wired
-into the weekly and monthly checks; 1 Sep: one-pager generator delivered)}
+{\color{bcgrey} 27 August 2026 --- version 1.3 (29 Aug: Performance tab wired
+into the weekly and monthly checks; 1 Sep: one-pager generator delivered;
+2 Sep: RKLB\,$\to$\,AVGO swap --- plan re-cast to 66\%/yr)}
 \vfill
 \end{titlepage}
 
@@ -62,7 +63,7 @@ into the weekly and monthly checks; 1 Sep: one-pager generator delivered)}
 {\Large\bfseries\color{bcnavy} Book Operations Manual}\\[0.15cm]
 {\color{bcnavy} run the machine; measure against plan; change only through the gates}\\[0.25cm]
 {\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
-\;$\bullet$\; book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ RKLB $\cdot$ MU
+\;$\bullet$\; book: TSM $\cdot$ VRT $\cdot$ VST $\cdot$ AVGO $\cdot$ MU
 $\cdot$ GM $\cdot$ VLO $\cdot$ CF $\cdot$ MRVL}
 \end{center}
 \vspace{0.1cm}
@@ -116,11 +117,13 @@ Performance tab & weekly actual (AT col P) vs the compounding target; assumption
 \end{tabular}
 \end{center}
 
-\textbf{Planning basis} (execution-accurate, 19 Aug 2026): book
-$\approx$\textbf{79\%/yr} on per-name planning anchors; the pooled live-loop
-measurement with all rules is $\approx$106\%/yr. Expected activity:
-$\approx$599 fills/yr, $\approx$20 time-stops/yr. These are the reference
-numbers every review below compares against.
+\textbf{Planning basis} (execution-accurate; re-cast 2 Sep 2026 for the
+RKLB\,$\to$\,AVGO swap): book $\approx$\textbf{66\%/yr} on per-name planning
+anchors (sheet convention 53\%); the pooled live-loop measurement with all
+rules is $\approx$88\%/yr. Expected activity: $\approx$530--540 fills/yr,
+$\approx$20 time-stops/yr. These are the reference numbers every review below
+compares against; performance before 2 September 2026 is judged against the
+old 79\%/yr plan, after it against the new one.
 
 \section{Daily runbook (market days, $\approx$10 minutes, David)}
 
@@ -189,8 +192,9 @@ one-pager, archive.
 \begin{checklist}
 \item \textbf{Book vs plan --- the Performance tab}: the standing instrument
       is the workbook's Performance sheet (between Notes and Allocation):
-      weekly actual P\&L against a target compounding at 80\%/yr from
-      \$6{,}150{,}000 starting capital (assumptions editable in C4/C5), with
+      weekly actual P\&L against a target compounding at 66\%/yr (the re-cast
+      plan, set in C5 on 2 Sep 2026) from \$6{,}150{,}000 starting capital
+      (assumptions editable in C4/C5), with
       cumulative lines charted. Read the \emph{cumulative} gap
       (column G / the chart), never a single week; the weekly increments are
       noise by construction. Judge the gap only against pre-agreed tolerance
@@ -226,11 +230,13 @@ The only forum with authority over composition. Agenda:
       the marginal book test --- a name must out-earn or de-risk the book it
       joins --- never through sentiment. Additions come only from the watch
       list (\S7).
-\item \textbf{Scheduled re-tests.} Standing diary: \textbf{AVGO} September
-      2026 (post-report, tenth pause window; admission bar: the ten-name
-      book must stop losing to the nine-name book on the tested half);
-      \textbf{NEM} end-Q1 2027 (admits if reclassified uncorrelated or the
-      plan clears 50\%).
+\item \textbf{Scheduled re-tests.} Standing diary: \textbf{AVGO}
+      mid-September 2026 --- now an \emph{in-book} check, not an admission
+      re-test (AVGO replaced RKLB on 2 Sep 2026): after the $\approx$4~Sep
+      report, confirm the frozen AVGO vector's post-print behaviour and the
+      pause question with a tenth report window in the data; \textbf{NEM}
+      end-Q1 2027 (admits if reclassified uncorrelated or the plan clears
+      50\%).
 \item \textbf{Rules integrity.} Cell-diff the live workbook against the
       reference copy: gates wired, script-read ranges unmoved, Gate
       Variables correct. Any drift is restored from reference, not patched.
@@ -263,9 +269,11 @@ list converts \emph{time} into the evidence money can trust:
       \emph{and} the marginal book test passes with the live rules on both
       sides. Both or neither.
 \item \textbf{Capacity.} The list holds at most five names (each one costs
-      weekly archiving). Current bench: \textbf{AVGO} (re-test scheduled),
-      \textbf{NEM} (watch-listed Aug 2026). A screening round to fill the
-      remaining seats feeds the Q4 review.
+      weekly archiving). Current bench: \textbf{NEM} (watch-listed Aug 2026)
+      --- AVGO left the list into the book on 2 Sep 2026, and RKLB left the
+      book without joining the list (removed on risk grounds, not
+      performance; re-admission would need a fresh case through G0--G5). A
+      screening round to fill the remaining seats feeds the Q4 review.
 \end{enumerate}
 
 \section{Alarms and escalation}
@@ -329,8 +337,9 @@ annual    & tax year end            & David & CT bullet payment; the machine res
 \end{tabular}
 \end{center}
 
-\tabnote{Standing diary entries: AVGO re-test September 2026; NEM re-test
-end-Q1 2027; intern Sunday availability to be confirmed --- if unavailable,
+\tabnote{Standing diary entries: AVGO in-book post-report check September
+2026; NEM re-test end-Q1 2027; intern Sunday availability to be confirmed ---
+if unavailable,
 \S4 items 2 and 4 run scripted and the package folds into $\sim$1 hour on
 Saturday. Tooling: the one-pager generator is delivered
 (\texttt{weekly\_onepager.py}, \S4). Pending: the watch-list paper-tracker
