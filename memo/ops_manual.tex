@@ -52,10 +52,10 @@ the watch-list protocol, alarms, and change control\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 27 August 2026 --- version 1.4 (29 Aug: Performance tab wired
+{\color{bcgrey} 27 August 2026 --- version 1.5 (29 Aug: Performance tab wired
 into the weekly and monthly checks; 1 Sep: one-pager generator delivered;
 2 Sep: plan construction settled --- anchors $\times$ execution
-$\times$ pooling $=$ 74\%/yr)}
+$\times$ pooling $=$ 74\%/yr; current-roster 2022 replay numbers added)}
 \vfill
 \end{titlepage}
 
@@ -126,6 +126,10 @@ its weaker measured half ($\times$1.12) $=$ \textbf{$\approx$74\%/yr --- the
 plan}. The pooled live-loop full-sample measurement with all rules is
 $\approx$88\%/yr (upper reference, carries fit lookahead --- not a target).
 Expected activity: $\approx$530--540 fills/yr, $\approx$20 time-stops/yr.
+Bear reference (2022 replay of the current roster, run 2 Sep 2026): calendar
+2022 costs $-13.8\%$ unprotected and makes \textbf{$+1.7\%$ under the adopted
+breadth gate} (max drawdown 15.7\%), $+17.8\%$ total over Jan 2022 -- Jun
+2023 --- bear-protection paper \S10.
 These are the reference numbers every review below compares against;
 performance before 2 September 2026 is judged against the plan then in
 force (79--80\%/yr), after it against the current one.
@@ -179,7 +183,8 @@ which is what makes it delegable. Standing order of work:
       (regular hours \emph{and} pre-market) for all book and watch-list
       names into the standard folders
       (\texttt{data\_5min/TICKER\_5min.xlsx},
-      \texttt{data\_pm/TICKER\_pm.xlsx}). The archive is why the 2022 replay
+      \texttt{data\_pm/TICKER\_pm.xlsx}). The archive is why the 2022 replay,
+      its current-roster re-run (2 Sep 2026, on freshly exported AVGO bars)
       and the pre-market rule were possible; it only exists if it is kept.
 \item \textbf{Watch-list update} (20 min): run the frozen watch-list vectors
       over the new week's data; append would-be fills to each candidate's
@@ -296,7 +301,9 @@ plumbing, never the strategy, under time pressure.
 A losing week or month inside the bands $\cdot$ a name gated by the breadth
 rule $\cdot$ a cluster of time-stops in a falling tape $\cdot$ an April-style
 drawdown. The 2022 replay and the April 2025 episode are the evidence that
-the wired rules handle these without help. The one discretionary instrument
+the wired rules handle these without help --- replayed on the \emph{current}
+roster (2 Sep 2026), calendar 2022 finishes $+1.7\%$ under the breadth gate
+against $-13.8\%$ unprotected. The one discretionary instrument
 that exists is the carve-out (Alloc E5/E6) --- deliberate, logged, and
 outside the model's capital. There is no ``manual de-risking'' inside the
 model's sleeves.
