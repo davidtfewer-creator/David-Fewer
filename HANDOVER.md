@@ -597,7 +597,20 @@ queued on AVGO Aug21–Jun23 5-min bars), ops manual v1.3 (planning basis 66%/yr
 HIST_HOLD/roster. **Planned overall book return: ≈66%/yr execution-accurate (sheet 53%)** — same
 construction as the old 79/65. Workbook plan wired: wire_plan_update.py sets Performance C5
 0.80→0.66 + generic chart title + Notes changelog (TradingExcel_9stock_avgo_v2.xlsx delivered);
-pre-2-Sep performance is judged against the old plan, after against 66%. Left alone by design:
+pre-2-Sep performance is judged against the old plan, after against 66%.
+
+**3.28a — AVGO 2-day post-print pause, tested (2 Sep), NOT adoptable yet.** The 66% plan includes
+gap exits by construction (exec-accurate = anchors × per-name gap-exit uplift; AVGO ×1.17) but
+assumes AVGO trades through earnings — no AVGO pause exists (MU's P3 is the only pause). Measured
+"no new AVGO bids for the 2 sessions after each report" (9 reports, 18 sessions): captive 52.7→65.5
+sheet (61.4→75.3 exec), pooled swapped book 72.4→74.4 full / 43.9→43.8 train / 104.9→109.6 test.
+Autopsy kills it: 10 blocked entries, 7 were winners (+1.4 to +3.4%); the ENTIRE gain is the
+12 Dec 2025 double stop-out (both sleeves −14.17%, 52d) plus one −4.4% June-2026 stop. Halves:
+train WORSENS 49.1→48.0, test +28pp (84.1) — one episode, one half; fails the both-halves bar
+(the VST-P2 single-cell mirage pattern). Do not bake into the plan. The scheduled mid-Sep in-book
+check adds a tenth report window — re-ask there with the ~4 Sep print in the data. Operationally
+this week, keeping AVGO bids off through the print remains sensible (backfill + script swap are
+pending anyway); it is an ops caution, not a plan input. Left alone by design:
 historical RKLB blotter rows (P&L stays in the weekly log; per-stock funds row 10 now shows AVGO),
 the OPEN discretionary RKLB position (manual book). Scripts 1/2: sheet layout and every address
 unchanged — the only script edit is the ticker string RKLB→AVGO where they carry a ticker list;
