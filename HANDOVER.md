@@ -594,10 +594,21 @@ composition paragraphs; plain edition explains the risk call), bear paper §10 c
 (machinery slot-based and carries over; 2022 replay/April-2025 are RKLB-era measurements; re-run
 queued on AVGO Aug21–Jun23 5-min bars), ops manual v1.3 (planning basis 66%/yr, Performance-tab
 66%, AVGO diary entry now in-book post-report check, watch bench = NEM only), one-pager
-HIST_HOLD/roster. **Planned overall book return: ≈66%/yr execution-accurate (sheet 53%)** — same
-construction as the old 79/65. Workbook plan wired: wire_plan_update.py sets Performance C5
-0.80→0.66 + generic chart title + Notes changelog (TradingExcel_9stock_avgo_v2.xlsx delivered);
-pre-2-Sep performance is judged against the old plan, after against 66%.
+HIST_HOLD/roster. **Planned overall book return: ≈74%/yr** — construction SETTLED same day (user challenge:
+"surely the plan should include any pooling uplift" — correct; gap exits and pooling are both
+mechanical properties of the machine, and crediting one but not the other was inconsistent).
+THREE-TIER PLAN NOMENCLATURE (the standing convention from here): (1) anchors — per-name captive,
+sheet convention, OOS haircuts: 53%/yr; (2) × gap-exit execution uplift (per name, AVGO ×1.17):
+66%/yr; (3) × pooling uplift at its WEAKER measured half: ×1.12 → **≈74%/yr = the plan**.
+Pooling uplift measured captive-book vs pooled-book, identical frozen vectors, exec-accurate:
+×1.233 full / ×1.485 train / ×1.121 test (swapped book; captive exec 71.8/38.0/111.8 vs pooled
+88.5/56.4/125.4) — COUNTER-CYCLICAL: biggest in the weak half because that's when sleeves sit in
+cash. The pooled full-sample measurement (88.5% exec / 72.4 sheet) is the upper reference, NOT the
+target (carries fit lookahead). Old-book plans (79–80%) had no pooling tier — constructions are
+not comparable across the 2-Sep boundary. Workbook plan wired: wire_plan_update.py (accepts C5
+0.80 or the interim 0.66) sets C5=0.74 + generic chart title + Notes changelog
+(TradingExcel_9stock_avgo_v3.xlsx delivered); pre-2-Sep performance is judged against the old
+plan, after against 74%. Ranking memo §9 carries the tier definitions; ops manual v1.4.
 
 **3.28a — AVGO 2-day post-print pause, tested (2 Sep), NOT adoptable yet.** The 66% plan includes
 gap exits by construction (exec-accurate = anchors × per-name gap-exit uplift; AVGO ×1.17) but

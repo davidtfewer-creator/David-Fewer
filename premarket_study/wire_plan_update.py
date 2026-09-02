@@ -1,11 +1,24 @@
 """
 Re-cast the Performance-tab plan for the RKLB -> AVGO swap (2 Sep 2026).
 
-The plan target C5 moves 80% -> 66%/yr: the execution-accurate per-name
-planning average with AVGO's anchor (51% x 1.17 gap-exit uplift = 60%) in
-RKLB's row (156% -> 174% exec), per the ranking memo's composition-change
-section. The chart title drops the hard-coded '80%' so future re-casts are a
-one-cell edit. A Notes changelog line records the change.
+Final construction, settled the same day: the plan is cautious per-name
+anchors plus the machine's two MEASURED mechanical effects, each taken
+conservatively --
+
+  anchors (captive, sheet convention, OOS haircuts)          53%/yr
+  x gap-exit execution uplift (per name; AVGO x1.17)         66%/yr
+  x pooling uplift at its WEAKER measured half (x1.12;
+    captive book vs pooled book, identical frozen vectors:
+    x1.23 full, x1.49 train, x1.12 test, exec-accurate)     ~74%/yr  <- C5
+
+The pooled live-loop full-sample measurement (88.5%/yr exec) is the upper
+reference, not the target -- it carries fit lookahead. Derivation:
+verified_book_ranking.pdf, composition-change section.
+
+The chart title drops the hard-coded '80%' so future re-casts are a one-cell
+edit. A Notes changelog line records the change. Accepts a workbook whose C5
+still holds 0.80 (pre-re-cast) or 0.66 (the interim anchors-x-execution plan
+delivered earlier on 2 Sep, before the pooling tier was settled).
 
 Usage: python wire_plan_update.py <in.xlsx> <out.xlsx>
 """
@@ -14,14 +27,15 @@ import sys
 
 import openpyxl
 
-NEW_PLAN = 0.66
+NEW_PLAN = 0.74
+OLD_PLANS = (0.80, 0.66)
 
 
 def wire(in_path, out_path):
     wb = openpyxl.load_workbook(in_path)
     pf, notes = wb['Performance'], wb['Notes']
 
-    assert abs(pf['C5'].value - 0.80) < 1e-9, pf['C5'].value
+    assert any(abs(pf['C5'].value - o) < 1e-9 for o in OLD_PLANS), pf['C5'].value
     pf['C5'] = NEW_PLAN
 
     ch = pf._charts[0]
@@ -34,14 +48,15 @@ def wire(in_path, out_path):
     ca.alignment = copy.copy(style_a.alignment)
     cb = notes.cell(
         row=row, column=2,
-        value=('Target return C5 set 80% -> 66%/yr on 2 Sep 2026 for the RKLB -> '
-               'AVGO swap: execution-accurate per-name planning average with '
-               'AVGO\'s 51% anchor (x1.17 gap-exit uplift = 60%) replacing RKLB\'s '
-               '156%/174% row. Sheet-convention planning 53%; measured pooled live '
-               'loop 72.4%/yr sheet / 88.5%/yr execution-accurate. Performance '
-               'before 2 Sep is judged against the old 79-80% plan, after it '
-               'against 66%. Derivation: verified_book_ranking.pdf, composition-'
-               'change section.'))
+        value=('Target return C5 set to 74%/yr on 2 Sep 2026 (RKLB -> AVGO swap; '
+               'plan construction settled). Three tiers: per-name captive anchors '
+               '53%/yr (sheet convention, OOS haircuts; AVGO anchor 51% replacing '
+               'RKLB\'s 156%), x gap-exit execution uplift = 66%, x pooling uplift '
+               'at its weaker measured half (x1.12; full-sample x1.23) = ~74%. '
+               'Pooled live-loop measurement 72.4%/yr sheet / 88.5%/yr execution-'
+               'accurate is the upper reference, not the target. Performance before '
+               '2 Sep is judged against the old 79-80% plan, after it against 74%. '
+               'Derivation: verified_book_ranking.pdf, composition-change section.'))
     cb.font = copy.copy(style_b.font)
     cb.alignment = copy.copy(style_b.alignment)
     wb.save(out_path)
