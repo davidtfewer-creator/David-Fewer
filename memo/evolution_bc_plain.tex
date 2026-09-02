@@ -109,10 +109,9 @@ orders the same morning.};
 \node[st, below=of s8] (s9) {{\tt 10 } \textbf{The stress test.} We replayed
 the exact book through the 2022 bear market: unprotected it lost 20\%; with
 our trend rule it roughly broke even. The boring stocks saved the year.};
-\node[fin, below=of s9] (s10) {\textbf{Today.} Nine stocks --- Broadcom
-replaced Rocket Lab in September 2026, a risk call, not a returns call ---
-all rules live in the trading workbook, honest expectation $\approx$74\%/yr
-on the cautious basis, and every claim reproducible from the code.};
+\node[fin, below=of s9] (s10) {\textbf{Today.} Nine stocks, all rules live in
+the trading workbook, honest expectation $\approx$74\%/yr on the cautious
+basis, and every claim reproducible from the code.};
 
 \draw[arr] (s1) -- (s2);
 \draw[arr] (s2) -- (s3);
@@ -327,28 +326,17 @@ One more honesty upgrade closed the loop: our sell orders are limit orders,
 so when a stock jumps \emph{over} our target overnight, we get filled at the
 better opening price. The model wasn't counting that --- reality pays about
 20 percentage points a year more at book level than our cautious models
-claimed. On the careful planning basis the book of that date targeted
-\textbf{roughly 79\% a year}; the fuller simulation of the live setup
-measured around 106\%.
+claimed.
 
-In September 2026 we made one change to the line-up: Rocket Lab out, Broadcom
-in. Not because the numbers turned --- Rocket Lab was our single biggest
-earner on paper --- but because of what the numbers can't see: its fortunes
-have been partly tied to SpaceX since around its IPO, and it lives with
-all-or-nothing events like the Neutron rocket launch. Looking back honestly,
-we think we admitted it on volatility and excitement ahead of the SpaceX IPO.
-A back-test cannot price a rocket blowing up, so we didn't let the back-test
-outvote the judgement. The honest cost: the book now targets \textbf{roughly
-74\% a year}. That number is built in three layers, and only the first is a
-forecast: cautious per-stock expectations (53\%), plus what our real
-executions measurably add (sell orders that gap over the target fill at the
-better opening price --- 66\%), plus what running \emph{one shared pot}
-measurably adds over nine separate pots (idle money gets re-used every
-morning; we credit the weakest half of that measurement --- 74\%). The fuller
-simulation of the live setup measures around 88\%. What we bought with those points: no binary launch
-risk, no SpaceX shadow, a slightly shallower worst drawdown --- Rocket Lab was
-exactly where the book piled in during the April 2025 stress --- and a
-less-correlated line-up.
+On the careful planning basis the book targets \textbf{roughly 74\% a year}.
+That number is built in three layers, and only the first is a forecast:
+cautious per-stock expectations (53\%), plus what our real executions
+measurably add (sell orders that gap over the target fill at the better
+opening price --- 66\%), plus what running \emph{one shared pot} measurably
+adds over nine separate pots (idle money gets re-used every morning; we
+credit the weakest half of that measurement --- 74\%). The fuller simulation
+of the live setup measures around 88\%; we treat that as the ceiling
+reference, not the target.
 
 \oneline{We replayed 2022: unprotected minus twenty, with our rules roughly
 flat --- and our real-world executions are better than our models assumed.}
