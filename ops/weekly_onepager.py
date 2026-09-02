@@ -52,9 +52,11 @@ import sys
 
 import openpyxl
 
-NAMES = ['TSM', 'VRT', 'VST', 'RKLB', 'MU', 'GM', 'VLO', 'CF', 'MRVL']
-HIST_HOLD = {'TSM': 4.2, 'VRT': 4.4, 'VST': 4.4, 'RKLB': 3.1, 'MU': 6.5,
-             'GM': 6.2, 'VLO': 14.1, 'CF': 16.7, 'MRVL': 7.3, 'BOOK': 5.9}
+# slot order matches the Query sheet's 4-column blocks (AVGO replaced RKLB
+# in slot 4 on 2 Sep 2026; hold references re-run with AVGO in the book)
+NAMES = ['TSM', 'VRT', 'VST', 'AVGO', 'MU', 'GM', 'VLO', 'CF', 'MRVL']
+HIST_HOLD = {'TSM': 4.2, 'VRT': 4.4, 'VST': 4.4, 'AVGO': 6.5, 'MU': 6.5,
+             'GM': 6.2, 'VLO': 14.1, 'CF': 16.7, 'MRVL': 7.3, 'BOOK': 6.5}
 STOP_DAYS = 50
 DMA_WIN = 200            # trailing closes, inclusive — matches AT col N
 ATH_NEAR = 0.02          # "cap territory" when close is within 2% of ATH
@@ -304,9 +306,11 @@ def build_html(book, report_week, wb_name):
     def cls(x):
         return 'pos' if x >= 0 else 'neg'
 
-    # -- activity by name
+    # -- activity by name (former book names, e.g. RKLB before the swap,
+    #    still show for weeks in which their blotter rows closed)
+    extras = sorted({t['stock'] for t in buys + exits + opens} - set(NAMES))
     act_rows = []
-    for nm in NAMES:
+    for nm in NAMES + extras:
         b = [t for t in buys if t['stock'] == nm]
         e = [t for t in exits if t['stock'] == nm]
         s = [t for t in e if t in stops]

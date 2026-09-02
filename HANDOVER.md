@@ -568,6 +568,32 @@ recovery pushed 16 Jun→9 Jul. A 15% per-sleeve cap fixes the episode (−25.5%
 and damages the 2022 rotation (−2.6%→−6.7%) — tested, not adopted. Net: gate = grinding-bear
 armour, ≈free on average, slightly negative in a V-crash; fast crashes remain the breaker's event.
 
+### 3.28 COMPOSITION CHANGE (2 Sep 2026): RKLB out, AVGO in — user risk decision, wired
+
+The user removed RKLB (SpaceX-linked performance since its IPO; binary Neutron launch risk; the
+admission judged volatility/excitement-driven ahead of the SpaceX IPO) and put AVGO in its slot.
+This was a **risk decision, not a model verdict** — do not re-litigate it against back-test
+numbers. Wiring (`wire_avgo_swap.py` → `TradingExcel_9stock_avgo.xlsx`, cell-diff verified, 2,461
+cells all in the intended set): Query N:Q = AVGO daily RTH OHLC from the verified research series
+(exact date match, 587 days to 2026-08-03; **4–31 Aug cleared, backfill via `ops/backfill_query.py`
+before AVGO trades** — until then AVGO's close/200dma/ATH read as of 3 Aug); `Model AVGO` params =
+AVGO reference vector (λ=1, φ_L=0.28162, ψ=0.24815, k=0.21818, prem 2.912%, peak cap 5.993%,
+OU W=113, buf 0.43090, OU prem 1.409%, OU cap 4.861% — captive verified 52.7/49.1/56.2, reference
+51.2/49.2/53.7); labels (Dashboard A7, Alloc A31/A32, AT A1/A10, Feed note, Notes roster); Alloc
+C14 ann-return 1.15→0.51; Performance hold refs AVGO 6.5 d (144 trades, 39% same-day), BOOK
+5.9→6.5. Feed AVGO pulls from Query by INDEX so the chain self-updates. User had already renamed
+Feed/Model sheets and rewired Dashboard row 7 / Alloc row 14 / order rows 25–26.
+**New pooled baseline (AVGO in RKLB's slot, live config): full 72.4 / train 43.9 / test 104.9**
+(was 87.3/59.5/118.4) — RKLB was the book's yield engine (0.476%/dollar-day); carry these as the
+reference numbers in the documentation re-cast, which is still TO DO (evolution docs, bear paper,
+ranking memo, ops manual, one-pager HIST_HOLD — the last already updated). Left alone by design:
+historical RKLB blotter rows (P&L stays in the weekly log; per-stock funds row 10 now shows AVGO),
+the OPEN discretionary RKLB position (manual book). Scripts 1/2: sheet layout and every address
+unchanged — the only script edit is the ticker string RKLB→AVGO where they carry a ticker list;
+if they read tickers from Query headers / order block, zero change. AVGO reports ~3–4 Sep 2026 and
+its earnings map profile is the MU profile (week-of entries adverse) — bids off through the print
+recommended; the 15 Sep AVGO re-test reminder now doubles as the post-print parameter sanity check.
+
 ---
 
 ## 4. Live workbook state and known issues

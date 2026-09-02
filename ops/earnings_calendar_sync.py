@@ -67,9 +67,9 @@ BOOK = {
     'VST':  ('book', 'pre-market',
              'No pause — trade through. (A tempting P2 pause cell was a textbook '
              'inverted-halves mirage — do not act on it.)'),
-    'RKLB': ('book', 'after close',
-             'No pause — trade through. Post-report gaps are large (up to 31%) but '
-             'entries around reports earn above average.'),
+    'RKLB': ('watch', 'after close',
+             'REMOVED from the book 2 Sep 2026 (SpaceX linkage, binary launch risk); '
+             'tracked only while the discretionary position remains open.'),
     'MU':   ('book', 'after close',
              'PAUSE ACTIVE (adopted P3 rule): no NEW MU bids from the Monday of the '
              'week before the report to the Sunday of the week after. Exits, targets '
@@ -85,10 +85,10 @@ BOOK = {
              'Not in the book. Bellwether print for the AI complex — NO defensive '
              'action: AI-six entries after NVDA reports measured better than average '
              '(+2.10% vs +1.67%).'),
-    'AVGO': ('watch', 'after close',
-             'Not in the book. Post-report data feeds the admission re-test '
-             '(ten-name book must stop losing to nine-name, PM rule both sides, '
-             'pause on).'),
+    'AVGO': ('book', 'after close',
+             'IN THE BOOK from 2 Sep 2026 (replaced RKLB). Earnings map measured '
+             'week-of model entries adverse (the MU profile) — consider keeping '
+             'AVGO bids off report week until a tested pause rule exists.'),
 }
 
 DATE_PAT = re.compile(r'(20\d{2})[-/]?(\d{2})[-/]?(\d{2})')
