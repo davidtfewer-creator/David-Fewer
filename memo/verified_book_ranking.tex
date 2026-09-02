@@ -379,9 +379,12 @@ that shows every figure in this memo to be conservative.
 armour): a name whose last close sits below its trailing 200-day average places
 no new bids, \emph{but only when at least $K{=}4$ of the nine names are below
 theirs at once} --- an isolated breach (a name recovering from its own drawdown)
-trades normally. Gated capital pools to the other sleeves. The 2022 rescue is
-preserved exactly under the breadth form ($-21.9\% \to -2.6\%$; that bear ran
-with six names below at once), the pooled 2024--26 cost stays $\approx$0, and
+trades normally. Gated capital pools to the other sleeves. On the current
+roster's 2022 replay (run 2 Sep 2026, AVGO bars in) the breadth form turns
+$-13.8\%$ unprotected into $+1.7\%$ --- and now \emph{beats} the per-name gate
+($-1.5\%$) rather than merely matching it, because the fourth slot recovers
+through isolated breaches the per-name form would have blocked; that bear ran
+with six names below at once. The pooled 2024--26 cost stays $\approx$0, and
 breadth-conditioning removes the per-name form's April-2025 concentration
 penalty (book max drawdown $32.2\% \to 25.8\%$) while reclaiming the
 isolated-breach trades it taxed (384 forgone entries averaging $+2.35\%$ ---
@@ -539,6 +542,18 @@ target. Maximum drawdown 24.7\%. Activity: $\approx$531 pooled fills/yr
 ($\approx$543 on the captive table basis), $\approx$20 time-stops/yr; book
 AI beta 0.66; average correlation to the old five-book 0.30.
 
+\textbf{Bear resilience (2022 replay, run 2 September 2026).} With AVGO's
+Sep 2021 -- Jun 2023 bars archived, the current roster has its own
+worst-regime evidence rather than inheriting the earlier roster's. AVGO per
+name through calendar 2022: buy-and-hold $-15.7\%$, the model $-3.6\%$/yr
+with 7 time-stops --- against the $-69\%$ the replay charged the fourth slot
+before. The book, pooled equal weights, calendar 2022: \textbf{$-13.8\%$
+unprotected} (drawdown 23.7\%) and \textbf{$+1.7\%$ under the adopted breadth
+gate} (drawdown 15.7\%); over the full Jan 2022 -- Jun 2023 span,
+\textbf{$+17.8\%$ total}. The same run reproduces the earlier roster's
+published figures exactly ($-21.9\%$ / $-2.6\%$), so the improvement is
+measured, not remixed. Full table and mechanism: bear-protection paper \S10.
+
 The Performance-tab plan compounds at 74\%/yr from 2 September 2026;
 performance before that date is judged against the plan then in force
 (79--80\%/yr, a construction without the pooling tier --- the two are not
@@ -552,7 +567,8 @@ comparable across the boundary).
 (candidate sweep), \texttt{rank\_book.py} (ranking), \texttt{rolling\_mle.py} and
 \texttt{mle\_homogeneity.py} (drift study), \texttt{live5\_load.py} (workbook
 mirror check), \texttt{minute\_index.py} (5-minute fill verification),
-\texttt{bear\_replay.py} (2022 replay), \texttt{premarket\_excl.py} (pre-market
+\texttt{bear\_replay.py} and \texttt{bear\_replay\_avgo.py} (2022 replay,
+earlier and current roster), \texttt{premarket\_excl.py} (pre-market
 rule), \texttt{breadth\_gate.py} (breadth-conditional gate),
 \texttt{book\_sim.py} (pooled simulator; \texttt{gap\_exit} execution
 correction), \texttt{wire\_*.py} (workbook wiring). Derived data and price
