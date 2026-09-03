@@ -7,9 +7,11 @@ Higher Level), covering Sections 1.1–1.10.
 |---|---|---|
 | `algebra1_summary_5pp.tex` | exactly 5 pages | Condensed revision sheet: definitions, every formula, the method recipes, one worked example per idea. |
 | `algebra1_summary_10pp.tex` | exactly 10 pages | Fuller version: the same structure plus the long-division layout in full, Pascal's triangle, difference tables, a glossary, more worked examples, a revision checklist and a wrong/right table of common mistakes. |
+| `algebra1_key_questions.tex` | 1 page + appendix | Thirty-three key questions drawn from Exercises 1.1–1.10 and the Revision Exercises, one page in two columns, each referenced back to the book; the appendix gives full solutions with the working. |
 
-Both cover theory, methods and worked examples only — the book's exercises are deliberately
-not reproduced.
+The two summaries cover theory, methods and worked examples only — the book's exercises are
+deliberately kept out of them, and live in the separate questions sheet instead. Every answer in
+the solutions appendix was checked symbolically with SymPy.
 
 **Conventions.** All mathematics is set in LaTeX. Anything a reader should know by heart is
 highlighted in light purple (`\key{...}`, via `soul`); formulae sit in light-purple boxes and
@@ -24,6 +26,7 @@ cannot handle a macro that takes an argument.
 ```
 pdflatex algebra1_summary_5pp.tex
 pdflatex algebra1_summary_10pp.tex
+pdflatex algebra1_key_questions.tex
 ```
 
 Requires `soul`, `tcolorbox`, `enumitem`, `titlesec`, `xcolor`, `textcomp` (on Debian/Ubuntu:
