@@ -1,0 +1,543 @@
+% Algebra 1 - ten-page chapter summary
+% Source: Text & Tests 4 (New Edition), Chapter 1 "Algebra 1"
+% Compile with: pdflatex algebra1_summary_10pp.tex
+\documentclass[11pt]{article}
+\usepackage[a4paper,top=1.9cm,bottom=1.9cm,left=2.1cm,right=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array,booktabs}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{lilac}{RGB}{228,214,248}      % light purple highlight
+\definecolor{lilacdeep}{RGB}{104,58,160}   % headings
+\definecolor{lilacline}{RGB}{176,150,214}  % rules and box frames
+\definecolor{greyish}{RGB}{95,95,105}
+\sethlcolor{lilac}
+
+\newcommand{\key}[1]{\hl{#1}}
+\newcommand{\keyin}[1]{\textbf{\color{lilacdeep}#1}}  % emphasis inside a purple box
+% NB: maths inside \key{...} must be written literally as \mbox{$...$} (soul limitation)
+
+\newtcolorbox{formulabox}[1][]{colback=lilac,colframe=lilacline,boxrule=0.7pt,
+  arc=2pt,left=7pt,right=7pt,top=4pt,bottom=4pt,#1}
+\newtcolorbox{methodbox}[1]{colback=white,colframe=lilacdeep,boxrule=0.7pt,arc=2pt,
+  title={#1},coltitle=white,colbacktitle=lilacdeep,fonttitle=\bfseries\small,
+  left=7pt,right=7pt,top=3pt,bottom=3pt}
+
+\titleformat{\section}{\color{lilacdeep}\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{lilacdeep}\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.0em}{0.35em}
+\titlespacing*{\subsection}{0pt}{0.7em}{0.25em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{greyish}Algebra 1 --- Chapter Summary (10 pages)}
+\fancyfoot[R]{\footnotesize\color{greyish}\thepage}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+
+\newcommand{\wex}[1]{\textbf{\color{lilacdeep}Worked:} #1}
+
+\begin{document}
+
+{\color{lilacdeep}\Large\bfseries Algebra 1 --- Chapter Summary}\\[2pt]
+{\color{greyish}\small \textit{Text \& Tests 4} (New Edition), Chapter 1 \quad$\cdot$\quad Leaving Certificate Higher Level \quad$\cdot$\quad Sections 1.1--1.10}\\[2pt]
+{\color{greyish}\small Theory, methods and worked examples. Exercises are not reproduced here.}\\[-6pt]
+
+\textcolor{lilacline}{\rule{\textwidth}{1pt}}
+
+\key{Anything highlighted in light purple is a result or a rule you should know by heart.}
+Boxes in purple are the formulae themselves; boxes with a purple banner are step-by-step methods.
+
+\begin{formulabox}
+\textbf{What the chapter covers}\\[3pt]
+\begin{tabular}{@{}p{1.35cm}p{6.0cm}p{1.35cm}p{6.4cm}@{}}
+\textbf{1.1} & Polynomial expressions: degree, expanding, dividing & \textbf{1.6} & Identities: equating coefficients, partial fractions\\
+\textbf{1.2} & Polynomial functions: $f(x)$ notation, evaluating & \textbf{1.7} & Manipulating formulae: changing the subject\\
+\textbf{1.3} & Factorising: five techniques & \textbf{1.8} & Patterns: first and second differences\\
+\textbf{1.4} & Algebraic fractions & \textbf{1.9} & Solving equations: roots\\
+\textbf{1.5} & Binomial expansions & \textbf{1.10} & Simultaneous equations in 2 and 3 unknowns\\
+\end{tabular}\\[3pt]
+The thread running through it: \keyin{every technique here is either a way of writing an expression as a product (factorising) or a way of turning one statement into an equation you can solve.}
+\end{formulabox}
+
+\subsection*{The chapter's key words}
+
+\begin{tabular}{@{}p{2.6cm}p{13.2cm}@{}}
+\textbf{expression} & a collection of terms, e.g.\ $5x^{3}-3x^{2}+4x-6$; it has a value once $x$ is known\\
+\textbf{equation} & two expressions set equal, true only for particular values of the variable\\
+\textbf{identity} & an equation true for \emph{every} value of the variable\\
+\textbf{variable} & the letter whose value may change; the \textbf{independent} one is the one you choose\\
+\textbf{degree} & the highest power appearing: linear (1), quadratic (2), cubic (3)\\
+\textbf{expanding} & multiplying out brackets; \textbf{factorising} is the reverse\\
+\textbf{factors} & expressions that multiply to give the original, leaving no remainder\\
+\textbf{in terms of} & written using only the stated letters, e.g.\ ``$r$ in terms of $A$''\\
+\textbf{simultaneous} & equations that must hold at the same time, for the same values\\
+\end{tabular}
+
+\section{Polynomial expressions (1.1)}
+
+A \textbf{polynomial expression} is a sum of algebraic terms whose powers are \key{positive whole numbers}. For example $5x^{3}-3x^{2}+4x-6$ has four \textbf{terms}: $5x^{3}$, $-3x^{2}$, $4x$ and $-6$.
+
+\begin{tabular}{@{}p{3.3cm}p{12.5cm}@{}}
+\textbf{degree} & the highest power of $x$: degree 1 = \textbf{linear}, 2 = \textbf{quadratic}, 3 = \textbf{cubic}\\
+\textbf{coefficient} & the number in front of a power: in $4x^{3}-2x^{2}+5x-6$ the coefficient of $x^{3}$ is 4, of $x^{2}$ is $-2$, of $x$ is 5\\
+\textbf{constant term} & the term with no $x$ (here $-6$); also called the term independent of $x$\\
+\textbf{binomial / trinomial} & an expression of two / three terms\\
+\end{tabular}
+
+Polynomials are written in order of decreasing powers ($5x^{3}-3x^{2}+4x-6$) or increasing powers ($9+3x-4x^{2}$).
+
+\key{An expression is \emph{not} a polynomial if a variable appears in a denominator or under a root} --- e.g.\ $3x^{2}-\frac{4}{x}+x^{\frac32}$ fails twice, because $\frac4x=4x^{-1}$ has a negative power and $x^{3/2}$ a fractional one.
+
+\subsection*{Adding, subtracting and multiplying}
+
+Add and subtract by collecting like terms; multiply using the distributive law $a(b+c)=ab+ac$, taking every term of the first bracket by every term of the second. Multiplying out is called \textbf{expanding}.
+
+\wex{$(x-5)(2x^{2}-3x+6)=x(2x^{2}-3x+6)-5(2x^{2}-3x+6)=2x^{3}-13x^{2}+21x-30$.}
+
+\begin{formulabox}
+\[(x+a)^{2}=x^{2}+2ax+a^{2}\qquad (x-a)^{2}=x^{2}-2ax+a^{2}\qquad (x-a)(x+a)=x^{2}-a^{2}\]
+\end{formulabox}
+
+The first two are \textbf{perfect squares}; the third is the \textbf{difference of two squares}, the single most useful factorising pattern in the chapter.
+
+\textbf{Perfect-square problems.} To make $ax^{2}+bx+c$ a perfect square, match it against $(\sqrt a\,x\pm\sqrt c)^{2}$: the middle term must be twice the product of the two roots, i.e.\ \key{\mbox{$b=\pm 2\sqrt{ac}$}}.
+
+\wex{$25x^{2}+px+16$ with $p>0$. Since $25x^{2}=(5x)^{2}$ and $16=(4)^{2}$, we need $(5x+4)^{2}$, so $p=2(5)(4)=40$. (Taking $16=(-4)^{2}$ gives $p=-40$, rejected because $p>0$.)}
+
+\subsection*{Dividing}
+
+Three situations arise:
+
+\begin{enumerate}[topsep=2pt,itemsep=1pt,leftmargin=*]
+\item \textbf{The denominator divides every term.} Split the fraction up:
+$\dfrac{6x^{3}-8x^{2}y+4xy^{2}+2x^{2}}{2x}=3x^{2}-4xy+2y^{2}+x$.
+\item \textbf{The denominator is a factor of the numerator.} Factorise and cancel:
+$\dfrac{6x^{2}+5xy+y^{2}}{2x+y}=\dfrac{(3x+y)(2x+y)}{2x+y}=3x+y$.
+\item \textbf{Otherwise, use long division.}
+\end{enumerate}
+
+\begin{methodbox}{Long division of polynomials}
+\begin{enumerate}[topsep=1pt,itemsep=0pt,leftmargin=*]
+\item Divide the first term of the divisor into the first term of what is left --- that gives the next term of the answer.
+\item Multiply the whole divisor by that term and subtract.
+\item Repeat with the new leading term until the remainder has lower degree than the divisor.
+\end{enumerate}
+\key{Write the dividend in decreasing powers and leave a gap for any missing power} (e.g.\ a cubic with no $x^{2}$ term), or the columns will not line up.
+\end{methodbox}
+
+\wex{$\dfrac{2x^{3}-9x^{2}+10x-3}{x-3}=2x^{2}-3x+1$, set out in full:}
+
+\vspace{-0.4em}
+\begin{center}
+\begin{tabular}{@{}r@{\ }l@{\qquad}l@{}}
+& \underline{$2x^{2}-3x+1$} & \\
+$x-3\,\big)$ & $2x^{3}-9x^{2}+10x-3$ & \small\color{greyish}$2x^{3}\div x=2x^{2}$\\
+& \underline{$2x^{3}-6x^{2}$}\hspace{2.55cm} & \small\color{greyish}multiply $2x^{2}$ by $(x-3)$, subtract\\
+& $\ \ \ \ \ -3x^{2}+10x-3$ & \small\color{greyish}$-3x^{2}\div x=-3x$\\
+& $\ \ \ \ \ \underline{-3x^{2}+9x}$\hspace{1.25cm} & \small\color{greyish}multiply, subtract\\
+& $\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x-3$ & \small\color{greyish}$x\div x=1$\\
+& $\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \underline{x-3}$ & \small\color{greyish}remainder $0$\\
+\end{tabular}
+\end{center}
+\vspace{-0.3em}
+
+A cubic with a missing power needs a gap: $(2x^{3}-11x+6)\div(2x^{2}+4x-3)=x-2$ is set out as $2x^{3}\ \underline{\hspace{6mm}}\ -11x+6$, with space left where the $x^{2}$ term would be.
+
+The second of these also shows the link to factors: since the division is exact,
+\[2x^{3}-11x+6=(x-2)(2x^{2}+4x-3),\]
+so long division is a way of \emph{finding} factors, not just of dividing.
+
+\section{Polynomial functions (1.2)}
+
+If a rectangle has length $x$ and width $x-5$, its area depends on $x$; we write $A(x)=x(x-5)=x^{2}-5x$. Here $x$ is the \textbf{independent variable} and $A(x)$ the \textbf{dependent variable}.
+
+\key{\mbox{$A(x)$} is one single symbol --- it does not mean \mbox{$A$} multiplied by \mbox{$x$}.}
+
+\textbf{Evaluating} means substituting and simplifying. With $p(x)=2x^{2}-5x+6$:
+\[p(1)=2-5+6=3,\qquad p(-3)=18+15+6=39,\qquad p(t)=2t^{2}-5t+6,\qquad p(t^{2})=2t^{4}-5t^{2}+6.\]
+
+\key{You may substitute a whole expression, not just a number} --- $f(3a)$, $f(t-2)$ and $f\!\left(\frac a4\right)$ are all handled the same way, with brackets kept around the substituted expression.
+
+\textbf{Combining functions.} Add or subtract by collecting like terms, then state the degree. With $f(x)=3x^{3}-4x^{2}-3x+4$ and $g(x)=5x^{3}+14x^{2}+7x-2$:
+\[2f(x)-g(x)=x^{3}-22x^{2}-13x+10\ \ (\text{degree }3),\qquad f(x)+2g(x)=13x^{3}+24x^{2}+11x\ \ (\text{degree }3).\]
+
+\wex{A rectangle of length $(2x+3)$ has area $A(x)=2x^{2}+7x+6$. The width is found by dividing: $\dfrac{2x^{2}+7x+6}{2x+3}=\dfrac{(2x+3)(x+2)}{2x+3}=x+2$, so the perimeter is $P(x)=2(2x+3)+2(x+2)=6x+10$.}
+
+\wex{The daily cost of producing $x$ litres of paint is $C(x)=0.001x^{2}+0.1x+5$ (degree 2). Then $C(100)=10+10+5=\texteuro 25$ and $C(400)=160+40+5=\texteuro 205$: doubling and redoubling the output does not double the cost, because the model is not linear.}
+
+\textbf{Context restricts the values.} A length must be positive, so if the width is $(x-5)$ then $x-5>0\Rightarrow x>5$; if the length is $(2x+3)$ then $x>-1.5$. \key{Always check what the variable is allowed to be when the question is about a real shape or a real quantity.}
+
+\textbf{More than one variable.} $V(r,h)=\pi r^{2}h$ says the volume depends on both $r$ and $h$; its degree is 2, the highest power of \emph{either} variable.
+
+\wex{An open box has dimensions $x+3$, $x+1$ and height $x$. Sides: $2x(x+3)+2x(x+1)=4x^{2}+8x$; base: $(x+3)(x+1)=x^{2}+4x+3$; so $S(x)=5x^{2}+12x+3$ and $S(5)=188\,\text{cm}^{2}$.}
+
+\section{Factorising (1.3)}
+
+\key{A factor divides into a polynomial leaving no remainder.} If $(x^{2}-x-12)\div(x-4)=x+3$, then $(x-4)$ and $(x+3)$ are both factors of $x^{2}-x-12$. Five techniques cover the chapter.
+
+\textbf{1. Highest common factor.} $3x^{2}-9xy=3x(x-3y)$; $2a^{2}b-4ab^{2}+12abc=2ab(a-2b+6c)$.
+
+\textbf{2. Grouping} (usually four terms, in two pairs):
+\[6x^{2}y+3xy^{2}-12x-6y=3xy(2x+y)-6(2x+y)=(2x+y)(3xy-6)=3(2x+y)(xy-2),\]
+where the last step is the reminder that a factor you have just produced may itself factorise.
+
+\textbf{3. Difference of two squares.} Write both parts as squares first:
+\begin{formulabox}
+\[c^{2}-d^{2}=(c-d)(c+d),\qquad x^{2}-9y^{2}=(x-3y)(x+3y),\]
+\[x^{2}-8y^{2}=\left(x-\sqrt8 y\right)\left(x+\sqrt8 y\right),\qquad x-9=\left(\sqrt x-3\right)\left(\sqrt x+3\right)\]
+\end{formulabox}
+
+\wex{$x^{4}-y^{4}=(x^{2}-y^{2})(x^{2}+y^{2})=(x-y)(x+y)(x^{2}+y^{2})$ --- one difference of squares can hide another.\\
+$12x^{2}-75y^{2}=3(4x^{2}-25y^{2})=3(2x-5y)(2x+5y)$ --- take the common factor out first.}
+
+\textbf{4. Quadratic trinomials $ax^{2}+bx+c$.} Either guess the factor pairs (trial and error), or, when the numbers are awkward or irrational, use the formula.
+
+\begin{formulabox}
+\[\text{If } ax^{2}+bx+c=0 \text{ then } x=\frac{-b\pm\sqrt{b^{2}-4ac}}{2a}.\qquad
+\text{A root } x=k \text{ gives the factor } (x-k);\ \ x=\tfrac pq \text{ gives } (qx-p).\]
+\end{formulabox}
+
+\wex{$3x^{2}-17x+20$: the formula gives $x=4$ or $x=\frac53$, so the factors are $(x-4)$ and $(3x-5)$.\\
+$x^{2}-2\sqrt2x-6$: $x=\dfrac{2\sqrt2\pm\sqrt{32}}{2}=\sqrt2\pm2\sqrt2=3\sqrt2$ or $-\sqrt2$, giving $\left(x-3\sqrt2\right)\left(x+\sqrt2\right)$.}
+
+\textbf{5. Sum and difference of two cubes.} Obtained by long division of $x^{3}-y^{3}$ by $(x-y)$.
+
+\begin{formulabox}
+\[x^{3}-y^{3}=(x-y)(x^{2}+xy+y^{2})\qquad\qquad x^{3}+y^{3}=(x+y)(x^{2}-xy+y^{2})\]
+\[(ax)^{3}-(by)^{3}=(ax-by)(a^{2}x^{2}+abxy+b^{2}y^{2})\qquad (ax)^{3}+(by)^{3}=(ax+by)(a^{2}x^{2}-abxy+b^{2}y^{2})\]
+\end{formulabox}
+
+Use them as templates: rewrite the expression as two cubes first, then substitute.
+
+\wex{$a^{3}+8b^{3}=a^{3}+(2b)^{3}=(a+2b)(a^{2}-2ab+4b^{2})$.\\
+$64c^{3}-125d^{3}=(4c)^{3}-(5d)^{3}=(4c-5d)\!\left[(4c)^{2}+(4c)(5d)+(5d)^{2}\right]=(4c-5d)(16c^{2}+20cd+25d^{2})$.}
+
+\begin{methodbox}{Which technique to use}
+\begin{enumerate}[topsep=1pt,itemsep=0pt,leftmargin=*]
+\item Is there a common factor in every term? Take it out first --- always.
+\item Two terms? Look for a difference of two squares, or a sum/difference of two cubes.
+\item Three terms? It is a quadratic: trial and error, or the formula if the numbers are awkward.
+\item Four terms? Group them in two pairs and look for a common bracket.
+\item Then check each factor again: a factor may itself factorise.
+\end{enumerate}
+\key{Take out the highest common factor first, then keep going until nothing factorises further.}
+\end{methodbox}
+
+\section{Algebraic fractions (1.4)}
+
+Algebraic fractions behave exactly like numerical ones.
+
+\begin{formulabox}
+\begin{enumerate}[topsep=1pt,itemsep=0pt,leftmargin=*]
+\item A \textbf{common denominator} is needed to add or subtract.
+\item A fraction can be reduced \textbf{only if the numerator and denominator share a common \emph{factor}}.
+\item If a numerator or denominator itself contains added fractions, combine them into a single fraction first.
+\item To divide, multiply by the reciprocal (the denominator turned upside down).
+\end{enumerate}
+\end{formulabox}
+
+\key{Cancel factors, never terms.} In $\dfrac{6\times12}{3}$ you may cancel; in $\dfrac{6+12}{3}$ you may not cancel the 6 alone --- and the same is true with letters.
+
+\textbf{Simplifying.} Factorise the top and the bottom fully, then cancel.
+\[\frac{5ax}{15a+10a^{2}}=\frac{5a\,x}{5a(3+2a)}=\frac{x}{3+2a},\qquad
+\frac{t^{2}+3t-4}{t^{2}-16}=\frac{(t+4)(t-1)}{(t-4)(t+4)}=\frac{t-1}{t-4},\qquad
+\frac{x^{2}-9y^{2}}{3x+9y}=\frac{x-3y}{3}.\]
+
+\textbf{Adding with factorised denominators.} Factorise \emph{before} choosing the common denominator, so the denominator is as small as possible.
+
+\wex{$\dfrac{x-4}{x^{2}-x-2}-\dfrac{x-3}{x^{2}-4}
+=\dfrac{x-4}{(x-2)(x+1)}-\dfrac{x-3}{(x-2)(x+2)}
+=\dfrac{(x-4)(x+2)-(x-3)(x+1)}{(x-2)(x+1)(x+2)}=\dfrac{-5}{(x^{2}-4)(x+1)}$.}
+
+\textbf{Complex fractions} (a fraction inside a fraction): turn the top into one fraction, turn the bottom into one fraction, then divide by inverting.
+
+\wex{$\dfrac{\,y-\frac{x^{2}+y^{2}}{y}\,}{\ \frac1x-\frac1y\ }
+=\dfrac{\frac{-x^{2}}{y}}{\frac{y-x}{xy}}
+=\frac{-x^{2}}{y}\times\frac{xy}{y-x}=\frac{-x^{3}}{y-x}$.}
+
+\section{Binomial expansions (1.5)}
+
+Expanding $(a+b)^{n}$ by repeated multiplication is slow. The pattern of the expansions is:
+
+\begin{enumerate}[topsep=2pt,itemsep=0pt,leftmargin=*]
+\item powers of $a$ go \emph{down} by one from term to term, powers of $b$ go \emph{up} by one;
+\item the powers in every term add to $n$;
+\item there are \key{\mbox{$n+1$} terms} in the expansion of $(a+b)^{n}$;
+\item the coefficients are the rows of \textbf{Pascal's triangle}, each entry the sum of the two above it:
+\item those coefficients are the combinations $\binom nr={}^nC_r$, available on the calculator's \textsf{nCr} key.
+\end{enumerate}
+
+\vspace{-0.5em}
+\begin{center}
+\begin{tabular}{@{}r@{\quad}c@{\qquad}l@{}}
+row 0 & $1$ & \small\color{greyish}$\binom00$\\
+row 1 & $1\quad1$ & \small\color{greyish}$\binom10\ \binom11$\\
+row 2 & $1\quad2\quad1$ & \small\color{greyish}$\binom20\ \binom21\ \binom22$\\
+row 3 & $1\quad3\quad3\quad1$ & \small\color{greyish}coefficients of $(a+b)^{3}$\\
+row 4 & $1\quad4\quad6\quad4\quad1$ & \small\color{greyish}coefficients of $(a+b)^{4}$\\
+row 5 & $1\quad5\quad10\quad10\quad5\quad1$ & \small\color{greyish}coefficients of $(a+b)^{5}$\\
+\end{tabular}
+\end{center}
+
+\begin{formulabox}
+\textbf{Binomial Theorem} (page 20 of \textit{Formulae and Tables}):
+\[(x+y)^{n}=\binom n0x^{n}+\binom n1x^{n-1}y+\binom n2x^{n-2}y^{2}+\cdots+\binom nrx^{n-r}y^{r}+\cdots+\binom nny^{n}\]
+\textbf{General term:} $\displaystyle \binom nr x^{n-r}y^{r}$, with $r=0,1,2,\dots$
+\end{formulabox}
+
+Useful coefficient facts: $\binom n0=\binom nn=1$, $\binom n1=n$, and \key{\mbox{$\binom nr=\binom n{n-r}$}} (so $\binom 64=\binom 62$).
+
+\key{Because the expansion starts at \mbox{$r=0$}, the \mbox{$(r+1)$}th term uses \mbox{$r$}: the 3rd term has \mbox{$r=2$}, the 4th term has \mbox{$r=3$}.} This off-by-one is the commonest slip in the whole section.
+
+\wex{$(p+q)^{6}=p^{6}+6p^{5}q+15p^{4}q^{2}+20p^{3}q^{3}+15p^{2}q^{4}+6pq^{5}+q^{6}$.}
+
+\wex{$(2x-3y)^{4}$: take $x\to 2x$, $y\to-3y$, $n=4$:
+\[\binom40(2x)^{4}+\binom41(2x)^{3}(-3y)+\binom42(2x)^{2}(-3y)^{2}+\binom43(2x)(-3y)^{3}+\binom44(-3y)^{4}
+=16x^{4}-96x^{3}y+216x^{2}y^{2}-216xy^{3}+81y^{4}.\]}
+
+\key{Substitute the \emph{whole} term, sign and coefficient included, inside brackets} --- $(-3y)^{2}=+9y^{2}$, not $-9y^{2}$. When the second term is negative the signs alternate.
+
+\wex{First three terms of $(1-5y)^{8}$: with $x=1$, $y=-5y$, $n=8$,
+$1+\binom81(-5y)+\binom82(-5y)^{2}+\cdots=1-40y+700y^{2}+\cdots$}
+
+\wex{Fourth term of $(3a+b)^{7}$: $r=3$, so $\binom73(3a)^{4}b^{3}=35\cdot81a^{4}b^{3}=2835a^{4}b^{3}$.}
+
+\wex{Sixth term of $(2x+y)^{10}$: the 6th term means $r=5$, giving $\binom{10}{5}(2x)^{5}y^{5}=252\cdot32x^{5}y^{5}=8064x^{5}y^{5}$.}
+
+To find one particular \emph{coefficient} rather than one particular term, do not expand everything: write the general term, decide which value of $r$ produces the power you want, and evaluate only that term.
+
+\wex{The number of terms in $(p+2q)^{6}$ is $6+1=7$, so the middle term is the 4th, with $r=3$: $\binom63p^{3}(2q)^{3}=20\cdot8\,p^{3}q^{3}=160p^{3}q^{3}$.}
+
+\textit{Note on the printed text:} in the worked example for $(1-5y)^{8}$ the book's third line prints $(1-3y)^{8}$; that is a typographical slip --- the arithmetic that follows ($-40y$, $700y^{2}$) is the expansion of $(1-5y)^{8}$.
+
+\section{Algebraic identities (1.6)}
+
+An \textbf{identity} is an equation that is true \key{for all values} of the variable, not just for one or two.
+
+\begin{formulabox}
+If $ax^{3}+bx^{2}+cx+d=px^{3}+qx^{2}+rx+s$ for all values of $x$, then
+\[a=p,\qquad b=q,\qquad c=r,\qquad d=s.\]
+\textbf{In an identity, the coefficients of like powers are equal} (and a power missing from one side has coefficient 0).
+\end{formulabox}
+
+So if $ax^{3}+bx^{2}+cx+d=qx^{2}+s$ for all $x$, then $a=c=0$, $b=q$ and $d=s$.
+
+\wex{$(2x+a)^{2}=4x^{2}+12x+b$ for all $x$. Expanding: $4x^{2}+4ax+a^{2}=4x^{2}+12x+b$, so $4a=12\Rightarrow a=3$, and $a^{2}=b\Rightarrow b=9$.}
+
+\wex{$3t^{2}x-3px+c-2t^{3}=0$ for all $x$. Write both sides as polynomials in $x$: $(3t^{2}-3p)x+(c-2t^{3})=(0)x+(0)$. Hence $3t^{2}=3p\Rightarrow t=\sqrt p$, and $c=2t^{3}=2p^{3/2}$.}
+
+\subsection*{Partial fractions}
+
+A single fraction can be split back into simpler ones, e.g.\ $\dfrac{1}{(x+1)(x-2)}=\dfrac{A}{x+1}+\dfrac{B}{x-2}$. Multiplying up gives the identity $1=A(x-2)+B(x+1)$, true for all $x$. Two methods:
+
+\begin{methodbox}{Finding $A$ and $B$}
+\textbf{Method 1 --- substitute convenient values.} Choose values of $x$ that kill one bracket:
+$x=2\Rightarrow 1=3B\Rightarrow B=\frac13$; \ $x=-1\Rightarrow1=-3A\Rightarrow A=-\frac13$.\\[2pt]
+\textbf{Method 2 --- equate coefficients.} $1=x(A+B)-2A+B$, so $A+B=0$ and $-2A+B=1$; solving simultaneously, $A=-\frac13$, $B=\frac13$.
+\end{methodbox}
+\[\therefore\quad \frac{1}{(x+1)(x-2)}=\frac{-1}{3(x+1)}+\frac{1}{3(x-2)}\]
+
+An identity with three unknowns is handled the same way, and Method 1 is much the quicker.
+
+\wex{$5x+3=Ax(x+3)+Bx(x-1)+C(x-1)(x+3)$ for all $x$. Put $x=0$: $3=-3C\Rightarrow C=-1$. Put $x=1$: $8=4A\Rightarrow A=2$. Put $x=-3$: $-12=12B\Rightarrow B=-1$.}
+
+\subsection*{Identities and factors}
+
+\key{If a divisor is a \emph{factor}, the division leaves no remainder --- so every coefficient of the remainder must be zero.} That turns a factor statement into equations connecting the unknown coefficients. Equivalently (and usually faster), write the missing factor with unknowns and expand:
+
+\wex{$(x-t)^{2}$ is a factor of $x^{3}+3px+c$. Dividing by $x^{2}-2tx+t^{2}$ leaves the remainder $(3p+3t^{2})x+(c-2t^{3})$. Setting it identically to zero: $3p+3t^{2}=0\Rightarrow p=-t^{2}$, and $c-2t^{3}=0\Rightarrow c=2t^{3}$.}
+
+\wex{If $x^{2}-ax+b$ is a factor of $x^{3}+2ax^{2}+4bx+c$, let the other factor be $(x+k)$. Expanding $(x+k)(x^{2}-ax+b)=x^{3}+(k-a)x^{2}+(b-ak)x+bk$ and comparing coefficients gives $k=3a$, $b=-a^{2}$ and $c=3ab$.}
+
+\wex{$2x-\sqrt3$ is a factor of $4x^{2}-2(1+\sqrt3)x+\sqrt3$. Let the second factor be $(ax+b)$. Then $2ax^{2}+(2b-\sqrt3a)x-\sqrt3b$ must match, so $2a=4\Rightarrow a=2$; $2b-2\sqrt3=-2-2\sqrt3\Rightarrow b=-1$; the constants confirm it. The second factor is $2x-1$.}
+
+\section{Manipulating formulae (1.7)}
+
+Making $r$ the \textbf{subject} of $A=\pi r^{2}$ means writing $r$ in terms of the other letters: $r=\sqrt{A/\pi}$. The steps are always the same.
+
+\begin{methodbox}{Changing the subject}
+\begin{enumerate}[topsep=1pt,itemsep=0pt,leftmargin=*]
+\item Clear roots (square both sides) and fractions (multiply by the denominators).
+\item Expand any brackets.
+\item Gather every term containing the required variable on one side, everything else on the other.
+\item \key{If the variable appears more than once, factorise it out} --- this is the step people forget.
+\item Divide by the bracket that multiplies it.
+\end{enumerate}
+\end{methodbox}
+
+\wex{$v^{2}=u^{2}+2as\Rightarrow 2as=v^{2}-u^{2}\Rightarrow a=\dfrac{v^{2}-u^{2}}{2s}$.}
+
+\wex{$\sqrt{\dfrac{x+y}{x-y}}=\dfrac12$. Squaring: $\dfrac{x+y}{x-y}=\dfrac14\Rightarrow4(x+y)=x-y\Rightarrow5y=-3x\Rightarrow y=\dfrac{-3x}{5}$; at $x=5$, $y=-3$.}
+
+\wex{$x=\dfrac{t+4}{3t+1}$. Then $x(3t+1)=t+4\Rightarrow3tx-t=4-x\Rightarrow t(3x-1)=4-x\Rightarrow t=\dfrac{4-x}{3x-1}$.}
+
+\wex{The pendulum formula $T=2\pi\sqrt{\dfrac lg}$. Divide by $2\pi$, then square: $\dfrac{T^{2}}{4\pi^{2}}=\dfrac lg$, so $l=\dfrac{gT^{2}}{4\pi^{2}}$. With $T=3$\,s and $g=10$\,m\,s$^{-2}$, $l=\dfrac{10(9)}{4\pi^{2}}\approx2.3$\,m.}
+
+\key{Check a rearrangement by putting numbers into both versions} --- if the original and the rearranged form disagree, the slip is usually a sign lost when terms were moved across.
+
+A formula can also be rewritten by \textbf{substituting} one relationship into another: for a cone with $\tan\theta=\frac rh$ we get $r=h\tan\theta$, so
+\[V=\tfrac13\pi r^{2}h=\tfrac{\pi}{3}(h\tan\theta)^{2}h=\tfrac{\pi}{3}h^{3}\tan^{2}\theta .\]
+
+\section{Algebraic patterns (1.8)}
+
+\textbf{Linear patterns} ($0,3,6,9,\dots$ or $1,4,7,10,\dots$) go up by a constant amount.
+
+\begin{formulabox}
+For $f(x)=mx+c$ with $x=0,1,2,\dots$: \quad
+\textbf{1st difference} $=m$ (the slope), \quad \textbf{starting value} $f(0)=c$ (the $y$-intercept).
+\end{formulabox}
+
+\textbf{Quadratic patterns} ($0,1,4,9,16,\dots$) do not. Their first differences ($1,3,5,7,\dots$) are not constant, but the \textbf{second differences} are.
+
+\begin{formulabox}
+For $f(x)=ax^{2}+bx+c$: \quad \keyin{the second difference is \mbox{$2a$}}. \quad
+$f(x)=x^{2}+b$ is $\cup$-shaped, $f(x)=b-x^{2}$ is $\cap$-shaped, both symmetric about $x=0$.
+\end{formulabox}
+
+\begin{methodbox}{Finding the rule for a pattern}
+\begin{enumerate}[topsep=1pt,itemsep=0pt,leftmargin=*]
+\item Write out the 1st differences. Constant $\Rightarrow$ linear; if not, take the 2nd differences. Constant $\Rightarrow$ quadratic.
+\item Quadratic: $c=f(0)$, the first term of the pattern; $a=\tfrac12(\text{2nd difference})$; then get $b$ from $f(1)=a+b+c$.
+\item Check the rule against a term you have not used.
+\end{enumerate}
+\end{methodbox}
+
+\wex{$4,7,16,31,52,79$.}
+
+\vspace{-0.5em}
+\begin{center}
+\begin{tabular}{@{}l|cccccc@{}}
+\textbf{pattern} & 4 & 7 & 16 & 31 & 52 & 79\\
+\textbf{1st difference} & & 3 & 9 & 15 & 21 & 27\\
+\textbf{2nd difference} & & & 6 & 6 & 6 & 6\\
+\end{tabular}
+\end{center}
+\vspace{-0.3em}
+
+The second difference is constant, so the pattern is quadratic: $2a=6\Rightarrow a=3$; $c=f(0)=4$; and $f(1)=3+b+4=7\Rightarrow b=0$. Hence $f(x)=3x^{2}+4$, which does give $f(2)=16$ and $f(3)=31$.
+
+\wex{Matchstick patterns needing $4,10,18,28,\dots$ sticks: 2nd difference $=2\Rightarrow a=1$; $c=f(0)=4$; $f(1)=1+b+4=10\Rightarrow b=5$; so $f(x)=x^{2}+5x+4$. \key{The pattern starts at \mbox{$x=0$}, so the 10th pattern is \mbox{$f(9)=81+45+4=130$} matchsticks} --- not $f(10)$.}
+
+\section{Solving equations (1.9)}
+
+Solving an equation means finding the values of the variable that satisfy it. The values that make $y=0$ are the \textbf{roots}; \key{graphically, the roots are where the curve crosses the \mbox{$x$}-axis.} $4x-12=0$ has the single root $x=3$; $x^{2}-5x+6=0$ has two, $x=2$ and $x=3$.
+
+Solving $2x+1=2$ instead of $2x+1=0$ is the same idea: it asks where the line $y=2x+1$ meets the line $y=2$. A linear equation always has exactly one root.
+
+So there are three equivalent questions, and it is worth seeing them as one: \emph{solve $f(x)=0$}, \emph{find the roots of $f$}, and \emph{find where the graph of $f$ cuts the $x$-axis}. A linear function crosses once; a quadratic may cross twice, once, or not at all.
+
+\begin{methodbox}{Linear equations containing fractions}
+Find the lowest common denominator, multiply every term by it, expand, gather the variable on one side and the numbers on the other, then divide.
+\end{methodbox}
+
+\wex{$\dfrac{2t-3}{5}+\dfrac{1}{20}=\dfrac{t-1}{4}$. Multiply by 20: $4(2t-3)+1=5(t-1)\Rightarrow8t-12+1=5t-5\Rightarrow3t=6\Rightarrow t=2$.}
+
+\section{Simultaneous equations (1.10)}
+
+Two equations in $x$ and $y$ are either \textbf{parallel} (no common point) or meet at exactly one point $(x_1,y_1)$ that satisfies both \emph{simultaneously}. There are three ways to find it: substitution, elimination, or reading it off a graph.
+
+\begin{methodbox}{Two unknowns}
+\textbf{Substitution:} rearrange the easier equation to get one variable in terms of the other, substitute into the second equation, solve, then back-substitute.\\[2pt]
+\textbf{Elimination:} multiply one or both equations so that one variable has matching coefficients, then add or subtract to remove it.\\[2pt]
+\key{Always check the answer in \emph{both} original equations.}
+\end{methodbox}
+
+The graphical picture matters: solving a pair of equations is finding the point the two lines share. Parallel lines (same slope, different intercept) share no point and the algebra shows it --- both variables vanish and a false statement such as $0=7$ is left. If instead the two equations are multiples of one another, every point of the line is a solution.
+
+\wex{(substitution) $3x-y=1$, $x-2y=-8$. From the second, $x=-8+2y$; then $3(-8+2y)-y=1\Rightarrow5y=25\Rightarrow y=5$, so $x=2$ and $(x,y)=(2,5)$.}
+
+\wex{(elimination) $2x-5y=9$ (A), $3x+2y=4$ (B). $3\text{A}: 6x-15y=27$; $2\text{B}: 6x+4y=8$; subtracting, $-19y=19\Rightarrow y=-1$, then $2x-5(-1)=9\Rightarrow x=2$, so $(2,-1)$.}
+
+\textbf{Three unknowns.} An equation such as $x+y+z=6$ is a \textbf{plane}. Three planes that are not parallel meet in a single point $(x,y,z)$.
+
+\begin{methodbox}{Three unknowns}
+\begin{enumerate}[topsep=1pt,itemsep=0pt,leftmargin=*]
+\item Choose the unknown that is easiest to isolate.
+\item Eliminate it twice, taking the equations \emph{two at a time}, to get two equations in two unknowns.
+\item Solve those two as usual, then substitute back into one of the originals for the third unknown.
+\item Check the solution in all three equations.
+\end{enumerate}
+\end{methodbox}
+
+\wex{A: $x+y+z=6$; B: $2x+y-z=1$; C: $4x-3y+2z=4$. A${}+{}$B gives D: $3x+2y=7$; $2$B${}+{}$C gives E: $8x-y=6$. Then D${}+2$E: $19x=19\Rightarrow x=1$, so $y=2$ from D, and $z=3$ from A: $(x,y,z)=(1,2,3)$.}
+
+Substitution is the method that carries forward: it is how the intersection of a line and a curve is found later in the course, so it is worth being fluent in it even where elimination is quicker.
+
+\textbf{Problems in context.} The algebra is the easy part; the marks are in the setting up.
+
+\begin{methodbox}{Turning words into equations}
+State clearly what each letter stands for, write one equation for each piece of information given, \key{keep the units consistent} (e.g.\ \texteuro 32 becomes 3200 cent when the other terms are in cent), solve, and answer the question that was asked.
+\end{methodbox}
+
+\wex{240 people attended, tickets at \texteuro 31 and \texteuro 16, takings \texteuro 5595. With $x$ the number of \texteuro 16 tickets and $y$ the number of \texteuro 31 tickets: $x+y=240$ and $16x+31y=5595$. Eliminating $x$ gives $y=117$ and $x=123$.}
+
+\wex{50c, 20c and 10c coins worth \texteuro 32 in total, with $2y+z=3x$ and $4x+z=6y$. In standard form: $50x+20y+10z=3200$, $3x-2y-z=0$, $4x-6y+z=0$. Eliminating $z$ leads to $x=40$, $y=35$, $z=50$ --- forty 50c, thirty-five 20c and fifty 10c coins.}
+
+\subsection*{Where this chapter leads}
+
+Nothing here is self-contained. The factorising and the quadratic formula are the tools for solving quadratic equations and for sketching curves; the binomial coefficients $\binom nr$ reappear as combinations in probability; first and second differences are taken up again in the chapter on sequences and series; and substitution into simultaneous equations becomes the standard way of finding where a line meets a curve. \key{Treat this chapter as the toolkit rather than as a topic --- almost every later chapter assumes it.}
+
+\section*{\color{lilacdeep}Quick reference}
+
+\begin{formulabox}
+\[(x\pm a)^{2}=x^{2}\pm2ax+a^{2}\qquad (x-a)(x+a)=x^{2}-a^{2}\qquad x=\frac{-b\pm\sqrt{b^{2}-4ac}}{2a}\]
+\[x^{3}\pm y^{3}=(x\pm y)(x^{2}\mp xy+y^{2})\qquad
+(x+y)^{n}=\sum_{r=0}^{n}\binom nrx^{n-r}y^{r}\qquad \text{2nd difference}=2a\]
+\end{formulabox}
+
+\textbf{Revision checklist} --- can you, without looking anything up:
+\begin{enumerate}[topsep=2pt,itemsep=0pt,leftmargin=*,label=$\square$]
+\item state the degree, coefficients and constant term of a polynomial, and say why an expression is not one;
+\item expand a product of two or three brackets, and recognise a perfect square and a difference of two squares;
+\item divide one polynomial by another by long division, leaving gaps for missing powers, and read off the factors;
+\item factorise by HCF, grouping, difference of two squares, quadratic trial or formula, and sum/difference of cubes;
+\item add, subtract and simplify algebraic fractions, including complex ones;
+\item write out any binomial expansion and pick out a named term or coefficient using $\binom nr x^{n-r}y^{r}$;
+\item find unknown coefficients by equating like powers, and split a fraction into partial fractions;
+\item change the subject of a formula when the subject appears twice;
+\item decide from first and second differences whether a pattern is linear or quadratic, and find its rule;
+\item solve simultaneous equations in two and three unknowns, and set them up from a worded problem?
+\end{enumerate}
+
+\textbf{Ten mistakes to avoid}
+
+\begin{tabular}{@{}p{7.6cm}p{4.0cm}p{4.0cm}@{}}
+\toprule
+& \textbf{\color{lilacdeep}wrong} & \textbf{\color{lilacdeep}right}\\
+\midrule
+Calling an expression with a negative or fractional power a polynomial & $3x^{2}-\frac4x+x^{3/2}$ & polynomial powers must be $0,1,2,3,\dots$\\
+Losing the gap for a missing power in a long division & $2x^{3}-11x+6$ & $2x^{3}\ \underline{\hspace{5mm}}\ -11x+6$\\
+Cancelling a term instead of a factor & $\frac{6+12}{3}=6+4$ & $\frac{6+12}{3}=\frac{18}{3}=6$\\
+Stopping halfway when factorising & $(x^{2}-y^{2})(x^{2}+y^{2})$ & $(x-y)(x+y)(x^{2}+y^{2})$\\
+Missing the common factor first & $12x^{2}-75y^{2}$ ``won't factorise'' & $3(2x-5y)(2x+5y)$\\
+Off-by-one in the binomial general term & 4th term uses $r=4$ & 4th term uses $r=3$\\
+Dropping the bracket around a negative term & $-3y^{2}$ & $(-3y)^{2}=9y^{2}$\\
+Not factorising out the subject when it appears twice & $3tx-t=4-x$, then stuck & $t(3x-1)=4-x$\\
+Indexing a pattern from 1 when it starts at $x=0$ & 10th term $=f(10)$ & 10th term $=f(9)$\\
+Ignoring what the variable is allowed to be & $x$ any real number & a width needs $x-5>0$\\
+\bottomrule
+\end{tabular}
+
+\subsection*{What the \textit{Formulae and Tables} booklet gives you --- and what it does not}
+
+The booklet supplies the \textbf{Binomial Theorem} and the notation $\binom nr={}^nC_r$ (page 20) and the \textbf{quadratic formula}. It does \emph{not} supply the expansions of $(x\pm a)^{2}$, the difference of two squares, the sum and difference of two cubes, or the fact that a constant second difference equals $2a$. \key{Those four have to be in your head.} Nor does it supply any method: the marks in this chapter go to the setting out --- the long-division layout, the line ``for all values of $x$, so the coefficients are equal'', the statement of what each letter stands for in a worded problem.
+
+\subsection*{Symbols used in this chapter}
+
+\begin{tabular}{@{}p{1.5cm}p{6.2cm}p{1.5cm}p{6.2cm}@{}}
+$\Rightarrow$ & implies, ``and so'' & $\therefore$ & therefore\\
+$\in \mathbb{N}$ & is a natural number $0,1,2,\dots$ & $\in \mathbb{R}$ & is a real number\\
+$\binom nr$ & the number of ways of choosing $r$ objects from $n$ & $f(x)$ & the value of the function $f$ at $x$\\
+\end{tabular}
+
+\end{document}
