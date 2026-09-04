@@ -41,7 +41,16 @@ as long as the two files sit together (Data -> Edit Links -> Change Source if
 the live file is renamed).
 
 Usage:
-    python build_9stock_performance.py <source_trading_book.xlsx> <out.xlsx>
+    python build_9stock_performance.py <source_trading_book.xlsx> <out.xlsx> [--links]
+
+Default mode is STATIC: the Feed sheet holds plain VALUES copied from the
+source, no external links at all — refresh by re-running this script (or
+ops/refresh_performance.py, which also preserves anything you typed). This is
+the mode that works everywhere INCLUDING Excel on the web / Box, which cannot
+refresh workbook links (discovered 4 Sep 2026: Box's WOPI layer rewrote the
+link target and emptied the cache). --links builds the external-link variant
+for desktop Excel with both files in one folder.
+
 The source is opened READ-ONLY; it is never written.
 """
 import datetime as dt
@@ -85,7 +94,16 @@ def read_cache(src_path):
     return cache
 
 
-def build(src_name, out_path, start_cap):
+def read_feed_values(src_path):
+    wb = openpyxl.load_workbook(src_path, data_only=True)
+    at = wb['Active Trading']
+    wk = [(at[f'O{r}'].value, at[f'P{r}'].value, at[f'R{r}'].value)
+          for r in WK_ROWS]
+    disc = [(at[f'AD{r}'].value, at[f'AE{r}'].value) for r in DISC_ROWS]
+    return dict(wk=wk, disc=disc)
+
+
+def build(src_name, out_path, start_cap, feed=None, keep=None):
     wb = openpyxl.Workbook()
     pf = wb.active
     pf.title = 'Performance'
@@ -101,27 +119,48 @@ def build(src_name, out_path, start_cap):
         fd[c].font = Font(bold=True, color=NAVY)
     for i, r_src in enumerate(WK_ROWS):
         r = 2 + i
-        fd.cell(row=r, column=1, value=f"='[1]Active Trading'!O{r_src}").number_format = 'dd/mm/yyyy'
-        fd.cell(row=r, column=2, value=f"='[1]Active Trading'!P{r_src}")
-        fd.cell(row=r, column=3, value=f"='[1]Active Trading'!R{r_src}")
+        if feed:
+            o, p, rr = feed['wk'][i]
+            fd.cell(row=r, column=1, value=o).number_format = 'dd/mm/yyyy'
+            fd.cell(row=r, column=2, value=p)
+            fd.cell(row=r, column=3, value=rr)
+        else:
+            fd.cell(row=r, column=1, value=f"='[1]Active Trading'!O{r_src}").number_format = 'dd/mm/yyyy'
+            fd.cell(row=r, column=2, value=f"='[1]Active Trading'!P{r_src}")
+            fd.cell(row=r, column=3, value=f"='[1]Active Trading'!R{r_src}")
     for i, r_src in enumerate(DISC_ROWS):
         r = 2 + i
-        fd.cell(row=r, column=5, value=f"='[1]Active Trading'!AD{r_src}")
-        f = fd.cell(row=r, column=6, value=f"='[1]Active Trading'!AE{r_src}")
+        if feed:
+            ad, ae = feed['disc'][i]
+            fd.cell(row=r, column=5, value=ad)
+            f = fd.cell(row=r, column=6, value=ae)
+        else:
+            fd.cell(row=r, column=5, value=f"='[1]Active Trading'!AD{r_src}")
+            f = fd.cell(row=r, column=6, value=f"='[1]Active Trading'!AE{r_src}")
         f.number_format = 'dd/mm/yyyy'
-    fd['H2'] = ('Direct external references to the trading workbook (same folder). '
-                'Do not edit; everything downstream computes on the Performance sheet.')
+    if feed:
+        fd['H1'] = f'Snapshot of {src_name}, taken {dt.date.today():%d %b %Y}.'
+        fd['H1'].font = Font(bold=True, color=NAVY)
+        fd['H2'] = ('Plain values (no links — works in Excel on the web / Box). '
+                    'Refresh: python refresh_performance.py <trading book> <this file> '
+                    '— it preserves your assumptions and Capital added entries.')
+    else:
+        fd['H2'] = ('Direct external references to the trading workbook (same folder). '
+                    'Do not edit; everything downstream computes on the Performance sheet.')
     fd['H2'].font = note
 
     # ---------------- Performance sheet
     t = pf.cell(row=1, column=1, value='BAYESIAN CAPITAL — 9-STOCK BOOK vs PLAN BAND')
     t.font = Font(bold=True, size=13, color=NAVY)
+    how = (f'Snapshot of {src_name} (refresh: run refresh_performance.py — your '
+           f'entries survive).' if feed else
+           f'Feeds from {src_name} in the same folder by external links; enable '
+           f'link updates when Excel asks (desktop Excel only).')
     pf.cell(row=2, column=1, value=(
-        f'Feeds from {src_name} in the same folder (never modified). Actual = weekly '
-        'realised P&L as recorded (blotter + closed discretionary); the second table '
-        'strips the discretionary log. Type IBKR capital additions in the shaded '
-        'column — they compound into both plan lines from that week. Enable link '
-        'updates when Excel asks.')).font = Font(italic=True, color=GREY)
+        f'{how} Actual = weekly realised P&L as recorded (blotter + closed '
+        'discretionary); the second table strips the discretionary log. Type IBKR '
+        'capital additions in the shaded column — they compound into both plan '
+        'lines from that week.')).font = Font(italic=True, color=GREY)
 
     pf.cell(row=4, column=2, value='Starting capital').font = Font(bold=True)
     c = pf.cell(row=4, column=3, value=start_cap)
@@ -253,6 +292,16 @@ def build(src_name, out_path, start_cap):
     pf.add_chart(mk_chart('Cumulative P&L vs plan band — excluding discretionary', 12),
                  f'K{R1 + 3}')
 
+    if keep:
+        if keep.get('cap') is not None:
+            pf['C4'] = keep['cap']
+        if keep.get('mn') is not None:
+            pf['C5'] = keep['mn']
+        if keep.get('mx') is not None:
+            pf['C6'] = keep['mx']
+        for r, v in (keep.get('adds') or {}).items():
+            pf.cell(row=r, column=3, value=v)
+
     wb.calculation.fullCalcOnLoad = True
     wb.save(out_path)
 
@@ -305,6 +354,11 @@ def inject_links(path, src_name, cache):
                 b'</sheets><externalReferences><externalReference '
                 b'xmlns:r="http://schemas.openxmlformats.org/officeDocument/'
                 b'2006/relationships" r:id="rIdEL1"/></externalReferences>')
+            # update links at open without the prompt (the prompt, once
+            # dismissed with "Don't update", is remembered — the #1 cause of
+            # a link workbook silently going stale)
+            data = data.replace(b'<workbookPr/>',
+                                b'<workbookPr updateLinks="always"/>')
         elif item.filename == 'xl/_rels/workbook.xml.rels':
             data = data.replace(
                 b'</Relationships>',
@@ -330,27 +384,50 @@ def inject_links(path, src_name, cache):
     shutil.move(tmp, path)
 
 
+def read_keep(out_path):
+    """Preserve user inputs from an existing copy: assumptions + additions."""
+    if not os.path.exists(out_path):
+        return None
+    try:
+        wb = openpyxl.load_workbook(out_path)
+    except Exception:
+        return None
+    pf = wb['Performance']
+    adds = {}
+    for r in range(R0, R1 + 1):
+        v = pf.cell(row=r, column=3).value
+        if isinstance(v, (int, float)) and v:
+            adds[r] = v
+    return dict(cap=pf['C4'].value, mn=pf['C5'].value, mx=pf['C6'].value,
+                adds=adds)
+
+
 def main():
     src, out = sys.argv[1], sys.argv[2]
+    links = '--links' in sys.argv[3:]
     src_name = re.sub(r'^[0-9a-f]{8}-', '', os.path.basename(src))
-    cache = read_cache(src)
     wbp = openpyxl.load_workbook(src, data_only=True)
     start_cap = wbp['Performance']['C4'].value or 5_000_000
-    build(src_name, out, start_cap)
-    inject_links(out, src_name, cache)
-
-    import xml.dom.minidom
-    z = zipfile.ZipFile(out)
-    assert z.testzip() is None
-    for part in ('xl/externalLinks/externalLink1.xml',
-                 'xl/externalLinks/_rels/externalLink1.xml.rels',
-                 'xl/workbook.xml', '[Content_Types].xml'):
-        xml.dom.minidom.parseString(z.read(part))
-    z.close()
+    keep = read_keep(out)
+    if links:
+        build(src_name, out, start_cap, keep=keep)
+        inject_links(out, src_name, read_cache(src))
+        import xml.dom.minidom
+        z = zipfile.ZipFile(out)
+        assert z.testzip() is None
+        for part in ('xl/externalLinks/externalLink1.xml',
+                     'xl/externalLinks/_rels/externalLink1.xml.rels',
+                     'xl/workbook.xml', '[Content_Types].xml'):
+            xml.dom.minidom.parseString(z.read(part))
+        z.close()
+        mode = f'external links -> {src_name}'
+    else:
+        build(src_name, out, start_cap, feed=read_feed_values(src), keep=keep)
+        mode = f'static snapshot of {src_name}'
     wb2 = openpyxl.load_workbook(out)
     assert wb2.sheetnames == ['Performance', 'Feed']
-    assert wb2['Feed']['A2'].value == "='[1]Active Trading'!O42"
-    print(f'built {out} (links -> {src_name}, start capital {start_cap:,.0f}); '
+    kept = f"; kept {len((keep or {}).get('adds') or {})} additions" if keep else ''
+    print(f'built {out} ({mode}, start capital {start_cap:,.0f}{kept}); '
           f'validation passed')
 
 
