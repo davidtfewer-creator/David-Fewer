@@ -150,22 +150,32 @@ def build(src_name, out_path, start_cap):
     pf.cell(row=5, column=6, value='Equity now (capital + P&L)').font = Font(bold=True, color=NAVY)
     pf.cell(row=5, column=8, value=f'=$H$4+IFERROR(LOOKUP(9.99E+307,$E${R0}:$E${R1}),0)')
     pf.cell(row=6, column=6, value='Projected EOY profit  (MIN | MAX)').font = Font(bold=True, color=NAVY)
-    pf.cell(row=6, column=8,
-            value=(f'=IFERROR(LOOKUP(9.99E+307,$E${R0}:$E${R1}),0)'
-                   f'+$H$5*((1+$C$7)^(52-COUNT($D${R0}:$D${R1}))-1)'))
-    pf.cell(row=6, column=9,
-            value=(f'=IFERROR(LOOKUP(9.99E+307,$E${R0}:$E${R1}),0)'
-                   f'+$H$5*((1+$D$7)^(52-COUNT($D${R0}:$D${R1}))-1)'))
+    proj = (f'=IFERROR(LOOKUP(9.99E+307,$E${R0}:$E${R1}),0)'
+            f'+$H$5*((1+{{rate}})^(52-COUNT($D${R0}:$D${R1}))-1)')
+    pf.cell(row=6, column=8, value=proj.format(rate='$C$7'))
+    pf.cell(row=6, column=9, value=proj.format(rate='$D$7'))
     pf.cell(row=7, column=6, value='Projected year-end fund size').font = Font(bold=True, color=NAVY)
     pf.cell(row=7, column=8, value='=$H$4+$H$6')
     pf.cell(row=7, column=9, value='=$H$4+$I$6')
-    for addr in ('H4', 'H5', 'H6', 'I6', 'H7', 'I7'):
+    # extrapolation at the book's own run-rate: realized weekly growth to date,
+    # (equity / invested)^(1/weeks elapsed) - 1, compounded over the rest of the 52
+    live = f'(($H$5/$H$4)^(1/COUNT($D${R0}:$D${R1}))-1)'
+    pf.cell(row=8, column=6, value='At current run-rate  (profit | fund)').font = \
+        Font(bold=True, color=NAVY)
+    pf.cell(row=8, column=8, value='=' + proj.format(rate=live)[1:])
+    pf.cell(row=8, column=9, value='=$H$4+$H$8')
+    j8 = pf.cell(row=8, column=10,
+                 value=f'=IFERROR("pace "&TEXT((1+{live})^52-1,"0%")&"/yr","")')
+    j8.font = note
+    for addr in ('H4', 'H5', 'H6', 'I6', 'H7', 'I7', 'H8', 'I8'):
         pf[addr].number_format = '$#,##0'
         pf[addr].font = Font(bold=True, color=NAVY)
-    pf.cell(row=8, column=6, value=(
-        'Projection: current equity compounded at the plan rates over the remaining '
-        'weeks of the 52. Future additions typed below lift the plan lines now and '
-        'join the projection once their week arrives.')).font = note
+    pf.cell(row=9, column=6, value=(
+        'Projections: current equity compounded over the remaining weeks of the 52 — '
+        'at the plan rates, and (last row) at the book\'s own realized weekly growth '
+        'to date. Early in the year the run-rate is noisy; it firms up as weeks '
+        'accumulate. Future additions typed below lift the plan lines now and join '
+        'the projections once their week arrives.')).font = note
 
     heads = ['Week #', 'Week ending', 'Capital added', 'Weekly P&L',
              'Cumulative P&L', 'Cum plan MIN', 'Cum plan MAX', 'vs MIN', 'vs MAX',
