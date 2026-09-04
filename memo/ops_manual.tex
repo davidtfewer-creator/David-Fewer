@@ -52,10 +52,12 @@ the watch-list protocol, alarms, and change control\par}
 {\bfseries Bayesian Capital}\\[0.2cm]
 {\color{bcgrey} Systematic Trading Research}\\[0.9cm]
 {\itshape\color{bcgrey} Internal document --- strictly confidential}\\[0.3cm]
-{\color{bcgrey} 27 August 2026 --- version 1.5 (29 Aug: Performance tab wired
+{\color{bcgrey} 27 August 2026 --- version 1.6 (29 Aug: Performance tab wired
 into the weekly and monthly checks; 1 Sep: one-pager generator delivered;
 2 Sep: plan construction settled --- anchors $\times$ execution
-$\times$ pooling $=$ 74\%/yr; current-roster 2022 replay numbers added)}
+$\times$ pooling $=$ 74\%/yr; current-roster 2022 replay numbers added;
+4 Sep: performance companion workbook --- plan band, capital additions,
+EOY projection)}
 \vfill
 \end{titlepage}
 
@@ -114,6 +116,7 @@ ATH gate & no buy whose exit needs a print above ATH ($\varepsilon$ in AT M7) \\
 MU pause (manual) & no new MU bids, report week $\pm$ one week --- \S4 keeps it on the calendar \\
 discretionary carve-out & Alloc E5 flag / E6 amount; discretionary log at AT T41:AF241 \\
 Performance tab & weekly actual (AT col P) vs the compounding target; assumptions in C4/C5 \\
+performance workbook & \texttt{9stock\_performance.xlsx}, same folder: plan band (MIN 74\% / MAX 88.5\%), capital additions, EOY projection; feeds the trading book by external links, never writes it \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -173,12 +176,15 @@ which is what makes it delegable. Standing order of work:
       exits and stop-due flags are the items that escalate. PM vetoes are not
       on it: the sheet keeps no 9:00 history, so those are checked live on
       the morning run.
-\item \textbf{Performance-tab check} (5 min): confirm the week's row filled
-      (week ending, actual P\&L from AT col P --- blotter plus any closed
-      discretionary trades) and that the cumulative-actual line updated on the
-      chart. This is a \emph{recording} check, not a judgement: a single
-      week's gap to the target line is noise by construction. The tab's
-      verdicts are read monthly (\S5).
+\item \textbf{Performance check} (5 min): open
+      \texttt{9stock\_performance.xlsx} (beside the trading workbook), let
+      the links update, and confirm the week's row filled --- all-in and
+      excluding-discretionary --- and both charts extended. \textbf{Any IBKR
+      deposit that landed this week is typed into the Capital added column
+      now} (the reconcile above is where it shows up); additions compound
+      into both plan lines from their week. This is a \emph{recording}
+      check, not a judgement: a single week's gap to a plan line is noise by
+      construction. Verdicts are read monthly (\S5).
 \item \textbf{Archive the data} (20 min): export the week's 5-minute bars
       (regular hours \emph{and} pre-market) for all book and watch-list
       names into the standard folders
@@ -200,21 +206,25 @@ one-pager, archive.
 \section{Monthly review (first Sunday of the month, $+$1 hour)}
 
 \begin{checklist}
-\item \textbf{Book vs plan --- the Performance tab}: the standing instrument
-      is the workbook's Performance sheet (between Notes and Allocation):
-      weekly actual P\&L against a target compounding at 74\%/yr (the re-cast
-      plan, set in C5 on 2 Sep 2026: anchors $\times$ gap exits $\times$
-      pooling at its weaker half) from \$6{,}150{,}000 starting capital
-      (assumptions editable in C4/C5), with
-      cumulative lines charted. Read the \emph{cumulative} gap
-      (column G / the chart), never a single week; the weekly increments are
-      noise by construction. Judge the gap only against pre-agreed tolerance
-      bands derived from the verified backtest's own dispersion --- inside
-      the bands, \emph{no action and no narrative}. (Bands to be computed
-      and appended to this manual as Appendix A.) Changing the target
-      assumptions is a quarterly-review decision, not a monthly one.
-\item \textbf{Activity pace}: fills and stops vs the $\approx$599/yr and
-      $\approx$20/yr references. A collapse in fill count is a structural
+\item \textbf{Book vs plan --- the performance workbook}: the standing
+      instrument is \texttt{9stock\_performance.xlsx} (in the trading book's
+      folder, feeding it by external links --- the trading book itself is a
+      mirror and is never edited). It carries weekly and cumulative realised
+      P\&L, all-in \emph{and} excluding the discretionary log, against a
+      \textbf{plan band}: MIN 74\%/yr (the plan --- anchors $\times$
+      execution $\times$ pooling) and MAX 88.5\%/yr (the pooled full-sample
+      ceiling), both compounding on starting capital \emph{plus typed IBKR
+      additions}; a summary block projects end-of-year profit and fund size
+      at both rates. Read the \emph{cumulative} position against the band,
+      never a single week; the weekly increments are noise by construction.
+      Inside the band: \emph{no action and no narrative}. Persistently below
+      MIN is the flag (pre-agreed tolerance bands from the verified
+      backtest's dispersion refine this --- Appendix A, still pending);
+      above MAX is noted, not celebrated --- the ceiling is a full-sample
+      measurement, not an expectation. Changing the plan assumptions is a
+      quarterly-review decision, not a monthly one.
+\item \textbf{Activity pace}: fills and stops vs the $\approx$530--540/yr
+      and $\approx$20/yr references. A collapse in fill count is a structural
       alarm even when returns look fine --- it means the bids stopped being
       touched.
 \item \textbf{Execution audit}: the month's live fills vs engine-predicted
