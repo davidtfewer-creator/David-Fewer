@@ -1,0 +1,203 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[letterspace=180]{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+\definecolor{bcnavy}{RGB}{24,38,68}
+\definecolor{bcgold}{RGB}{198,160,74}
+\definecolor{bcteal}{RGB}{23,110,120}
+\definecolor{bcgrey}{RGB}{95,95,95}
+\definecolor{bcred}{RGB}{160,60,50}
+
+\titleformat{\section}{\bfseries\large\color{bcnavy}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\bfseries\color{bcteal}}{}{0em}{}
+\captionsetup{font={footnotesize},labelformat=empty,textfont={color=bcgrey}}
+\newcommand{\tabnote}[1]{\begin{center}\begin{minipage}{0.92\textwidth}
+  \footnotesize\color{bcgrey}#1\end{minipage}\end{center}}
+\newlist{checklist}{itemize}{1}
+\setlist[checklist]{label=$\square$, leftmargin=1.6em, itemsep=2pt, topsep=2pt}
+
+\begin{document}
+
+% ---------------------------------------------------------------- header
+\begin{center}
+{\Large\bfseries\color{bcnavy} The Watch List --- Working Brief}\\[0.15cm]
+{\color{bcnavy} building the bench for the nine-name book}\\[0.25cm]
+{\small\color{bcgrey} Bayesian Capital --- Systematic Trading Research
+\;$\bullet$\; 8 September 2026 \;$\bullet$\; for the watch-list analyst}
+\end{center}
+\vspace{0.1cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.4cm}
+
+\section{The mandate}
+
+Develop the watch list to its full strength ($\leq 5$ names), \textbf{freeze}
+each candidate's analysis at admission to the list, and paper-track the frozen
+work forward over the coming three months. The December quarterly review reads
+your register and decides; graduation into the live book is a review decision,
+never an analyst one, and the standing bar (\S3) asks for \emph{two} quarters
+of forward evidence --- so December is your first formal checkpoint, and the
+earliest realistic graduation is the Q1 2027 review unless the principal
+decides otherwise on the December evidence. Your product is not a
+recommendation to buy anything; it is a candidate whose \emph{forward} record,
+earned after the analysis stopped, clears a pre-agreed bar.
+
+\begin{tcolorbox}[colback=bcgold!8, colframe=bcgold, boxrule=0.8pt,
+  title={\bfseries The one law}, coltitle=bcnavy]
+\textbf{Freeze means freeze.} The reference vector fitted at admission to the
+list is never touched again while the name is on it --- not re-fitted,
+not ``improved,'' not nudged after a bad month. Three independent instruments
+(forty historical folds; a fresh two-variant optimisation on verified fills; a
+likelihood test of the price process) agree that parameter search does not
+transport out of sample. The entire value of the watch list is that every week
+after the freeze is \emph{genuinely} out of sample --- it converts time into
+the only evidence money can trust. A re-fit resets the clock to zero and
+quietly poisons the record.
+\end{tcolorbox}
+
+\section{What a candidate is being tested for}
+
+The book trades two limit-order sleeves per name (a Bayesian trend filter and
+an Ornstein--Uhlenbeck reversion model), buying morning weakness at
+model-derived bids and selling at a fixed premium, with a 50-day time stop and
+a pooled morning allocation across all names. What pays the premium is
+\textbf{daily range} --- the candidate screen is, above all, a screen for
+names volatile enough to pay for patience, liquid enough to fill at the bid,
+and clean enough to verify.
+
+\section{The admission gates (standing, unchanged)}
+
+\begin{description}[leftmargin=1.9em, itemsep=3pt]
+\item[G0 --- Data \& instrument.] Listed ordinary shares; $\geq 2$ years of
+daily history spanning at least one stress episode; 5-minute bars for fill
+verification. No exceptions: unverifiable means untradeable.
+\item[G1 --- Classification.] AI beta and book correlation measured
+$\Rightarrow$ AI-related or uncorrelated. Sets the return gate.
+\item[G2 --- Return gate.] Planning figure $\geq 50\%$/yr (AI-related) or
+$\geq 30\%$/yr (uncorrelated), on verified fills, planning basis.
+\item[G3 --- Transportability.] Single split at the half-sample: fit on the
+first half only, freeze, score the second. The tested half must support the
+plan; where train-only fits collapse far below the observed range, plan on the
+low end.
+\item[G4 --- Both-halves rule.] Any structural rule counted toward the plan
+must improve both halves independently. One regime's evidence is not evidence.
+\item[G5 --- Marginal book test.] At equal weight the name must improve the
+book it joins: higher planned return, or lower beta / drawdown / stress loss.
+A name that neither out-earns nor de-risks re-concentrates. Run with the live
+rules on, in both directions.
+\end{description}
+
+Your three months cover G0--G3 now (that is the freeze) and the accumulating
+forward record; G4/G5 are re-run at review time on the live-rule book.
+
+\section{The record --- names already judged}
+
+Do not re-propose a declined name without genuinely new facts (a regime it has
+not shown, not a better fit on the same data).
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+name & verdict & gate & mechanism \\
+\midrule
+MRVL & \textbf{admitted} Aug 2026 & --- & train-only fits clear 50\% outright on the tested half \\
+AVGO & in book 2 Sep 2026 & --- & composition decision of the principal; fragility flag stands \\
+NEM  & \textbf{on watch} & G2 & honest fits 35--48\% vs its 50\% bar (AI $\beta$ 0.27); re-test Q1 2027 \\
+NVDA & declined & G2 & planning $\approx$40\% \\
+TSLA & declined & G2 & planning $\approx$40\% (weekly book only) \\
+AMD  & declined & G2 & planning $\approx$42\%; crash half $-14.6\%$/yr \\
+SMCI & declined & G2/G3 & halves inverted; loses money on the recent year \\
+CEG  & declined & G2/G5 & head-to-head swap for VST lost 3.6pp \\
+FCX  & declined & G2/G3 & 48.2\% through-cycle; train halves 8--19\% \\
+UAL  & declined & G5 & one variant clears, the other collapses to 12.7\% \\
+LEN  & declined & G2 & the one true uncorrelated --- but too quiet to pay the premium \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tabnote{The structural finding of the August diversifier round, which your
+screen will run into immediately: \textbf{volatility IS the AI trade} in this
+sample. Names with enough range to pay the premium tend to carry AI beta;
+genuinely uncorrelated names (LEN) tend to lack the range. The book's average
+AI beta is 0.66 --- candidates that de-correlate it are worth more than their
+raw plan number, which is why the uncorrelated gate sits at 30\%, not 50\%.}
+
+\section{Sourcing the shortlist}
+
+\begin{checklist}
+\item Start from G0, not from conviction: two clean years of daily data
+      spanning a stress episode, and 5-minute bars exportable in the standard
+      format. Anything that fails this is out before analysis starts.
+\item Screen for the fuel: average daily range $\gtrsim 2.5\%$ at workable
+      liquidity (the book fills $\sim$500 orders a year without moving
+      anything).
+\item Aim the mix at the book's need: two or three genuinely uncorrelated
+      candidates (AI $\beta \lesssim 0.3$) are worth more than five more AI
+      names --- but be honest at G1; the August round reclassified three
+      ``diversifiers'' as AI-correlated once measured.
+\item Earnings behaviour is part of the record from day one: log each report
+      date; report-adjacent entries are where the book's stop-outs cluster.
+\end{checklist}
+
+\section{The routine}
+
+\begin{description}[leftmargin=1.9em, itemsep=3pt]
+\item[Now (weeks 1--3).] Shortlist $\to$ export data $\to$ G0/G1 $\to$ honest
+half-sample fits and the G2/G3 verdicts $\to$ \textbf{freeze} the reference
+vectors and open the register: one page per name recording admission date,
+classification and gate bar, the frozen vector, the fit evidence
+(train / tested / full), and the report-date calendar.
+\item[Every Sunday.] Run each frozen vector over the week's archived 5-minute
+data; append the would-be fills, exits and stops to the candidate's paper
+track. Archive the week's bars (regular hours \emph{and} pre-market) in the
+standard folders --- the archive is the evidence; it only exists if it is
+kept.
+\item[Monthly.] One short note per name: paper-track cumulative vs its gate
+bar, anything structural observed (an earnings blow-up, a data problem).
+No verdicts --- the review gives verdicts.
+\item[December review.] Present the register: one quarter of forward track
+per name, G5 re-run on the live-rule book both directions, and an honest
+recommendation per name --- \emph{graduate / hold for the second quarter /
+drop}.
+\end{description}
+
+\section{What kills watch-list work (learned the expensive way)}
+
+\begin{checklist}
+\item \textbf{Re-fitting} --- the one sin. See the box in \S1.
+\item \textbf{Single-episode evidence.} A rule or a name whose entire case is
+      one event in one half (the book's ledger holds several of these
+      mirages) fails G4 by construction. If the benefit disappears when you
+      remove one week, you have found one week, not a rule.
+\item \textbf{Inverted halves.} A tempting full-sample number whose train and
+      test halves disagree is the signature of a name that only worked in one
+      regime. SMCI and FCX both died of this.
+\item \textbf{Quiet improvement of the record.} A missed data day, a
+      corrected fill, a re-run --- all fine, all logged. An unlogged change
+      to a paper track makes the whole register worthless.
+\end{checklist}
+
+\vspace{0.4cm}
+{\color{bcnavy}\hrule height 0.8pt}
+\vspace{0.2cm}
+{\footnotesize\color{bcgrey} Companions: \emph{Admission Gates} (the full
+protocol paper), \emph{Verified Book Ranking} (the current book and planning
+basis), \emph{Book Operations Manual} \S7 (the watch-list protocol this brief
+operationalises). Machine handover for your Claude session:
+\texttt{HANDOVER\_WATCHLIST.md}. Data formats and tooling are described
+there; the weekly paper-tracker script does not exist yet --- building it is
+your first deliverable, and the handover gives your Claude everything needed
+to write it.}
+
+\end{document}
