@@ -704,14 +704,13 @@ had recovered yet — this is a multi-leg slide, closer in shape to the band's f
 May 2026) than to the clean snapbacks. Breadth was 2/9 pre-drop (VST, AVGO), VRT likely third —
 gate unarmed under K=4. Discipline: note-and-wait; watch breadth, not VRT.
 
-**IN FLIGHT — `ops/dislocation_scan.py` (UNTESTED).** Pre-open scanner formalising the VRT
-process: reads workbook Query, flags names (≥5% below 3-session high OR ≥3% below 10dma, AND vol
-≥1.3×), prints per flag: dip metrics, the NAME'S OWN banded base rates (48-session recovery to
-pre-dip and +2.5%), breadth context with ≥4 caution, earnings proximity from AT G7:G15 (blank =
-warn), ready ticket (entry/target/time-stop), and the explicit HUMAN news test (company-specific
-= repricing ≠ ticket; sector/general = candidate). A syntax error (f-string) was fixed; the script
-has NOT yet been run — FIRST ACTION next session: test against the latest workbook attachment,
-iterate, commit, deliver. Operating modes discussed: (a) user uploads workbook here pre-open,
+**`ops/dislocation_scan.py` — TESTED AND CORRECTED (10 Sep, see §3.29).** Pre-open scanner
+formalising the VRT process: reads workbook Query, grades all nine names, prints per graded name
+the dip metrics, the CLASS base rate (both halves), the NAME'S OWN banded base rates (48-session
+recovery to pre-dip and +2.5%), breadth context with ≥4 caution, earnings proximity from AT
+G7:G15 (blank = warn), the ready ticket where the grade earns one, and the explicit HUMAN news
+test (company-specific = repricing ≠ ticket; sector/general = candidate). Also takes an optional
+as-of date to replay a past session. Operating modes: (a) user uploads workbook here pre-open,
 Claude runs scan + does the news layer via WebSearch (works today); (b) scheduled locally on the
 trading machine post-Script-1, optionally piping flags through Claude CLI for the news pass. The
 news layer stays human/Claude by design.
@@ -727,6 +726,64 @@ discussion: AIFMD is the real regulation (not MiFID advice); sub-threshold regis
 sketched (~74-word summary in chat only, nothing in repo). MU pause window imminent (MU reports
 late Sep; AT G11 still blank — chase). Plan remains 74%/yr; pooled refs 72.4/88.5; all five papers
 consistent as of 3 Sep (no removal narrative, current-roster 2022 replay −13.8/+1.7 throughout).
+
+### 3.29 The dislocation screen's flag rule, measured (10 Sep) — the week-of-range gate is load-bearing, and VRT does not earn a ticket
+
+First run of `ops/dislocation_scan.py` against the live workbook (Query fresh through 2026-09-09,
+613 sessions — the user has done the AVGO backfill). It ran clean and printed **no flags** — which
+was itself the finding, because the script had been written to formalise the VRT episode and VRT
+was the one thing it should have caught. Two separate causes, both in the flag rule, both now
+measured on the harness that validated the original ticket study (`disc_vol_gate.py`, nine names,
+daily workbook data, +5%/10-session bracket, halves split 2025-05-23; every signal scored
+standalone so the populations nest — the non-overlap rule in `disc_structure.run` lets a loose
+rule's early signal displace a tight rule's later one, which confounds exactly this comparison).
+
+| cell | n | hit | avg | train | test |
+|---|---|---|---|---|---|
+| A tested proxy: 10dma ≤ −3%, week hot | 373 | 66% | +1.50% | +1.02% | +2.45% |
+| B alternative: 3-session-high ≤ −5%, week hot | 322 | 71% | +1.85% | **+1.35%** | **+2.72%** |
+| A OR B (the scanner as first written) | 445 | 66% | +1.48% | +0.99% | +2.33% |
+| A AND B (both dip tests agree) → **STRONG** | 250 | 72% | +1.99% | +1.47% | +3.06% |
+| B not A (dip off a running high) → **FLAG** | 72 | 68% | +1.38% | +0.78% | +1.95% |
+| A not B (the grinding slide) → **SLIDE** | 123 | 53% | +0.52% | **+0.05%** | +1.32% |
+| C violent day, calm week → **DAYVOL** | 154 | 70% | +1.86% | **−0.22%** | **+3.18%** |
+| … of those, deep (3sh ≤ −8%) | 61 | 74% | +1.37% | −0.85% | +3.81% |
+| D no vol gate at all: 3sh ≤ −5% | 769 | 69% | +1.41% | +0.66% | +2.09% |
+| E no screen at all: every session | 4923 | 61% | +1.07% | +0.19% | +1.68% |
+
+- **The dip test that pays is distance below the 3-SESSION HIGH, not below the 10-day mean.**
+  B beats A on both halves (+0.33pp train, +0.27pp test, hit 71 vs 66%), and the signals only the
+  10dma test finds — the grinding slide — earn **+0.05% on the train half against +0.19% for doing
+  nothing at all** (row E). The 10dma branch was carrying the screen's dead weight. This is a
+  specification change, not a threshold search: both dip tests were already written into the two
+  scripts and no grid was run. Adopted, per §3.1's rule that structural changes survive.
+- **The volatility gate must stay a WEEK of range** (5-day mean true range vs the 60-day median).
+  Scoring the signal day's own range instead is the only way to flag VRT — and that population
+  (row C) averages **−0.22% on the train half against +3.18% on the test half**, worse on train
+  than doing nothing; the deep cut is more inverted still (−0.85% / +3.81%). That is the
+  single-cell mirage pattern of VST-P2 (§3.25) and the AVGO pause (§3.28a). **Rejected.**
+  Note also row D: dropping the vol gate entirely halves the train-half edge (+0.66% vs +1.35%).
+  The gate earns its place.
+- **So the scan's silence on VRT was correct, and is now explicit rather than accidental.** VRT
+  on 9 Sep grades **DAYVOL**: −9.6% against its 3-session high, 2.37× its normal range on the day,
+  but only 1.20× across the week — a violent session inside a calm one. The name's own 48-session
+  band record is strong (27/31 back to pre-dip, 25/31 to +2.5%) and is printed, labelled as five
+  times the ticket window and as context for the name rather than a ticket hit rate. The grade
+  carries no ticket. Same discipline as §3.28d: note-and-wait, watch breadth.
+
+Scanner changes: four grades (STRONG / FLAG / SLIDE / DAYVOL) each printing its own class base
+rate and both halves, tickets only on STRONG and FLAG, a one-line table of all nine names every
+run so no dislocation is ever invisible, the time-stop date derived from the workbook's own
+session spacing instead of a ×1.5 calendar guess, an explicit up-front warning when AT G7:G15 is
+empty, and an optional as-of argument that replays a past session (all four grade paths were
+exercised that way: STRONG CF 2025-01-24, DAYVOL AVGO 2025-01-27, SLIDE AVGO 2025-01-30, FLAG VLO
+2025-02-06). Baseline invariance: `disc_structure.py` on the fresh workbook reproduces the
+published T=5%/N=10 cell exactly (127 trades, 67% hit, +1.86%, per-week 14.31).
+
+**Live state on this run (data through 9 Sep):** breadth 2 of 9 below their 200dma (AVGO, VST) —
+gate unarmed under K=4, so VRT trades. One grade in the book, VRT/DAYVOL, no ticket. **AT G7:G15
+is entirely empty** — not just MU's G11; every earnings check the scanner and the ticket rule
+depend on reads UNKNOWN. That is the chase, and MU reports late Sep.
 
 ---
 
