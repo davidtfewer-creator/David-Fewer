@@ -1,0 +1,43 @@
+{
+ "_rebuilt": "Rebuilt 10 Sep 2026 after the original (gitignored) file was lost in a container recycle. Reference vectors recovered from the live workbook's Model sheets (full precision) and the session record; the original file's candidate A/B variants and declined-name entries are NOT reproduced here - restore them over this file if an original copy surfaces. Now tracked in git.",
+ "MRVL": {
+  "reference": {
+   "vec": [
+    0.6630040536844309,
+    0.2666961043260138,
+    0.3797158406757842,
+    0.03429888194107799,
+    0.03555276837362029,
+    0.140044649913305,
+    0.03512857631233481,
+    0.08959445194442937,
+    80.0
+   ],
+   "full": 0.851,
+   "train": 0.159,
+   "test": 1.913,
+   "fitted_here": true
+  }
+ },
+ "AVGO": {
+  "reference": {
+   "vec": [
+    -1.2672061421396346,
+    0.24815210052740527,
+    0.21817803427574478,
+    0.02912374009381593,
+    0.05993266745789266,
+    0.4308981272496185,
+    0.014091552931815389,
+    0.048611303218466836,
+    112.58772320427576
+   ],
+   "full": 0.5121115781097219,
+   "train": 0.49248821118934805,
+   "test": 0.5369019053435575,
+   "buys_test": 72,
+   "buys_full": 144,
+   "fitted_here": true
+  }
+ }
+}
