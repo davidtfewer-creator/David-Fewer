@@ -785,6 +785,40 @@ gate unarmed under K=4, so VRT trades. One grade in the book, VRT/DAYVOL, no tic
 is entirely empty** — not just MU's G11; every earnings check the scanner and the ticket rule
 depend on reads UNKNOWN. That is the chase, and MU reports late Sep.
 
+**3.29a — the VRT episode was IDIOSYNCRATIC, not complex profit-taking (correction to §3.28d).**
+The news layer could not be run (this session has no web search and the environment's egress
+policy blocks the finance sites), so the tape half of the news test was done instead, from the
+workbook's own Query data. It contradicts the characterisation recorded in §3.28d:
+- **9 Sep was VRT alone.** VRT −9.6% close-to-close while MRVL **+4.3%**, MU **+2.8%**, CF +2.8%,
+  VLO +1.6%; TSM −0.8%, VST −0.4%, AVGO −1.1%. Book median −0.4%. Exactly ONE name down ≥3%:
+  VRT. The two most AI-levered names in the book both rose hard that session, so "AI-infra
+  complex profit-taking" is not what the tape shows.
+- **VRT was rallying into it, not sliding.** The three sessions before were +4.7%, +4.4%, +3.7% —
+  up ~13% in three days, then −9.6% in one. The month-scale slide is real (−9.5% since 24 Jul
+  against MRVL +21%, MU +11.6%, TSM +7.9%, VLO +28.6%) but the immediate setup was a round trip
+  off a three-day run-up, not a continuation.
+- **That puts the episode in §3.26's worst bucket.** The idiosyncratic single-name drop with the
+  complex up is the adverse-information case that study isolated: 1–2 names down ≥3% earned
+  +1.10% with 14 stops in 249 — the weakest bucket in the table, and precisely what the per-name
+  4% pre-market rule exists to veto. Two independent screens now agree: the DAYVOL grade (train
+  −0.22%) and the idiosyncratic-drop bucket.
+- It also explains the DAYVOL shape mechanically: the WEEK's range was calm (1.20×) because the
+  three preceding sessions were an orderly rally; only the 9 Sep session was violent (2.37×).
+  "Violent day, calm week" IS the single-name gap-down shape.
+- **What the tape cannot settle**, and the news test still must: whether VRT's own event was a
+  company-specific repricing (guidance, a contract, a downgrade) or a VRT-specific flow (index/ETF,
+  a block, a large holder). Note the asymmetry — under the ticket rules a company-specific cause
+  is a repricing and disqualifies, and a single-name drop with the complex up already fails the
+  sector-sympathy condition the ticket wants. The news test can only downgrade this one, never
+  upgrade it. No ticket either way; the open question is about the held model position.
+- **Number to reconcile:** §3.28d records −8.17% for 9 Sep; the workbook's Query has 290.83 →
+  262.89, which is −9.61% close-to-close. The −8.17% was probably written intraday. The Query
+  series is the reference.
+- Not checked, for want of the data: whether the 09:00 pre-market rule would have vetoed either
+  sleeve. Both bids (283.00, 278.10) sat ABOVE yesterday's close, so the 4%-below-PM veto looks
+  unlikely to bind on this shape — but `data_pm/` was lost to the container recycle (§3.28d), so
+  this is unverified and should not be quoted.
+
 ---
 
 ## 4. Live workbook state and known issues
