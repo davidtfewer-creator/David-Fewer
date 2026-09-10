@@ -657,6 +657,77 @@ if they read tickers from Query headers / order block, zero change. AVGO reports
 its earnings map profile is the MU profile (week-of entries adverse) — bids off through the print
 recommended; the 15 Sep AVGO re-test reminder now doubles as the post-print parameter sanity check.
 
+### 3.28d Session block 4–10 Sep 2026 — disc-ticket thread, VRT episode, environment loss (READ FIRST in a new session)
+
+**ENVIRONMENT — data loss and recovery (critical).** The remote container was recycled ~5–8 Sep:
+ALL untracked data is GONE — `data_5min/`, `data_pm/` (incl. pm_last_cuts.pkl), `data_bear/`,
+every delivered xlsx, and the old chat uploads. Consequences: NO engine/verified-fill/pooled-book
+run is currently possible (book_sim.load_all, minute_index, PM rule all need those files); recent
+studies fell back to DAILY data read from the user's attached workbook Query sheet
+(`disc_structure.load_from_workbook(path)` — reusable loader). To restore full capability the user
+must re-upload the 5-minute files (Box holds them: "TICKER 5min Apr2024-Aug2026.xlsx" etc. — Box
+MCP can search/list but CANNOT download binaries). Also: `fresh_opt_cands.json` was gitignored
+(early-era rule) AND lost locally — REBUILT 10 Sep from the live workbook's Model sheets + session
+record (MRVL + AVGO reference vectors only, verified exact vs workbook cells), un-ignored, now
+TRACKED. The original's candidate A/B variants and declined-name entries are still missing —
+restore over the rebuilt file if a copy surfaces on the trading machine/Box. Other still-ignored
+JSONs (params_all, fresh_opt_results, rank_book, weekly_12m, har_*, regime_gate) have the same
+loss exposure — an audit of which are load-bearing was offered, not yet done.
+
+**Discretionary "dislocation ticket" (user thread, 8–10 Sep).** User wants disc trades
+semi-structured: human event-driven entries (his AVGO-on-MRVL/Google-news and MU-at-912 trades),
+pre-defined exits, ~3%+/hold-week ambition, no stock-watching. Work done:
+- `disc_structure.py`/`.json` — mechanical proxy (close ≥3% below 10dma + 5d TR ≥1.3× 60d median,
+  buy next open) × bracket grid (target T × time-cap N), nine names daily (workbook Query data).
+  Sweet spot T=5%/N=10 sessions: 67% hit, +1.86%/trade, median 6d hold; halves agree everywhere;
+  worst single trade −37% (earnings crash inside window). Blended ≈2%/wk = the FLOOR; the user's
+  live tickets (+10%/1d, +6%/3d) beat it — human filter is the alpha.
+- `disc_loop.py`/`.json` — the ticket as a capital loop vs the book: best config ~30%/yr at ~28%
+  occupancy vs book 72.4%/yr — LOSES decisively on occupancy (per-dollar-day yields comparable
+  ~0.3%; dislocations are episodic, the book bids daily). Verdict: ticket = containment for disc
+  trading at small carve-out (≤2 tickets, ≤8% each), never a pool alternative. Earnings-window
+  exclusion COST return in the loop (30→19.5%) but stop-autopsy says report-adjacency is where
+  disasters live — kept as cheap insurance, human may override when the print IS the thesis.
+- TICKET DESIGN (agreed shape, not yet written into any doc): entry human but gated (one-sentence
+  nameable cause; ≥3% below 10dma; vol ≥1.3× norm; not in own earnings window; ≤8% equity,
+  ≤2 open); exit mechanical AT entry (GTC sell entry×1.05 + time-stop open of session 10, never
+  revisited); quarterly review of disc yield/dollar-day vs the model book.
+
+**VRT episode (9–10 Sep) — live case study.** VRT −8.17% on 9 Sep on NO company news (AI-infra
+complex profit-taking; UtilityInnovation deal integration chatter; had been sliding since late
+Jul). THE MODEL BOUGHT: Bayes @283.00 (target 289.14, prem 2.17%) and OU @278.10 (target 285.50,
+prem 2.66%) — ~8–9% underwater at ~257.6, day ~1–2 of 50. VRT-specific recovery study (price-path,
+daily data, dips ≥7% below 3-session high, 48-session window): band −7..−10% = 14/16 to pre-dip
+level, 13/16 to +2.5% target, median 8 sessions; deeper than −10% = only 4/8 (crash regime).
+Caveats: 2024–26 sample only; the two most recent dips (28 Jul, 18 Aug) are CENSORED and neither
+had recovered yet — this is a multi-leg slide, closer in shape to the band's failures (Jun 2024,
+May 2026) than to the clean snapbacks. Breadth was 2/9 pre-drop (VST, AVGO), VRT likely third —
+gate unarmed under K=4. Discipline: note-and-wait; watch breadth, not VRT.
+
+**IN FLIGHT — `ops/dislocation_scan.py` (UNTESTED).** Pre-open scanner formalising the VRT
+process: reads workbook Query, flags names (≥5% below 3-session high OR ≥3% below 10dma, AND vol
+≥1.3×), prints per flag: dip metrics, the NAME'S OWN banded base rates (48-session recovery to
+pre-dip and +2.5%), breadth context with ≥4 caution, earnings proximity from AT G7:G15 (blank =
+warn), ready ticket (entry/target/time-stop), and the explicit HUMAN news test (company-specific
+= repricing ≠ ticket; sector/general = candidate). A syntax error (f-string) was fixed; the script
+has NOT yet been run — FIRST ACTION next session: test against the latest workbook attachment,
+iterate, commit, deliver. Operating modes discussed: (a) user uploads workbook here pre-open,
+Claude runs scan + does the news layer via WebSearch (works today); (b) scheduled locally on the
+trading machine post-Script-1, optionally piping flags through Claude CLI for the news pass. The
+news layer stays human/Claude by design.
+
+**Other state (4–10 Sep):** 9stock_performance.xlsx ABANDONED by user ("hard to manage" — Box
+WOPI rewrote external links; rebuilt as static-snapshot + refresh script, but user will knit
+metrics into the main excel later; builder/refresh stay in ops/). Watch-list: brief
+(memo/watchlist_brief.pdf) + HANDOVER_WATCHLIST.md delivered for the colleague's Claude; colleague
+got premarket_study.zip (tracked files; needs fresh_opt_cands.json separately — sent; and has NO
+price data). NVDA question answered: 40% planning is captive/sheet/haircut by design; exec ×1.13
+→ 45.4 vs restated bar ~56 — still fails G2; pooling enters only at G5. 3rd-party capital
+discussion: AIFMD is the real regulation (not MiFID advice); sub-threshold registered AIFM route
+sketched (~74-word summary in chat only, nothing in repo). MU pause window imminent (MU reports
+late Sep; AT G11 still blank — chase). Plan remains 74%/yr; pooled refs 72.4/88.5; all five papers
+consistent as of 3 Sep (no removal narrative, current-roster 2022 replay −13.8/+1.7 throughout).
+
 ---
 
 ## 4. Live workbook state and known issues
