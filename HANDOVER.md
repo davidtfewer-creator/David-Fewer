@@ -659,6 +659,17 @@ recommended; the 15 Sep AVGO re-test reminder now doubles as the post-print para
 
 ### 3.28d Session block 4–10 Sep 2026 — disc-ticket thread, VRT episode, environment loss (READ FIRST in a new session)
 
+**UPDATE 15 Sep: the AVGO post-report check-in FIRED (one-shot trigger, will not re-fire) and is
+BLOCKED ON DATA.** The check is re-purposed since AVGO entered the book 2 Sep: it is now an
+in-book parameter sanity check + the pause question with the tenth report window, NOT an
+admission re-test (the 10-vs-9 bar is moot). Cannot run: all 5-minute data lost to container
+recycles, and the newest workbook on hand ends 4 Sep (no post-print sessions). Needs from David:
+AVGO_5min.xlsx (RTH, Apr 2024→mid-Sep) + AVGO_pm.xlsx minimum (standalone legs: post-report
+decomposition incl. the tenth window; held with/without 2-session pause); plus the other eight
+names' refreshed 5-min + PM files for the pooled/PM-rule leg on a common calendar. Recipe in
+§3.14a; params = fresh_opt_cands.json AVGO reference. A refreshed workbook alone permits a
+daily-bar first look only.
+
 **ENVIRONMENT — data loss and recovery (critical).** The remote container was recycled ~5–8 Sep:
 ALL untracked data is GONE — `data_5min/`, `data_pm/` (incl. pm_last_cuts.pkl), `data_bear/`,
 every delivered xlsx, and the old chat uploads. Consequences: NO engine/verified-fill/pooled-book
