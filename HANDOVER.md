@@ -819,6 +819,95 @@ workbook's own Query data. It contradicts the characterisation recorded in §3.2
   unlikely to bind on this shape — but `data_pm/` was lost to the container recycle (§3.28d), so
   this is unverified and should not be quoted.
 
+### 3.30 Frozen sleeves: the one-position-per-sleeve rule costs ~660 touched bids a year — DIAGNOSTIC PASSES, build it properly (3 Oct)
+
+User proposal: when BOTH sleeves of a name are held, that name is frozen out of the book until
+one sells. A violently-moving name can offer several round trips inside that window and the book
+takes none of them. He has been taking them by hand in the discretionary log and reports strong
+margin, and proposes a second "Today's orders" list permitting a second funding of a name.
+Scripts: `disc_reentry_live.py`, `frozen_sleeve_diag.py`, `frozen_sleeve_reserve.py` (all read the
+live workbook; the 5-minute archive is still lost so nothing here is verified-fill).
+
+**The live log, corrected.** 20 discretionary trades to 2 Oct. SIX rows dated 2 Oct and labelled
+VRT are in fact VST — logged at 135–140 when VRT traded 248.54–254.80 and VST 134.79–143.02
+(`disc_reentry_live.py` now relabels any trade whose buy price sits outside the logged name's own
+range that day and inside exactly one other name's, and prints the corrections). After the fix,
+split by the sleeve occupancy reconstructed from the main blotter's own buy/sell dates:
+
+| entry made when… | n | avg | worst | med hold | P&L |
+|---|---|---|---|---|---|
+| both sleeves frozen | 7 | +2.74% | +0.21% | 2 sess | +$63.3k |
+| one sleeve held | 8 | +3.07% | +0.50% | 2 sess | +$85.3k |
+| name wholly free | 5 | +1.47% | **−2.49%** | 16 sess | +$50.5k |
+
+Fifteen entries into a name with capacity already committed, not one loser. The five into a wholly
+free name hold the only losses and the only long holds (two AVGO tickets open since 19 Aug, both
+under water). Small and hand-picked — the human filter is known to be the alpha (§3.28d) — but it
+points the same way as everything below.
+
+**It is a bookkeeping constraint, not a model one.** The Model sheets compute a bid every session
+whether or not the sleeve can act on it. One position per sleeve is an artefact of the blotter's
+one-row-per-tranche design, so relaxing it is a specification change, the category §3.1 says
+survives, not a parameter search.
+
+**Diagnostic — the prize is large** (`frozen_sleeve_diag.py`, nine Model sheets, 630 sessions,
+deployed parameters, conservative fills: no position may exit before the day after entry):
+- **28.7% of name-sessions have both sleeves occupied** — 74 per name-year. Per name 8.9% (VST) to
+  46.7% (VLO); longest single spell 35 sessions.
+- On those days the model's own bid is touched **1,619 times** (~660/yr, against the book's ~531
+  actual pooled fills/yr). Those entries: avg +1.72%, **median +2.64%**, 101 stops (6.2%),
+  **both halves positive (train +0.96%, test +2.18%)**. That is the quality of the trades the book
+  already takes (§3.21: completed trades avg 1.6–2.1%, median ~2.25%).
+- Not uniform: CF is the warning (118 entries, +0.91%, 42 stops, median hold 12d) and MRVL thin
+  (+0.79%, worst −51.1%); TSM, MU, VLO, GM are the strong ones.
+
+**But the pool is fully allocated, so this is a carve-out question, not free money.** On 2 Oct the
+whole $2,574,895 of available cash went to six free ungated sleeves at $429,149 each, with nothing
+over (Allocation B46 "OK"). A second list is funded only by taking from the first.
+
+**Costed on the reserved capital** (`frozen_sleeve_reserve.py`; one pot, N concurrent slots, idle
+cash at 3.14%, every idle day counted — the `dip_reserve.py` yardstick):
+
+| | ann. return | occupancy | avg | aggregate %/dollar-day |
+|---|---|---|---|---|
+| shared pot, 3 slots, conservative fills | +56.7% | 80.1% | +1.85% | 0.231% |
+| shared pot, 3 slots, **sheet convention** | **+77.3%** | 80.4% | +1.96% | 0.280% |
+| the pooled book, sheet convention | 72.4% | — | — | 0.306% (§3.27) |
+
+Like for like (sheet convention both sides) the carve-out earns **77.3% against the book's 72.4%**
+— slightly ahead annually, slightly behind per dollar-day (0.280 vs 0.306), the difference being
+occupancy: the re-entry pot is deployed 80% of the time. Halves agree (train +0.85%, test +2.03%
+average per entry). **Slots barely matter** — 1 slot 64.0%, 3 slots 56.7%, 9 slots 55.8%
+(conservative basis): the first slot captures most of it, which argues for a SMALL carve-out and
+converges on the disc ticket's existing ≤2-open rule.
+
+**The breadth gate does not conflict**, despite today's snapshot (3 of 9 frozen and all of them
+gated, breadth 4). Over the sample the K=4 gate would block only **13%** of frozen-day touches, and
+those are the weak ones (0.105%/dollar-day vs 0.248% for the rest). **73% of frozen-day touches are
+on names ABOVE their own 200dma** — the freeze is normal operation, not distress, consistent with
+§3.21. That also shrinks, without removing, the concentration worry.
+
+**What is NOT established, and blocks adoption:**
+1. **No drawdown number.** A third position in a name already double-held is triple exposure, which
+   is precisely the April-2025 pooled blind spot (§3.13). Return is measured here; risk is not.
+2. **Not the pooled marginal test.** Freeze windows come from the captive single-name sheets, and
+   the carve-out is scored as an independent pot rather than inside book_sim's pooled loop where it
+   would compete order-by-order with the first list and change its fills.
+3. **No verified fills.** The 77.3% is sheet convention, which §3.5 shows reads high (RKLB 438 vs
+   158); the conservative read is 56.7%. The truth sits between and usually nearer the floor.
+
+**Recommendation: build and test it, do not wire it yet.** This has the best prior of anything
+proposed since the pre-market exclusion (§3.16), and for a related reason — it does not reshape the
+harvest, it removes an artificial cap on capacity. Two things follow:
+- **The funding mechanism already exists and is switched off.** Allocation E5 (flag 1/0) and E6
+  (amount $) carve a discretionary fund out of cash BEFORE it is divided across the sleeves, and
+  the disc log and weekly P&L are already wired to it. E5=0, E6=0 today. That is the second list,
+  built, needing only a rule and a size.
+- **Blocker for the real test:** `data_5min/` and `data_pm/` must be restored before book_sim can
+  run the pooled marginal version with verified fills and a drawdown. Until then the ceiling on
+  what can be claimed is what is in this entry.
+
+
 ---
 
 ## 4. Live workbook state and known issues
