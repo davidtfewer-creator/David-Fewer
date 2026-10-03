@@ -996,6 +996,63 @@ rather than mixing a post-3-Oct level with a pre-3-Oct one. If the original `dat
 extracts ever surface, rebuilding from them would close the last gap.
 
 
+### 3.31 The discretionary carve-out made operable: tranche-driven exits, and a bracket placer (3 Oct)
+
+User, on §3.30a's "keep it discretionary": the carve-out has two costs that make it too manual —
+every trade is typed into IBKR by hand, and the badges of trade want a bracket with the exit fixed
+at entry. Both are addressed; the second is written but UNTESTED against a broker.
+
+**1. The log sets its own exit** (`premarket_study/wire_disc_targets.py` →
+`TradingExcel_9stock_disctargets.xlsx`). Disc log col AA now derives the target from the Tranche
+label in col V. The two conventions differ on purpose and must not be merged:
+
+| V | target | why |
+|---|---|---|
+| `Bayes` | entry + prev close × that stock's Bayes π (E7:E15) | the sleeve's own resting sell — the main blotter's Sell @ is Buy @ + close × π |
+| `OU` | entry + prev close × OU π (F7:F15) | same, OU side |
+| anything else (`DISC`) | entry × (1 + AA40) = +5% | the tested dislocation ticket (§3.28d), multiplicative off the fill |
+
+Previous close is the last Query session **strictly before** the buy date, via
+`LOOKUP(2,1/(...))`. A `MATCH` on the buy date would fail at 09:00 (Script 1 pulls after the close)
+and then silently change the recorded target next day — after the GTC was placed. "Last session
+before" returns the same number either way, so a placed bracket and the log cannot drift apart.
+Rows whose target was typed by hand (50, 51, 53, 56–59, 61) are **left as typed** — they record what
+was actually placed. Cell-diff verified: 378 cells changed, all in the intended set, and every DISC
+row re-derives to the value the sheet already cached. Python mirror of the new formula against the
+hand-typed rows: r51 VRT/OU typed 258.64 vs formula 258.38; r50 AVGO/OU typed 360 vs formula 356.00
+(AVGO's OU π is only 1.41%, so the round number was 1.1% rich).
+
+**2. A ticker guard (col AH), which the mirror forced.** Running the formula over the live log
+produced nonsense on rows 56–59: they are the §3.30 VST-typed-as-VRT rows, so the target was
+computed from VRT's 246.12 close against a 139 entry. **Mislabelling used to cost only P&L
+attribution; with the exit derived from the ticker it becomes a wrong order.** AH flags
+`CHECK TICKER` when the entry sits outside that ticker's own high/low on the buy date, blank until
+the buy date reaches Query. The placer refuses any ticket it flags.
+
+**3. The bracket placer** (`ops/disc_bracket_place.py`, `ops/disc_bracket_place_test.py`).
+Parent BUY LMT at the log's entry, child SELL LMT GTC at the log's target, transmitted together.
+Design decisions worth keeping:
+- **It never writes the workbook.** openpyxl blanks every cached value on save (§4), which on a
+  live trading sheet means nothing displays until Excel reopens it. Placement state goes to a JSON
+  journal keyed on (stock, date, price, shares), which is also what makes a re-run safe.
+- Rails, all default-on: dry run unless `--live`; per-ticket and per-run notional caps; refuses a
+  `CHECK TICKER` row, a target at or below the limit, or a limit >25% from the last close
+  (decimal slips); `--live` against a live-account port additionally needs `--i-mean-it`.
+- **The 10-session time stop is deliberately not automated** — IBKR has no "sell at the open after
+  N sessions" order, so forcing it means a scheduled market sell, a second and riskier automation.
+  `--due` reports which open tickets have passed it and leaves the selling to a human.
+- 12/12 screening tests pass, including the openpyxl trap: a freshly-patched workbook whose
+  formulas have no cached value reads target=None and the placer **refuses rather than guessing**.
+  So the delivered workbook must be opened and saved in Excel once before the placer can read it.
+- **Untested against a broker** (no gateway here, and ib_insync is assumed — the trading machine's
+  Script 1 framework is unconfirmed). Paper account first, reconcile by hand, then live.
+
+**Live finding from `--due`:** the two AVGO tickets bought 19 Aug are still open and are **six weeks
+past their 10-session time stop** (due 2 Sep). They are also the only losers in the whole disc log
+(§3.30: −1.94%, −2.49%). The discipline existed and was not applied; that is the carve-out's real
+failure mode, not the typing.
+
+
 ---
 
 ## 4. Live workbook state and known issues
