@@ -896,9 +896,9 @@ on names ABOVE their own 200dma** — the freeze is normal operation, not distre
 3. **No verified fills.** The 77.3% is sheet convention, which §3.5 shows reads high (RKLB 438 vs
    158); the conservative read is 56.7%. The truth sits between and usually nearer the floor.
 
-**Recommendation: build and test it, do not wire it yet.** This has the best prior of anything
-proposed since the pre-market exclusion (§3.16), and for a related reason — it does not reshape the
-harvest, it removes an artificial cap on capacity. Two things follow:
+**Recommendation at the time: build and test it, do not wire it yet.** It had the best prior of
+anything proposed since the pre-market exclusion (§3.16). **It was tested the same day the archive
+came back — see §3.30a, which rejects it.** Two things followed:
 - **The funding mechanism already exists and is switched off.** Allocation E5 (flag 1/0) and E6
   (amount $) carve a discretionary fund out of cash BEFORE it is divided across the sleeves, and
   the disc log and weekly P&L are already wired to it. E5=0, E6=0 today. That is the second list,
@@ -906,6 +906,94 @@ harvest, it removes an artificial cap on capacity. Two things follow:
 - **Blocker for the real test:** `data_5min/` and `data_pm/` must be restored before book_sim can
   run the pooled marginal version with verified fills and a drawdown. Until then the ceiling on
   what can be claimed is what is in this entry.
+
+
+### 3.30a The re-entry sleeve, tested in the pooled book: REJECTED — it redistributes capital, it does not create value
+
+The 5-minute archive came back on 3 Oct (all nine names, Apr 2024 – 3 Aug 2026, with pre-market
+bars), so §3.30's proposal could be run as the test that decides it rather than the diagnostic that
+motivates it. `book_sim` gained `reentry` (default None, baseline byte-identical): a THIRD sleeve
+per name, eligible only on mornings when both base sleeves are held, bidding the shallower of the
+two live bids with that sleeve's premium, and claiming its allocation **from the same pool as every
+other order** — so it is funded by thinning the rest, which is the only way to ask the question.
+Live config throughout (09:00 / 4% PM rule, verified fills, deployed parameters).
+Script: `frozen_reentry_book.py`.
+
+| | full | train | test | maxDD | fills |
+|---|---|---|---|---|---|
+| baseline | 73.4 | 45.4 | 105.1 | 24.2 | 1234 |
+| re-entry, 1 slot | 74.5 | **46.3** | **106.5** | 24.7 | 1337 |
+| re-entry, 2 slots | 74.4 | **47.6** | 104.5 | 23.7 | 1421 |
+| re-entry, 3 slots | 74.8 | 44.9 | 109.1 | 26.5 | 1460 |
+| re-entry, uncapped | 75.3 | 46.0 | 108.7 | 26.6 | 1581 |
+| 3 slots, bid ≤ −2% | 75.1 | 44.9 | 109.9 | 24.4 | 1357 |
+| 3 slots, bid ≤ −4% | 73.8 | 45.6 | 105.7 | 24.8 | 1266 |
+
+- **The protocol kills it.** Train-pick-then-freeze — the blade every adopted finding passed — picks
+  **2 slots** on the train half (+2.1pp) and that cell then **loses the frozen test half by 0.6pp**.
+  The only both-halves cell (1 slot, +0.8/+1.3) is picked with hindsight from a four-cell grid.
+- **On the convention the book actually trades it is nothing.** Exec-accurate (gap exits both
+  sides), 1 slot: **+0.4 full, +0.6 train, −0.0 test**, DD +0.5. The test-half edge disappears
+  entirely once execution accuracy is on.
+- **Robust to the one reconstruction risk.** data_pm/ was rebuilt from the 5-minute files and its
+  cut convention is a reconstruction, so the comparison was re-run on both boundaries. Deltas are
+  stable — full +0.4 to +1.1, train +0.6 to +1.6, test −0.0 to +1.3, DD +0.5 throughout. The
+  verdict does not rest on the rebuilt cache.
+- **Mechanism — the re-entry trades are ordinary book trades.** n=221 at 3 slots, avg +1.66%,
+  median +2.21%, 8 stops (3.6%) against the book's own avg +1.73%, median +2.22%, 3.9%.
+  Statistically the same trade. The P&L arithmetic shows what is really happening: re-entry adds
+  **+$2.87m** while the base book falls from **$23.56m to $21.64m** because every allocation is
+  thinner — net **+$0.95m on a $23.5m book, under 1%**. This is §3.27 restated: the pool does not
+  have a capital-starvation problem that a new claimant fixes, because the marginal dollar was
+  already earning the book's margin somewhere else.
+- **The concentration fear was overstated** (my §3.30 caveat 1, withdrawn). Through the April 2025
+  episode, 1 slot IMPROVES drawdown (24.0 → 23.1, −0.9pp) and the window return (+12.8 → +15.5).
+  Only the uncapped variant hurts (+1.5pp DD). Triple exposure at small size is not the hazard §3.13
+  made it look like.
+- **Per name, 1 slot** (avg per trade): VLO +3.32, MRVL +3.53, MU +2.47, AVGO +2.07, VST +1.67,
+  GM +1.48, TSM +1.27, **VRT −1.37**, **CF −1.24** (3 of the 4 stops are CF's). The name that
+  motivated the proposal is the second-worst in the sleeve. Halves of the re-entry trades
+  themselves: train n=36 avg +1.02%, test n=65 avg +2.00%.
+
+**Rejection #18, and the first to be rejected after its diagnostic passed.** §3.30's diagnostic was
+right that the forgone opportunity is large (660 touched bids/yr, median +2.64%); it was wrong to
+read that as money on the table. Those bids are touchable but not *additional* — funding them costs
+the same capital the book was already deploying at the same margin.
+
+**What survives, and it matters.** The user's own hand-picked entries into occupied names (§3.30:
+n=15, avg +2.74% / +3.07%, **no losers**) beat this mechanical rule's +1.66% decisively. That gap is
+the §3.28d finding again — the human filter is the alpha, and the mechanical proxy is the floor. So
+the conclusion is NOT that the observation was wrong; it is that **automating it earns the floor
+while doing it by hand earns the filter**. Keep it in the discretionary carve-out (Allocation E5/E6,
+still switched off), do not wire a second Today's orders list, and judge the carve-out on the
+quarterly disc-yield review the ticket design already calls for.
+
+### 3.30b Environment restored (3 Oct) — and what the rebuild cannot guarantee
+
+The loss recorded in §3.28d is largely reversed. All nine 5-minute files are back in `data_5min/`
+(Apr 2024 – 3 Aug 2026; MRVL to 13 Aug), and they carry **pre-market bars from 04:00**, which the
+originals were separate files for — so `data_pm/` no longer needs its own extracts.
+- `build_pm_cache.py` (new) rebuilds `pm_last.pkl` and `pm_last_cuts.pkl` (08:30/09:00/09:15/09:25)
+  from `data_5min/` directly. Bars are start-stamped; a cut at T takes the last bar that FINISHED by
+  T (stamp strictly before T), which is what a rule acting at T can see.
+- `live5_load.py` repaired: it pointed at a dead upload path and still carried the pre-swap roster.
+  It now discovers the workbook (`BAYES_WORKBOOK` env var, else `premarket_study/workbook.xlsx`,
+  else the newest `TradingExcel*.xlsx` upload) and lists **AVGO, not RKLB**. Run anything that
+  touches the book with `BAYES_WORKBOOK=<attachment>`.
+- `baseline_check.py` (new) is the gate on all of it: engine vs the workbook's own Model sheets, then
+  the pooled baseline against the published numbers.
+
+**Mirror check: exact.** The engine reproduces all five Model sheets on annual return, buys and
+stops to the digit (TSM 156.2%, VRT 243.9%, VST 257.7%, AVGO 91.2%, MU 174.2%).
+
+**Pooled baseline: close but not exact, and the gap is the PM cache.** Live config gives
+**73.4 / 45.4 / 105.1** against the published **72.4 / 43.9 / 104.9**; stops **47 exactly** and
+530 fills/yr against ~531. The inclusive cut boundary gives 71.7 / 42.6 / 104.9 — so the published
+figure sits BETWEEN the two reconstructions and neither is the original builder. **Consequence: new
+LEVELS carry ±1pp of calibration uncertainty against anything published before 3 Oct; A/B DELTAS are
+safe, because both arms share one cache** (the §3.19 convention). Quote deltas, and re-baseline
+rather than mixing a post-3-Oct level with a pre-3-Oct one. If the original `data_pm/*_pm.xlsx`
+extracts ever surface, rebuilding from them would close the last gap.
 
 
 ---

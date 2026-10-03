@@ -50,3 +50,8 @@ premarket_study/premium_vol.json
 premarket_study/price_stop.json
 premarket_study/data_bear/
 premarket_study/data_pm/
+
+# restored intraday archive and the caches derived from it (large, proprietary)
+premarket_study/data_5min/
+premarket_study/data_pm/
+premarket_study/workbook.xlsx

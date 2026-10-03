@@ -82,7 +82,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
-             gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None):
+             gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
+             reentry=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -141,11 +142,35 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     captured at least half the position's premium (close >= (bid+target)/2).
     Pass a collection of names to apply 'profit' to those names only, or
     (mode, names) to combine. None (default) reproduces hold-to-target. Exit
-    count in we_exits."""
+    count in we_exits.
+    reentry: dict enabling the frozen-sleeve re-entry sleeve (HANDOVER 3.30).
+    A sleeve holds one position at a time, so a name whose Bayes and OU
+    sleeves are both occupied is frozen out of the book however far it falls.
+    This adds a THIRD sleeve per name, eligible ONLY on mornings when both of
+    that name's base sleeves are holding, bidding the SHALLOWER of the two
+    live bids (the one the tape reaches first, and the worse price) with that
+    sleeve's own premium, and claiming its allocation from the same pool as
+    every other order -- so it is funded by thinning the rest, which is what
+    makes this a marginal test rather than free money. Keys:
+      slots      max concurrent re-entry positions book-wide (None = unlimited)
+      names      restrict to these names (None = all)
+      max_depth  require the bid to sit at least this far below the previous
+                 close (None = no requirement)
+    All existing overlays still apply to the re-entry order: the PM rule, the
+    DMA/breadth gate, pauses and the breaker see it as an ordinary sleeve.
+    None (default) appends nothing and reproduces the book exactly."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
     n = len(sleeves)
+    base = {}
+    for s in sleeves:
+        base.setdefault(s['name'], []).append(s)
+    if reentry is not None:
+        assert mode == 'pooled', 'reentry requires pooled mode'
+        re_names = reentry.get('names') or sorted(base)
+        sleeves = list(sleeves) + [dict(name=nm, kind='R', bids=None, prem=None)
+                                   for nm in re_names]
     for s in sleeves:
         s.update(holding=False, shares=0.0, target=None, entry=None,
                  own=capital / n,
@@ -170,7 +195,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     for d in cal:
         # -------- holding-saturation state, from YESTERDAY's close
         cap_frac_h = (prev_mv / equity_curve[-1]) if (equity_curve and equity_curve[-1] > 0) else 0.0
-        slv_frac_h = sum(1 for s in sleeves if s['holding']) / n
+        slv_frac_h = sum(1 for s in sleeves if s['holding'] and s['kind'] != 'R') / n
         frac_series.append((cap_frac_h, slv_frac_h))
         halted = False
         if hold_halt is not None:
@@ -202,10 +227,30 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
 
         # -------- morning: who is free and has a live bid?
         active = []
+        re_open = sum(1 for s in sleeves if s['kind'] == 'R' and s['holding'])
         for s in sleeves:
             nd = data[s['name']]
             i = nd['idx'][d]
-            bid = nd[s['bids']][i]
+            if s['kind'] == 'R':
+                # eligible only while BOTH base sleeves of this name are held
+                bs = base[s['name']]
+                if not all(b['holding'] for b in bs):
+                    s['_i'], s['_bid'], s['_w'] = i, None, s['w']
+                    continue
+                live = [(nd[b['bids']][i], b['prem']) for b in bs
+                        if nd[b['bids']][i] is not None]
+                if not live:
+                    s['_i'], s['_bid'], s['_w'] = i, None, s['w']
+                    continue
+                bid, s['prem'] = max(live)       # shallower bid, its own premium
+                md = reentry.get('max_depth')
+                slots = reentry.get('slots')
+                if ((md is not None and i > 0 and bid > nd['C'][i - 1] * (1 - md))
+                        or (slots is not None and re_open >= slots)):
+                    s['_i'], s['_bid'], s['_w'] = i, None, s['w']
+                    continue
+            else:
+                bid = nd[s['bids']][i]
             paused = (no_buy and d in no_buy.get(s['name'], ())) or halted
             if (deep_excl is not None and bid is not None and i > 0
                     and bid < nd['C'][i - 1] * (1 - deep_excl)):

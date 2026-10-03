@@ -10,9 +10,31 @@ from openpyxl.utils import column_index_from_string as cix
 
 from engine import Params
 
-UPLOAD = ('/root/.claude/uploads/9e026445-9e62-588b-af81-7e0c231b0f24/'
-          '5385d808-TradingExcel_5stock_live.xlsx')
-STOCKS = ['TSM', 'VRT', 'VST', 'RKLB', 'MU']
+# The workbook is an upload, so its path changes every session and the old one
+# dies with the container. Set BAYES_WORKBOOK to the current attachment, or drop
+# a copy at premarket_study/workbook.xlsx; the newest match wins.
+def _find_workbook():
+    import glob
+    import os
+    env = os.environ.get('BAYES_WORKBOOK')
+    if env and os.path.exists(env):
+        return env
+    here = os.path.dirname(os.path.abspath(__file__))
+    cands = [os.path.join(here, 'workbook.xlsx')]
+    cands += sorted(glob.glob('/root/.claude/uploads/*/*TradingExcel*.xlsx'),
+                    key=os.path.getmtime, reverse=True)
+    for c in cands:
+        if os.path.exists(c):
+            return c
+    raise FileNotFoundError(
+        'no workbook found: set BAYES_WORKBOOK or place premarket_study/workbook.xlsx')
+
+
+UPLOAD = _find_workbook()
+# the five daily names the workbook carries Feed/Model sheets for as the BOOK
+# core; GM/VLO/CF/MRVL join via book_sim.NAMES. AVGO took RKLB's slot on
+# 2 Sep 2026 (HANDOVER 3.28).
+STOCKS = ['TSM', 'VRT', 'VST', 'AVGO', 'MU']
 
 
 def _to_date(d):
@@ -25,7 +47,8 @@ def _to_date(d):
     return datetime.date.fromisoformat(str(d)[:10])
 
 
-def load(path=UPLOAD):
+def load(path=None):
+    path = path or UPLOAD
     """Return (data, params, cached): data[name] = (dates, O, H, L, C)."""
     wb = openpyxl.load_workbook(path, data_only=True, read_only=True)
     q = wb['Query']
