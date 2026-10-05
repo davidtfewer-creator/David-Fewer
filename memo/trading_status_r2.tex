@@ -1,0 +1,431 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{bcnavy}{RGB}{11,31,58}
+\definecolor{bcblue}{RGB}{32,74,135}
+\definecolor{bcgold}{RGB}{176,141,87}
+\definecolor{bcgrey}{RGB}{90,98,112}
+\definecolor{bcrule}{RGB}{210,214,220}
+\definecolor{bckeep}{RGB}{232,237,244}
+\definecolor{bcact}{RGB}{247,241,228}
+
+\titleformat{\section}{\color{bcnavy}\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\color{bcblue}\large\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.45em}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{bcrule}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\footnotesize\color{bcgrey}Bayesian Capital}
+\fancyfoot[C]{\footnotesize\color{bcgrey}Confidential --- Internal}
+\fancyfoot[R]{\footnotesize\color{bcgrey}Page \thepage\ of \pageref{LastPage}}
+
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+
+\newcommand{\note}[2]{%
+  \begin{center}\fcolorbox{bcrule}{#1}{\parbox{0.95\textwidth}{\vspace{0.2em}#2\vspace{0.2em}}}\end{center}}
+
+\begin{document}
+
+{\color{bcgold}\rule{\textwidth}{1.6pt}}\\[0.3cm]
+{\color{bcnavy}\huge\bfseries Trading Status}\\[0.15cm]
+{\color{bcblue}\Large The Company's Activity Against the Badges of Trade}\\[0.35cm]
+{\color{bcgold}\rule{\textwidth}{0.8pt}}\\[0.35cm]
+
+\begin{tabular}{@{}ll@{}}
+\textbf{Company} & Bayesian Capital Limited, company number 815246 \\
+\textbf{Registered office} & 76 Georges Avenue, Blackrock, Co. Dublin \\
+\textbf{Date} & 5 October 2026 \\
+\textbf{Trading record to} & 2 October 2026 \\
+\textbf{Source} & \texttt{TradingExcel\_9stock\_avgo.xlsx}, Trade Log and Discretionary Trade Log \\
+\textbf{Status} & Internal record --- maintained monthly \\
+\end{tabular}
+
+\vspace{0.6em}
+{\color{bcrule}\rule{\textwidth}{0.6pt}}
+
+\section{Position}
+
+\textbf{The company carries on a trade of dealing in listed shares.} Its sole activity is the
+purchase and resale of fully paid ordinary shares listed on United States exchanges. It holds no
+other assets and carries on no other activity.
+
+Three facts define the operation, and each is a matter of record rather than of intention:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+\item \textbf{Every position's exit price is fixed before the position exists.} All 109 positions
+      opened to date, across both the systematic and the discretionary books, had their selling
+      price determined before the shares were acquired.
+\item \textbf{Every purchase is made below the prevailing market price}, at a limit price computed
+      in advance. The company does not buy at market and does not raise its bid to obtain stock.
+\item \textbf{No position may be held beyond 50 calendar days.} The rule has been in force since
+      June 2026 and no exception has been made to it.
+\end{itemize}
+
+In the nine weeks from 4 August to 2 October 2026 --- 44 trading days --- the company opened
+\textbf{109 positions} across all nine shares in its universe and closed \textbf{97}. Thirty-seven
+closed on the day they were bought and 77 within three days. The median completed holding period
+was \textbf{one day}; the longest was 31. Two of 97 completed positions realised a loss. Gross
+purchases were \textbf{USD 35,581,460} and realised profit \textbf{USD 780,702}, across nine
+consecutive profitable weeks.
+
+The purchase and the resale are a single decision, taken before the asset is acquired. The company
+has never bought a share without having first fixed the price at which it intends to sell it.
+
+\section{The trading record}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r@{}}
+\toprule
+\textbf{4 Aug --- 2 Oct 2026} & \textbf{Systematic} & \textbf{Discretionary} & \textbf{Combined} \\
+\midrule
+Positions opened                  & 89 & 20 & \textbf{109} \\
+Positions closed                  & 81 & 16 & \textbf{97} \\
+Open at 2 October                 &  8 &  4 & 12 \\
+Exit price fixed before entry     & 89 of 89 & 20 of 20 & \textbf{109 of 109} \\
+Closed same day as bought         & 30 (37\%) & 7 (44\%) & 37 (38\%) \\
+Closed within three days          & 64 (79\%) & 13 (81\%) & 77 (79\%) \\
+Median completed hold             & 1 day & 1 day & \textbf{1 day} \\
+Longest completed hold            & 31 days & 22 days & 31 days \\
+Completed positions at a loss     & 2 & 0 & 2 of 97 \\
+Distinct shares dealt in          & 9 & 4 & 9 of 9 \\
+Gross value of purchases          & USD 27,699,177 & USD 7,882,282 & USD 35,581,460 \\
+Largest single position           & USD 614,378 & USD 825,030 & USD 825,030 \\
+Realised profit                   & USD 569,186 & USD 211,516 & \textbf{USD 780,702} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Activity is continuous rather than episodic. The company placed purchases on 36 of the 44
+trading days in the period, a rate of 2.48 new positions per trading day sustained since launch,
+and dealt in every one of the nine shares in its universe.
+
+\subsection{Realised profit by week}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r@{}}
+\toprule
+\textbf{Week ending} & \textbf{Realised P\&L (USD)} & \textbf{Trades} \\
+\midrule
+7 August 2026    &  59,691 &  9 \\
+14 August 2026   &  25,747 &  8 \\
+21 August 2026   & 145,807 & 13 \\
+28 August 2026   &  89,554 &  8 \\
+4 September 2026 & 109,452 &  9 \\
+11 September 2026 &  65,284 &  8 \\
+18 September 2026 &  43,389 &  6 \\
+25 September 2026 &  73,176 & 11 \\
+2 October 2026    & 168,602 &  9 \\
+\midrule
+\textbf{Total}    & \textbf{780,702} & \textbf{81} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Positions by share}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l r r r r r r r r r@{}}
+\toprule
+& VST & TSM & MU & GM & MRVL & VRT & VLO & AVGO & CF \\
+\midrule
+Positions opened & 19 & 19 & 14 & 13 & 13 & 10 & 9 & 8 & 4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{How the company operates}
+
+\subsection{The exit is fixed before the entry}
+
+This is the central feature of the operation and it applies without exception to both books.
+
+\textbf{Systematic book.} Each morning two independent quantitative models compute, for each share,
+a limit price below an estimated fair value. On execution of a purchase, a corresponding sell order
+is placed at a price determined at the moment of entry, as a fixed percentage above the purchase
+price. The sell order rests with the broker from the moment the position exists.
+
+\textbf{Discretionary book.} The target sale price is recorded in the Discretionary Trade Log
+before the buy order is transmitted. The log carries a dedicated \emph{Target sale} field and it
+is populated on all 20 positions taken to date. The standard uplift is 5.0\% above the purchase
+price; tighter targets are set where the trade warrants, ranging down to 0.5\%.
+
+The discipline is visible in the executions rather than only in the intention. Of the 16
+discretionary positions closed, \textbf{10 sold at or above the pre-set target} and \textbf{6 sold
+at the target price itself}, to within two cents --- the signature of a resting limit order filling
+at a level set in advance.
+
+\subsection{The complete discretionary record}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{@{}l l r r r r l r r r@{}}
+\toprule
+\textbf{Share} & \textbf{Bought} & \textbf{Price} & \textbf{Shares} & \textbf{Cost} &
+\textbf{Target} & \textbf{Sold} & \textbf{Price} & \textbf{Hold} & \textbf{P\&L} \\
+\midrule
+AVGO & 19 Aug & 362.15 & 1,000 & 362,153 & 380.26 & open        & ---    & --- & --- \\
+AVGO & 19 Aug & 364.21 & 1,000 & 364,215 & 382.42 & open        & ---    & --- & --- \\
+AVGO & 26 Aug & 351.09 & 2,000 & 702,190 & 368.64 & 27 Aug      & 369.20 & 1  & 36,191 \\
+MU   & 27 Aug & 912.00 &   500 & 456,002 & 957.60 & 1 Sep       & 967.00 & 5  & 27,493 \\
+MU   &  2 Sep & 931.45 &   600 & 558,873 & 978.02 & 2 Sep       & 948.00 & 0  &  9,921 \\
+AVGO &  3 Sep & 354.89 & 1,200 & 425,879 & 372.64 & 8 Sep       & 372.00 & 5  & 20,509 \\
+VRT  & 10 Sep & 247.50 & 2,000 & 495,010 & 259.88 & 2 Oct       & 252.00 & 22 &  8,971 \\
+MU   & 15 Sep & 932.00 &   500 & 466,002 & 978.60 & 17 Sep      & 966.96 & 2  & 17,473 \\
+AVGO & 28 Sep & 351.03 & 1,000 & 351,035 & 360.00 & 29 Sep      & 360.00 & 1  &  8,956 \\
+VRT  & 28 Sep & 251.64 & 1,300 & 327,139 & 258.64 & open        & ---    & --- & --- \\
+VST  & 30 Sep & 135.50 & 3,000 & 406,506 & 142.27 & 2 Oct       & 142.27 & 2  & 20,276 \\
+AVGO & 30 Sep & 353.00 & 1,410 & 497,737 & 360.00 & open        & ---    & --- & --- \\
+VRT  &  1 Oct & 240.00 & 1,500 & 360,008 & 252.00 & 2 Oct       & 252.00 & 1  & 17,978 \\
+VRT  &  1 Oct & 239.51 &   500 & 119,760 & 251.49 & 2 Oct       & 252.00 & 1  &  6,235 \\
+VST  &  2 Oct & 139.00 & 3,000 & 417,015 & 139.70 & 2 Oct       & 139.70 & 0  &  2,056 \\
+VST  &  2 Oct & 136.00 & 3,000 & 408,015 & 139.70 & 2 Oct       & 139.70 & 0  & 11,056 \\
+VST  &  2 Oct & 135.00 &   466 &  62,912 & 139.00 & 2 Oct       & 139.00 & 0  &  1,857 \\
+VST  &  2 Oct & 135.00 & 1,034 & 139,595 & 139.00 & 2 Oct       & 139.70 & 0  &  4,845 \\
+VST  &  2 Oct & 137.50 & 6,000 & 825,030 & 144.38 & 2 Oct       & 140.00 & 0  & 14,913 \\
+VST  &  2 Oct & 137.20 & 1,000 & 137,205 & 144.00 & 2 Oct       & 140.00 & 0  &  2,786 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{The rest of the operation}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+\item \textbf{Ordinary shares only, fully paid.} No derivatives, no options, no futures, no
+      contracts for difference, no borrowed stock and no short selling. The company has never held
+      a position other than fully paid listed stock.
+\item \textbf{A hard maximum holding period of 50 calendar days.} If the exit price has not been
+      reached by then, the position is closed at the next opening price regardless of profit or
+      loss.
+\item \textbf{Two models run on each share}, each allocated half of that share's capital: a
+      Bayesian state-space filter and a mean-reversion model. Each takes and closes its own
+      positions independently.
+\item \textbf{Order placement is automated.} Orders are transmitted to the broker by the company's
+      own software each morning before the market opens. Every order carries a machine-readable
+      reference identifying the share and the model that generated it, and every resulting
+      execution is journalled automatically and reconciled to the broker's records daily.
+\item \textbf{Capital is turned over, not accumulated.} Cash released by a sale is redeployed into
+      the next purchase on the following morning. Nothing is set aside to be held.
+\end{itemize}
+
+\subsection{Funding}
+
+The company is funded by a loan facility from its director, Mr David Fewer, of up to
+EUR 10,000,000, of which EUR 5,211,000 was advanced within two months of execution. The facility
+is repayable on demand, in whole or in part, and the recital records that the loan is provided
+``in order for BC to trade stocks in the stock market and fund its operational costs and
+expenses''.
+
+Because the loan is repayable on demand, the company must be able to realise its entire book at
+short notice at any time. Its holdings are accordingly confined to large, liquid, exchange-traded
+shares and no position may be held longer than 50 days. The financing and the strategy are
+consistent with one another.
+
+The loan is interest free. The company's own economic modelling nonetheless charges a cost of
+carry of 3.14\% per annum against positions held, so the activity is appraised internally on a
+financed basis.
+
+\section{The badges of trade}
+
+Seven of the nine badges support the company's activity being a trade. One is neutral on its face
+and is settled by the company's conduct. One does not arise.
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}c l l p{6.4cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Badge} & \textbf{Indication} & \textbf{Principal facts} \\
+\midrule
+1 & Profit-seeking motive & Supports & Exit price fixed before entry on 109 of 109 positions;
+    purchases only below computed fair value \\
+2 & Number and frequency & Supports & 109 positions in 44 trading days across all 9 shares;
+    2.48 per trading day \\
+3 & Nature of the asset & Neutral & Settled by conduct: no income sought, held in days, turned
+    over continuously \\
+4 & Expertise; character of operation & Supports & Organised commercial operation: documented
+    system, 640 automated checks, daily reconciliation \\
+5 & Changes to the asset & Not applicable & No supplementary work is possible on a share \\
+6 & Manner of the sale & Supports & Sales executed at a price computed at entry, or forced by the
+    50-day rule \\
+7 & Source of finance & Supports & Debt funded and repayable on demand; the book must be
+    realisable at any time \\
+8 & Interval between purchase and sale & Strongly supports & Median 1 day; 38\% same day; longest
+    31 days; hard 50-day limit \\
+9 & Method of acquisition & Supports & Deliberate purchases at pre-computed limit prices below
+    fair value \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Badges 1, 8 and 9 --- intention, holding period and acquisition}
+
+These are one fact seen three ways. A position is created only when the market falls to a price
+the company has computed in advance; at the moment it is created its selling price is already
+determined; and it cannot survive beyond 50 days.
+
+The realised holding periods bear this out rather than merely asserting it. Of 97 completed
+positions, 37 were bought and sold on the same day and 77 were closed within three days. The
+longest was held 31 days. Short holding periods are among the most heavily weighted of the badges,
+and a median of one day is the clearest possible statement of what the company does with the stock
+it buys.
+
+Badge 1 is evidenced by documents rather than by assertion. For the systematic book the sell order
+exists in the broker's records within seconds of the buy. For the discretionary book the target is
+recorded in the Trade Log before the buy order is transmitted, and in ten of the sixteen closed
+positions the stock sold at or above that recorded level.
+
+\subsection{Badge 2 --- number and frequency}
+
+109 positions in the company's first 44 trading days, across all 9 shares in its universe, is a
+rate of transaction characteristic of a dealing operation rather than the management of an
+investment portfolio. Purchases were placed on 36 of those 44 days. The record is systematic,
+fully documented, and the product of a process designed to operate at that frequency indefinitely.
+
+\subsection{Badge 6 --- the manner of the sale}
+
+Sales are not occasioned by a change of view, a need for cash or an opportunity taken. They are
+executed at a price computed at entry, or forced by the passage of time under the 50-day rule. The
+company's exits are decided before its entries are made.
+
+\subsection{Badge 4 --- expertise and the character of the operation}
+
+The activity is conducted as an organised commercial operation rather than as a series of separate
+investment decisions. Every systematic order the company has ever placed was generated by the same
+workbook and the same computer code, from the same parameters, and is traceable to it. The company
+maintains an operator's manual for the daily process, an automated test suite of approximately 640
+checks that must pass before any live run, a trade log reconciled daily against broker records, a
+documented research record, and a defined division of responsibilities between three individuals.
+
+\subsection{Badge 3 --- the nature of the asset}
+
+Shares are capable of being held as investments and of being dealt in as stock. The badge is
+therefore settled not by the asset class but by what the company does with it, and on that the
+record is unambiguous.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+\item \textbf{The company does not seek or rely on the income of the asset.} Dividends are not a
+      consideration in selecting shares, form no part of the return the company models, and cannot
+      in practice arise in a material way on holdings measured in days.
+\item \textbf{The company's return does not derive from appreciation of the asset.} Its own
+      analysis, which removes the underlying market trend from the historical record and re-runs
+      the system on what remains, finds that approximately 62\% of the return survives the removal
+      of that trend --- that is, it arises from short-term price oscillation harvested by repeated
+      purchase and resale.
+\item \textbf{The holdings are inventory rather than a portfolio.} Cash released by a sale is
+      redeployed into the next purchase on the following morning. The same capital is turned over
+      repeatedly and nothing is set aside to be held.
+\end{itemize}
+
+\subsection{Badge 7 --- source of finance}
+
+The activity is debt funded rather than equity funded, and the debt is repayable on demand. The
+company cannot assume it will be able to hold any position to a date of its own choosing. That
+constraint is not theoretical --- it is the reason the book consists exclusively of large, liquid
+shares and the reason no position may be held beyond 50 days. The financing and the strategy point
+the same way.
+
+\section{The operating standard --- what we keep doing}
+
+The company's position rests on what it actually does, recorded as it happens. The following are
+the practices that produce that record, and they are to be maintained without exception.
+
+\note{bcact}{\textbf{1. Fix the exit price before entry on every position, in both books.} This is
+the single most important practice in the operation. Systematic: the sell order goes to the broker
+on execution of the buy. Discretionary: the \emph{Target sale} field is completed in the Trade Log
+\emph{before} the buy order is transmitted --- not after the fill is confirmed. The sequence is
+what matters. Retain the 5.0\% default and continue recording tighter targets where the trade
+warrants one.}
+
+\note{bcact}{\textbf{2. Never make an exception to the 50-day maximum hold.} The rule's value lies
+entirely in its being absolute. The longest completed hold to date is 31 days, so the rule has
+never yet cost the company anything --- which is precisely why it must be honoured the first time
+it does. Review any position passing 35 days.}
+
+\note{bcact}{\textbf{3. Keep the book active.} The current rate is 2.48 new positions per trading
+day, with purchases on 36 of 44 trading days and dealings in all nine shares. A quiet book weakens
+the clearest badge the company has. Where the models generate no orders for an extended period, the
+reason should be recorded at the time.}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.25em]
+\item \textbf{Deal only in fully paid listed ordinary shares.} No derivatives, options, futures,
+      contracts for difference, borrowed stock or short positions. A single instrument outside this
+      description changes the character of the activity.
+\item \textbf{Buy below the market, always.} Limit orders at pre-computed prices. No market orders
+      and no raising the bid to obtain stock.
+\item \textbf{Redeploy released capital the following morning.} The capital is inventory funding,
+      not a portfolio allocation.
+\item \textbf{Reconcile the trade log to broker execution records daily}, and keep the
+      machine-readable order references on every order.
+\item \textbf{Run the automated test suite before every live session.} All 640 checks must pass.
+\item \textbf{Keep dividends out of share selection.} They form no part of the modelled return and
+      should form no part of the decision.
+\item \textbf{Keep every order traceable} to the workbook, the code and the parameters that
+      generated it.
+\item \textbf{Describe the activity consistently} across the website, the financial statements,
+      board minutes and internal documents.
+\item \textbf{Maintain the research record.} The testing and development history evidences an
+      organised commercial operation.
+\end{itemize}
+
+\section{Maintaining the record}
+
+This document is rewritten each month from the Trade Log and the Discretionary Trade Log in the
+current trading workbook. The monthly refresh covers:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.15em]
+\item Positions opened, closed and open; same-day and three-day counts; median and longest holding
+      period; losses; gross purchases; largest position; realised profit.
+\item Confirmation that every position opened in the month carried an exit price fixed before
+      entry, in both books.
+\item Confirmation that no position exceeded the 50-day limit.
+\item The weekly realised profit table and the positions-by-share table.
+\item The date of the most recent reconciliation to broker records.
+\end{itemize}
+
+\subsection{Revision history}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}l l r p{7.2cm}@{}}
+\toprule
+\textbf{Date} & \textbf{Record to} & \textbf{Positions} & \textbf{Changes} \\
+\midrule
+5 Oct 2026 & 2 Oct 2026 & 109 & Rewritten as the company's internal record. Discretionary book
+  confirmed to carry an exit price fixed before entry on all 20 positions. Badge 1 stated without
+  qualification. Operating standard added. \\
+28 Sep 2026 & 28 Sep 2026 & 92 & Discretionary book brought into the document. \\
+27 Sep 2026 & 25 Sep 2026 & 80 & First version. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.6em}
+{\color{bcrule}\rule{\textwidth}{0.6pt}}
+
+{\footnotesize\color{bcgrey}
+Trading figures are taken from the Trade Log and Discretionary Trade Log in
+\texttt{TradingExcel\_9stock\_avgo.xlsx} as at 2 October 2026, covering 4 August to 2 October 2026
+and reconciled to broker execution records. Loan terms are taken from the executed loan agreement
+between Mr David Fewer and the company. The trend-removal analysis referred to at badge 3 is
+recorded in the company's research file.}
+
+\end{document}
