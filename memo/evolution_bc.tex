@@ -88,16 +88,17 @@ for supplying liquidity into dips. No options/FX/HFT infrastructure needed.};
 \node[st, below=of s2] (s3) {{\tt 3 } \textbf{Targeting.} Liquid + volatile
 names in a flat-to-bull tape $\Rightarrow$ the AI trade. First protagonist:
 NVDA.};
-\node[st, below=of s3] (s4) {{\tt 4 } \textbf{First model.} Weekly
+\node[st, below=of s3] (s4) {{\tt 4 } \textbf{Incorporation.} The vehicle
+before the volume: a trading company, so profits compound \emph{gross} all
+year and Irish CT is a single 12.5\% year-end payment --- structure settled
+ahead of the strategy that would need it.};
+\node[st, below=of s4] (s5) {{\tt 5 } \textbf{First model.} Weekly
 fixed-parameter mean reversion (NVDA, AVGO). Strong returns --- but too few
 trades to compound or to trust statistically.};
-\node[st, below=of s4] (s5) {{\tt 5 } \textbf{Phase II.} Daily, two sleeves per
-name: Bayesian (Kalman) learning + OU mean reversion. Limit bid a
+\node[st, right=1.1cm of s1] (s6) {{\tt 6 } \textbf{Phase II.} Daily, two
+sleeves per name: Bayesian (Kalman) learning + OU mean reversion. Limit bid a
 volatility buffer below fair; fixed premium exit; 50-day stop. Turnover is the
 compounding engine.};
-\node[st, right=1.1cm of s1] (s6) {{\tt 6 } \textbf{Incorporation.} A trading
-company: profits compound \emph{gross} all year; Irish CT is a single 12.5\%
-year-end payment --- structure serving the maths.};
 \node[st, below=of s6] (s6a) {{\tt 7 } \textbf{Automation.} Python wraps the
 workbook: Script 1 feeds prices and cash in each morning; Script 2 places the
 limit orders at IBKR. Discipline by machine --- and every later gate deploys
@@ -172,6 +173,30 @@ concentrated us in a single theme, and we accepted it as the price of the
 volatility we needed. Managing the concentration came later, deliberately ---
 it became the work of stages 7 to 9.
 
+\section{Incorporation: the structure before the volume}
+
+The vehicle was in place before the strategy that would fill it. The thesis
+had already settled that the edge would be discipline and turnover, and a
+turnover-driven trade is a tax problem before it is anything else, so the
+structure was chosen in advance rather than discovered in arrears. It
+answers the problem twice over. The first point is timing. Corporation tax
+falls due after the year end, so every realised gain compounds gross for the
+remainder of the trading year: round trips recycle their full proceeds, and
+the tax is settled in a single 12.5\% payment on the year's profit, after
+which the machine restarts. Moving the tax drag from every trade to once a
+year is worth real compounding, and it is what would later make the daily
+cadence of \S7 viable at all; under personal rates that cadence is not worth
+running. The second point is the rate. Irish corporation tax at 12.5\%,
+against retention of roughly half under personal rates, is over a period of
+years the difference between the strategy working and not. Incorporating the
+vehicle, with trading badges and execution at Interactive Brokers, made the
+structure match the strategy before the strategy was fully built: gains
+compound untouched through the year, one payment settles the liability, and
+the pot stays in the market.
+
+With the vehicle settled, the open questions were what to trade in it, and
+on what clock.
+
 \section{The first model: weekly mean reversion}
 
 The first system we ran was a weekly mean-reversion model with fixed
@@ -201,23 +226,6 @@ intent, though at the level of a single trade both are doing the same thing,
 buying a dip and selling the bounce quickly. What compounds is the turnover:
 hundreds of verified fills a year at a few percent each, with the proceeds
 going straight back to work.
-
-\section{Incorporation}
-
-Compounding at this cadence is a tax problem before it is anything else, and
-the corporate structure deals with it twice over. The first point is timing.
-Corporation tax falls due after the year end, so every realised gain
-compounds gross for the remainder of the trading year. Hundreds of round
-trips recycle their full proceeds, and the tax is settled in a single 12.5\%
-payment on the year's profit, after which the machine restarts. For a
-strategy whose engine is turnover, moving the tax drag from every trade to
-once a year is worth real compounding; it is what makes the daily cadence
-viable at all. The second point is the rate. Irish corporation tax at 12.5\%,
-against retention of roughly half under personal rates, is over a period of
-years the difference between the strategy working and not. Incorporating the
-vehicle, with trading badges and execution at Interactive Brokers, made the
-structure match the strategy: gains compound untouched through the year, one
-payment settles the liability, and the pot stays in the market.
 
 \section{Automation: Python around the workbook}
 
