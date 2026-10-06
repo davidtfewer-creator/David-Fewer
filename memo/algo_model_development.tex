@@ -7,6 +7,7 @@
 \usepackage{array}
 \usepackage{float}
 \usepackage{amsmath,amssymb}
+\usepackage{graphicx}
 \usepackage{microtype}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
@@ -44,15 +45,13 @@
 \begin{titlepage}
 \centering
 \vspace*{3.2cm}
-{\color{bcnavy}\fboxsep=22pt\colorbox{bcnavy}{\parbox{3.2cm}{\centering
-  {\color{bcgold}\fontsize{34}{34}\selectfont\bfseries BC}\\[6pt]
-  {\color{white}\footnotesize\textsc{Bayesian Capital}}}}}\\[2.4cm]
+\includegraphics[width=5cm]{bc_logo.pdf}\\[2.4cm]
 {\color{bcgold}\rule{0.62\textwidth}{0.8pt}}\\[0.5cm]
 {\color{bcnavy}\LARGE\bfseries Algorithmic Trading\\[2mm]
 Model Development}\\[0.35cm]
 {\color{bcnavy}\large\bfseries A Summary of the Models Designed, Built and Deployed}\\[0.3cm]
-{\color{bcgrey}\itshape\small Summary of the full methodology white paper ``Volatility Harvesting
-with\\ Bayesian and Ornstein--Uhlenbeck Entries'' (Revision 4, October 2026)}\\[0.4cm]
+{\color{bcgrey}\itshape\small Two statistical pricing engines, a derivative-free optimisation
+framework,\\ and the validation programme that governs deployment}\\[0.4cm]
 {\color{bcgold}\rule{0.62\textwidth}{0.8pt}}\\[2.6cm]
 {\color{bcnavy}\bfseries Bayesian Capital}\\[0.15cm]
 {\color{bcgrey}Systematic Trading Research}\\[0.15cm]
@@ -67,8 +66,8 @@ course of 2026. The system runs a live nine-stock equity book from a spreadsheet
 production environment, with every entry price computed by one of two statistical models built
 in-house. This note summarises the mathematical content of that development for readers who do
 not need to work through it in detail; the full treatment --- derivations, calibration evidence,
-and the out-of-sample validation programme --- is in the methodology white paper, which runs to
-fourteen pages and is now in its fourth documented revision.
+and the out-of-sample validation programme --- is held in the firm's internal research
+documentation.
 
 The development comprises four distinct bodies of work: two statistical pricing engines, a
 derivative-free global optimisation framework for fitting them, and a validation programme that
@@ -208,16 +207,15 @@ The system runs live on nine US-listed names, each on both engines with its own 
 ten-parameter vector, pooled in a single capital loop and operated daily through a
 spreadsheet-and-broker production stack with automated data refresh. The modelled activity level
 is on the order of five hundred fills per year. The development is documented across a suite of
-internal papers --- the methodology white paper summarised here, an operations manual, a
+internal papers --- a full methodology paper, an operations manual, a
 book-construction and ranking memorandum, a bear-market protection study, and a strategy
 evolution record --- together with the research codebase (optimisers, replay engines, validation
 harnesses and operational tooling) from which every quoted figure is reproducible.
 
 \vfill
 {\color{bcrule}\rule{\textwidth}{0.5pt}}\\[0.2em]
-{\footnotesize\itshape\color{bcgrey} This note summarises, without restating the evidence for,
-the methodology white paper ``Volatility Harvesting with Bayesian and Ornstein--Uhlenbeck
-Entries'', Revision 4 (October 2026). Figures in-sample unless stated; not a forecast or an
-offer.}
+{\footnotesize\itshape\color{bcgrey} This note summarises the development without restating the
+evidence; the full derivations, calibration record and validation results are held in the firm's
+internal research documentation. Figures in-sample unless stated; not a forecast or an offer.}
 
 \end{document}
