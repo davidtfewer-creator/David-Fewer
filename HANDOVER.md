@@ -1163,14 +1163,46 @@ against 12, and much better through the AI drawdown (Jan–Apr 2025 −6.6% → 
 | variant B (train-half) | −0.4 | +1.6 | **−3.1** | +0.1 | 45 | 92% |
 
 Only the lookahead vector wins. **Declined at G5**, the gate §3.14a already identified as the
-binding one. (CF's deployed vector is also a full-sample fit, so reference-vs-deployed is
-like-for-like in lookahead terms; what is not symmetric is that CF's own A/B vectors were lost with
-the original JSON and were not refitted here. The burden of proof sits with the change, and the
-change does not carry it.)
+binding one.
+
+**The symmetric test, run on request (`cf_vs_nem_honest.py`).** The comparison above set NEM-honest
+against CF-DEPLOYED, and the deployed CF vector is itself a full-sample fit (§6), so CF's own A/B
+vectors were refitted (they were lost with the original JSON) and each name run on its own honest
+vector, variant against matching variant. **CF's refit reproduces §6 exactly** — reference full
+46.9%, B test 42.4%, the published numbers to the decimal.
+
+| captive, verified fills | reference full | A train/test | B train/test |
+|---|---|---|---|
+| CF | 46.9% | 43.4 / **52.9** | 44.4 / **42.4** |
+| NEM | 51.6% | 47.2 / **35.0** | 48.0 / **39.8** |
+
+NEM is better on the TRAIN half on both variants and worse on the TEST half on both — the
+train-up/test-down shape this book has declined seventeen times. Pooled, symmetric:
+
+| | full | train | test | maxDD |
+|---|---|---|---|---|
+| CF on its variant A | 72.4 | 44.6 | 103.9 | 24.1 |
+| NEM on its variant A | 71.9 | 45.4 | 101.7 | 23.8 |
+| **swap delta** | −0.4 | +0.9 | **−2.2** | −0.4 |
+| CF on its variant B | 75.8 | 49.1 | 105.7 | 22.9 |
+| NEM on its variant B | 73.0 | 47.0 | 102.0 | 24.3 |
+| **swap delta** | −2.8 | −2.1 | **−3.7** | +1.4 |
+
+**Removing the asymmetry strengthens the case against the swap rather than weakening it**: NEM loses
+the tested half on both variants, by more than the earlier run suggested. One residual asymmetry
+remains and it runs the other way (so it does not rescue NEM): a name with a reference vector is
+fitted with ou_W frozen at deployed, so CF searched 8 and 6 dimensions against NEM's 9 and 7 —
+the more conservative fit is CF's.
+
+**Incidental, not an adoption case:** CF on its own honest B vector gives the book 75.8 / 49.1 /
+105.7 at maxDD 22.9, against the deployed 73.4 / 45.4 / 105.1 at 24.2 — out of sample (the test
+column, the only one the B vector did not see) that is +0.6pp, i.e. noise. Read it as reassurance
+that CF's deployed vector is not leaving anything on the table, not as a reason to refit.
 
 **The structural finding, and the real answer to the question.** Not one candidate clears §3.32's
 profile bar (top third of trades under 80% of P&L): **CF 102%, NEM 97%, LEN 91%** — against MU 53%,
-VLO 64%, TSM 68% among the AI names. And NEM's variant A settles the mechanism directly: it trades
+VLO 64%, TSM 68% among the AI names (on the honest vectors it is no better: CF-A 117%, CF-B 107%,
+NEM-A 108%, NEM-B 92%). And NEM's variant A settles the mechanism directly: it trades
 **78/yr, more than three times CF**, and its concentration is the **worst in the comparison at
 108%**. *Turnover does not buy predictability in an uncorrelated name.* The §3.32 observation that
 fast names are also even ones is a correlation across the book, not a lever that can be imported: a
