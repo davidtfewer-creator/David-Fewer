@@ -1124,6 +1124,69 @@ trades, all winners (+1.31% avg) — too small to judge on, and its live complai
 than loss.
 
 
+### 3.33 LEN and NEM re-tested against CF's slot: both declined — turnover does not buy predictability in an uncorrelated name (7 Oct)
+
+User supplied 5-minute data for LEN and NEM after §3.32, to test the two names the August round
+(§3.14) left unresolved: LEN declined at G2, NEM put on the watch list for a re-test scheduled
+end-Q1 2027 (done early here). Full §3.14 path — `fresh_opt_cands.py LEN NEM` (reference fitted
+full-sample and flagged, then variants A and B on the train half), then the marginal book test in
+`cf_swap_test.py`. Both files 596 sessions, Apr 2024 – Aug 2026.
+
+**G1 reproduces the August round almost exactly**, which is also a check on the restored pipeline:
+LEN beta 0.09 / book corr 0.15 (recorded 0.09 / 0.16), NEM beta 0.27 / 0.31 (recorded 0.27 / 0.32).
+Classifications stand: LEN uncorrelated (30% gate), NEM AI-related (50% gate).
+
+**The fits also reproduce.**
+
+| | reference (full-sample, flagged) | A train/test | B train/test |
+|---|---|---|---|
+| LEN | 16.5% full, 46 buys | 19.2 / 19.9 (9 buys) | 12.5 / **−8.0** |
+| NEM | 51.6% full, 87 buys | 47.2 / 35.0 (98 buys) | 48.0 / 39.8 (54 buys) |
+
+LEN lands in §3.14's recorded "17–20%/yr"; NEM in its recorded "honest cluster 35–48%". **NEM passes
+the fragility check that killed UAL** — A and B agree rather than one collapsing.
+
+**LEN: declined again, now for two reasons.** Pooled swap CF→LEN is **−5.1 full / −4.0 train / −6.5
+test**; B collapses to −8.0%; and the new reason — **LEN trades 19/yr, SLOWER than the 24/yr CF it
+would replace.** It fails the user's own criterion as well as the return bar.
+
+**NEM: passes every gate until the binding one.** Swap CF→NEM on the reference vector looks good —
+**+1.0 full / −0.6 train / +3.0 test, maxDD −0.6**, 36 trades/yr against CF's 24, 8-day holds
+against 12, and much better through the AI drawdown (Jan–Apr 2025 −6.6% → **+9.3%**; Feb–Jun 2025
++12.8 → +19.5). But that vector is a FULL-SAMPLE fit. On the honest train-half vectors the swap
+**loses the tested half**:
+
+| swap CF → NEM with… | full | train | test | maxDD | NEM/yr | top 3rd |
+|---|---|---|---|---|---|---|
+| reference (full-sample) | +1.0 | −0.6 | **+3.0** | −0.6 | 36 | 97% |
+| variant A (train-half) | −1.5 | −0.0 | **−3.4** | −0.4 | 78 | **108%** |
+| variant B (train-half) | −0.4 | +1.6 | **−3.1** | +0.1 | 45 | 92% |
+
+Only the lookahead vector wins. **Declined at G5**, the gate §3.14a already identified as the
+binding one. (CF's deployed vector is also a full-sample fit, so reference-vs-deployed is
+like-for-like in lookahead terms; what is not symmetric is that CF's own A/B vectors were lost with
+the original JSON and were not refitted here. The burden of proof sits with the change, and the
+change does not carry it.)
+
+**The structural finding, and the real answer to the question.** Not one candidate clears §3.32's
+profile bar (top third of trades under 80% of P&L): **CF 102%, NEM 97%, LEN 91%** — against MU 53%,
+VLO 64%, TSM 68% among the AI names. And NEM's variant A settles the mechanism directly: it trades
+**78/yr, more than three times CF**, and its concentration is the **worst in the comparison at
+108%**. *Turnover does not buy predictability in an uncorrelated name.* The §3.32 observation that
+fast names are also even ones is a correlation across the book, not a lever that can be imported: a
+name that does not move with the book earns when the book does not, which is by construction a
+minority of the time. **The concentration IS the diversification.**
+
+**Recommendation: keep CF.** Five candidates have now been tested against this slot (FCX, NEM, UAL,
+LEN in §3.14, NEM and LEN re-tested here with better data and the corrected screen) and none
+survives. The profile the user wants — uncorrelated AND even — does not exist in this sample. The
+honest choice is therefore the one §3.32 framed: either accept that the diversifier slot is
+inherently bursty and judge it on drawdown contribution rather than predictability, or drop the
+slot entirely (eight names: +2.3pp/yr at +2.2pp of drawdown) as a priced risk decision. A genuinely
+different return source — not a US equity in this regime — is the only thing that would change the
+answer.
+
+
 ---
 
 ## 4. Live workbook state and known issues
