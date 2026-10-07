@@ -1053,6 +1053,77 @@ past their 10-session time stop** (due 2 Sep). They are also the only losers in 
 failure mode, not the typing.
 
 
+### 3.32 CF's profile: the user is right, the profile is intrinsic, and it is the price of the zero beta (7 Oct)
+
+User, on the live record: "I'm not happy with CF. With optimised parameters CF relies on a small
+number of high-margin trades to meet its return. That is the wrong profile — it lacks
+predictability. Fast turnover stocks are a better fit. But CF is a diversifier, so replacing it
+probably needs another diversifier." Scripts: `live_record.py`, `cf_profile.py`,
+`diversifier_profile.py`.
+
+**The claim is confirmed, on two independent measures.** Pooled book, live config, verified fills:
+
+| | /yr | avg | hold | stops | lose% | %/$-day | top 3rd of P&L |
+|---|---|---|---|---|---|---|---|
+| TSM | 91 | +1.00% | 1d | 4 | 2% | 0.222% | 68% |
+| VRT | 74 | +1.70% | 1d | 5 | 3% | 0.395% | 73% |
+| MU | 55 | +2.19% | 1d | 4 | 3% | 0.420% | 53% |
+| GM | 60 | +1.45% | 1d | 4 | 3% | 0.260% | 79% |
+| VLO | 35 | +2.87% | 5d | 7 | 7% | 0.258% | 64% |
+| **CF** | **24** | **+3.12%** | **12d** | **8** | **14%** | **0.182%** | **102%** |
+
+CF is last on every column that matters: fewest trades, longest hold, most stops, most losers,
+lowest yield per invested dollar-day (3.27 found the same). **The decisive number is the top-third
+share at 102% — CF's best third of trades carries more than all of its P&L, so the other two thirds
+lose money net.** No other name is above 84%. CF uses **13.5% of the book's invested capital-days to
+deliver 9.0% of its P&L**.
+
+**But the profile is what the zero beta costs, not a defect.** Across the nine names, book
+correlation and turnover correlate **+0.80** (AI beta vs trades/yr +0.59; vs yield per dollar-day
++0.64). CF has AI beta **−0.02**, the only true zero-beta name in the book, and is the slowest. That
+is one relationship, not two separate facts, and it is 3.14's structural lesson restated from the
+inside: the premium engine wants names that move, and in this era movement is AI-correlated.
+
+**Neither lever changes it.**
+- **Entry depth, never tested before** (CF bids k=2.04, the book's deepest). Sweeping CF's k down:
+  trade count is FLAT — 57 (deployed), 58 (×0.75), 62 (×0.5), 61 (×0.35), 62 (×0.25) — and hold
+  stays 11–14 days. The ×0.75 cell shows +3.1 train / +2.3 test, but it is one cell of five and it
+  does not move the shape (top third 102 → 92%), so it addresses nothing the user raised.
+- **Exit premium** was already tested and rejected (3.27; and 3.24 Addendum 3 found halving premia
+  the exit family's worst cell). CF is slow because its fit asks for 4.66–5.91% and waits; that ask
+  is load-bearing.
+
+**What dropping CF is worth.** Pooled, live config: **+2.3pp full, −1.1 train, +6.8 test, maxDD
++2.2pp WORSE** (73.4/45.4/105.1 DD 24.2 → 75.7/44.3/112.0 DD 26.4). Stress windows get worse on
+drawdown in all three and worse on return in two of three (Feb–Jun 2025 +12.8→+9.1; Jun–Jul 2026
++35.9→+30.2). CF is also by far the CHEAPEST diversifier to drop: without VLO the test half falls
+**16.4pp**, without GM the train half falls **7.4pp**. The three are not interchangeable.
+
+**GM is the existence proof that the quadrant is occupied** — AI beta 0.18, book correlation 0.25,
+and yet 60 trades/yr on 1-day holds at 0.260%/dollar-day, on the LOWEST mean daily move in the book
+(1.51%). So "uncorrelated ⇒ slow" is a tendency, not a law.
+
+**Correction to 3.14's screening method.** That round screened candidates on daily RANGE and
+declined LEN as "too quiet to pay the premium". Range is the weakest of four screens tested here
+against realised turnover (corr with trades/yr: range +0.31, mean |move| +0.34, dip frequency +0.42,
+dip-and-recovery +0.52). And even the best screen fails to separate CF from GM — 16.0% vs 17.5% of
+sessions dipping and recovering, for 24 vs 60 trades/yr. The difference is what each name's FIT asks
+for (CF 4.66/5.91%, GM 0.97/4.51%). **Turnover is a property of the fitted premium, not of the price
+series, so a candidate cannot be pre-screened on price statistics; the fit has to be run and the
+profile read off it.** Any future diversifier round should budget for that and should re-test LEN,
+which may have been declined on the wrong measure.
+
+**Recommendation: keep CF, and treat the swap as a priced risk decision rather than a model
+verdict.** Dropping the book's only zero-beta name buys +2.3pp/yr and costs 2.2pp of drawdown — in a
+sample that cannot price the insurance, because (§6) the only AI drawdown sits in the training
+region of every walk-forward fold. That is the trade this book has declined repeatedly. The bar for
+a replacement, stated numerically: **book correlation ≤0.3, ≥50 trades/yr, top-third share under
+~80%** — GM's quadrant. If the user wants the search, it needs 5-minute data per candidate and a
+full fit each, not a screen. **Live-record footnote:** the 63-day live sample has CF at 3 closed
+trades, all winners (+1.31% avg) — too small to judge on, and its live complaint is absence rather
+than loss.
+
+
 ---
 
 ## 4. Live workbook state and known issues
