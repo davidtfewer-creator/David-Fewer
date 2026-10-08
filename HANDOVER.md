@@ -1257,6 +1257,51 @@ plus `Pre market data/` and `2021 to 2023 bear market/`):
   is too short to fit.
 
 
+### 3.35 G1 on DE / NOC / RTX / STNG: three clean, and STNG is the best-shaped candidate yet screened (8 Oct)
+
+First candidate round sourced entirely from Box (§3.34) rather than hand uploads. `g1_screen.py`
+(new) runs the cheap gate — AI-factor beta, book correlation, and the price-behaviour columns —
+with the incumbent diversifiers printed alongside for scale.
+
+| | AI beta | corr AI | corr book | range% | \|move\|% | dip+rec | class |
+|---|---|---|---|---|---|---|---|
+| **NOC** | **−0.05** | −0.10 | **−0.07** | 2.05 | 1.10 | **8.2** | uncorrelated (30% gate) |
+| **RTX** | 0.09 | 0.18 | 0.21 | 1.93 | 1.07 | **8.4** | uncorrelated (30% gate) |
+| **STNG** | 0.13 | 0.17 | 0.21 | **3.23** | 1.77 | **23.5** | uncorrelated (30% gate) |
+| [CF] | −0.02 | −0.02 | 0.14 | 2.89 | 1.67 | 16.0 | incumbent |
+| [GM] | 0.18 | 0.24 | 0.35 | 2.61 | 1.51 | 17.5 | incumbent |
+| [VLO] | 0.11 | 0.15 | 0.31 | 3.04 | 1.65 | 19.9 | incumbent |
+
+**All three clear G1 as uncorrelated**, so all three face the 30% gate rather than 50%. But they
+split sharply on shape:
+
+- **NOC is the purest diversifier ever screened here** — book correlation −0.07, cleaner even than
+  CF's 0.14. It is also **the quietest**: 8.2% of sessions dip-and-recover, barely half CF's 16.0%
+  and well under LEN's 19.1%, and LEN went on to trade just 19/yr and was declined partly for being
+  too quiet to pay the premium. **RTX is the same story** (0.21 correlation, 8.4% dip+rec). Both are
+  defence primes — low-range trending names.
+- **STNG is the find.** Correlation as clean as VLO's (0.21), and **more active than any incumbent
+  diversifier or prior candidate**: range 3.23% (above VLO 3.04 and CF 2.89) and dip+rec **23.5%**,
+  the highest yet recorded — above NEM 22.8, VLO 19.9, LEN 19.1, GM 17.5, CF 16.0. It is the first
+  candidate to sit plainly in the quadrant §3.32 identified as occupied but unfilled: uncorrelated
+  AND busy.
+
+**Caveat carried forward from §3.33, and it is the binding one:** no price screen determines
+turnover — that follows the FITTED PREMIUM, not the price series (dip+rec correlates only +0.52
+with realised trades/yr, and it failed to separate CF from GM at all). So this table is a prior,
+not a verdict. STNG has the best prior any candidate has had; NOC and RTX have the worst, but
+"worst prior" is not a rejection and only a fit settles it.
+
+**Next step: fit STNG** (full §3.14 path — reference, A, B — then the G5 marginal book test against
+CF). NOC and RTX are lower priority on the shape evidence but remain untested.
+
+**DE is blocked, not declined.** Its Box folder (409651804651) and file (2411461460426) both return
+Internal Server Error on every call — `get_file_content`, `get_file_details` and
+`list_folder_content_by_folder_id` alike — while every other folder and file in the same parent
+responds normally. That is a Box-side problem with that item, not the integration. Re-uploading DE
+to Box under a new item, or attaching the file to chat, would both route around it.
+
+
 ---
 
 ## 4. Live workbook state and known issues
