@@ -1526,6 +1526,72 @@ either the swap or the add configuration, on either honest vector. The reclassif
 recording because it corrects the reasoning, not the outcome.
 
 
+### 3.41 "Accept it is an AI strategy": two premises hold, the decisive one does not — and the diversifier to question is GM, not CF (8 Oct)
+
+User's proposition: diversifier candidates keep failing; the AI names drive the live book's return;
+if the AI trade takes a 25% hit the diversifiers will not save the book anyway; and in a bear we
+will be watching daily regardless — so should this be run as an avowedly AI strategy?
+Script: `bear_roster.py`, on the 2021–23 archive restored from Box (§3.34).
+
+**Premise 1 — candidates keep failing: TRUE.** Seven tested, none admitted (§3.39).
+
+**Premise 2 — the AI names drive the value: TRUE but milder than it sounds.** Live record to 6 Oct:
+the AI six produced **80.4% of P&L from 67% of the slots**; the three diversifiers 19.6% from 33%.
+Per slot the diversifiers run at **49% of an AI name's rate** — in a bull. That is what insurance
+costs, not evidence it is not working.
+
+**Premise 3 — "the diversifiers will not save the book anyway": CONTRADICTED.** Calendar 2022,
+pooled, verified fills (nine-name rows reproduce §3.28b exactly, so the restored data is sound):
+
+| roster | n | nothing | per-name gate | breadth gate |
+|---|---|---|---|---|
+| nine (current) | 9 | −13.8% DD 23.7 | −1.5% DD 16.8 | **+1.7% DD 15.7** |
+| **AI six only** | 6 | **−25.1% DD 33.8** | −12.2% DD 26.5 | **−7.0% DD 22.1** |
+| AI six + GM | 7 | **−26.2% DD 34.1** | −15.8% DD 28.3 | −15.8% DD 28.3 |
+| AI six + VLO | 7 | −18.5% DD 28.6 | −5.3% DD 24.3 | −1.1% DD 20.9 |
+| **AI six + CF** | 7 | −16.0% DD 24.9 | −3.3% DD 15.6 | **−0.3% DD 13.0** |
+
+Full span Jan 2022 – Jun 2023: nine **+17.8%**, AI six **+14.6%**, AI six + CF **+19.3% at DD 13.0**
+— the best cell in the table — and AI six + GM **+0.9%**.
+
+- **The gate does not substitute for the diversifiers.** With the breadth gate on both sides,
+  dropping them costs **8.7pp of 2022 return and 6.4pp of drawdown** (+1.7 → −7.0, DD 15.7 → 22.1).
+  Unprotected the gap is **11.3pp** (−13.8 → −25.1). They were load-bearing in the one real bear.
+- **It is the diversification, not the headcount.** ONE diversifier recovers most of it: AI six + CF
+  (7 names) reaches −0.3% at DD **13.0**, a BETTER drawdown than the full nine.
+- **CF is the best of the three in a bear — the name that was under review for removal.** On every
+  protection setting and both windows, AI six + CF beats AI six + VLO beats AI six + GM.
+- **GM is the one that failed.** Adding it to the AI six made 2022 *worse* (−26.2 vs −25.1) and cost
+  **13.7pp over the full span** (+0.9 vs +14.6). A rate-sensitive automaker in a rate shock is not a
+  diversifier. Note the opposite holds in 2024–26, where dropping GM costs 7.4pp of the train half
+  (§3.32) — so this is regime-specific, and it is GM, not CF, whose diversifier credentials the
+  evidence now questions.
+
+**Premise 4 — "we will be watching daily anyway": the weakest link, and it is already tested.**
+§3.22 established that a fast crash damages the book through **held inventory** marked down and
+overnight gaps, *neither of which an entry veto can touch*; cancelling crash-day bids saves only
+marginal new entries, and §3.21 showed those are ordinary trades. Every mechanical form of
+"intervene in the downturn" has been tested and subtracted: the breaker (§3.13), gate+breaker
+(−10.2% vs gate alone −2.6%), the price stop (§3.13), the holding halt (§3.21), the intraday
+stand-down (§3.22). Watching tells you what is happening; the only instruments that protect
+inventory are exits and sizing, and both have been measured as costly here.
+
+**CAVEAT, and it is the real one.** 2022 was a rate-shock bear with a commodity bull to rotate into
+— CF and VLO rose *because* of the energy and food shock. An AI-specific bust might offer no such
+refuge, which §3.13 already flagged. So this says the diversifiers worked in the bear we have, not
+that they will work in the bear the user is imagining. The nearest AI-specific episode in the sample
+(Jan–Apr 2025, AI factor −45.9%) also favoured them on the held construction (§6: five names −37.3%
+vs eight −21.6%), though today's pooled nine-vs-eight is more equivocal (§3.32: CF cost 3.6pp of
+return in that window and saved 2.2pp of drawdown).
+
+**Verdict.** The strategy IS AI-driven and saying so plainly is right — 80% of live P&L from the AI
+six, and the honest planning basis should reflect it. But "therefore drop the diversifier slot" does
+not follow from the evidence: in the only full bear on record the slot was worth 9–11pp of return
+and 6–10pp of drawdown, and the gate did not replace it. The defensible version of the user's
+instinct is narrower and better supported: **keep the slot, stop hunting for additions (seven
+failures is enough), and question GM rather than CF.**
+
+
 ---
 
 ## 4. Live workbook state and known issues
