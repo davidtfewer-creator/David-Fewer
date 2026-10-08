@@ -83,7 +83,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
-             reentry=None):
+             reentry=None, regime_exit=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). cap_frac: max fraction of the pool one sleeve may
@@ -158,7 +158,16 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                  close (None = no requirement)
     All existing overlays still apply to the re-entry order: the PM rule, the
     DMA/breadth gate, pauses and the breaker see it as an ordinary sleeve.
-    None (default) appends nothing and reproduces the book exactly."""
+    None (default) appends nothing and reproduces the book exactly.
+    regime_exit: a set of dates on which the book stands DOWN entirely — every
+    held position is sold at that day's open and no orders are placed, with
+    trading resuming the first day not in the set. This is the discretionary
+    "I can see a bear starting, go to cash" action made mechanical, and it is
+    strictly stronger than no_buy, which only suppresses new entries and
+    leaves inventory exposed. The distinction matters: §3.22 found an entry
+    veto cannot protect a book through a FAST crash because the damage is in
+    held inventory — but a slow bear gives time to act, and this is what
+    acting would look like. None (default) changes nothing."""
     if date_lo is not None or date_hi is not None:
         cal = [d for d in cal
                if (date_lo is None or d >= date_lo) and (date_hi is None or d <= date_hi)]
@@ -314,6 +323,28 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if sd_tau is not None:
                     sd_tripped = True
                     sd_trips += 1
+
+        # -------- regime stand-down: sell everything at the open, bid nothing
+        if regime_exit is not None and d in regime_exit:
+            for s in sleeves:
+                if not s['holding']:
+                    continue
+                nd = data[s['name']]
+                px = nd['O'][s['_i']]
+                proceeds = s['shares'] * (px - COMM)
+                if mode == 'pooled':
+                    cash += proceeds
+                else:
+                    s['own'] = proceeds
+                if collect_trades:
+                    trades.append(dict(name=s['name'], kind=s['kind'],
+                                       entry=s['entry'], exit=d,
+                                       pnl=proceeds - s['cost'], cost=s['cost'],
+                                       stopped=(px < s['target'] - 1e-12)))
+                s.update(holding=False, shares=0.0, target=None, entry=None)
+            active = []
+            for s in sleeves:
+                s['_bid'] = None
 
         # -------- exits on positions held from before today
         for s in sleeves:

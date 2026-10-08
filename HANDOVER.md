@@ -1592,6 +1592,69 @@ instinct is narrower and better supported: **keep the slot, stop hunting for add
 failures is enough), and question GM rather than CF.**
 
 
+### 3.42 The AI-only case, properly tested: the diversifiers do not drag returns, and decisive stand-down is far worse than the gate (8 Oct)
+
+User sharpened the §3.41 argument: a grinding bear is both what the diversifiers protect against AND
+what a person watching daily can see starting; a sudden AI crash is unprotectable either way; so the
+diversifiers insure a risk already covered more cheaply by judgement — run the AI book, take a
+one-year view, review. **A correction first: my §3.41 reply cited §3.22 ("entry vetoes cannot
+protect inventory"), but that finding is about FAST crashes. In a slow bear there is time to act,
+and acting means SELLING. That is a different instrument and it had never been measured.**
+`book_sim` gained `regime_exit` (default None, baseline invariant): on a signal, liquidate at the
+open and place no orders until it clears. Scripts: `bear_standdown.py`, and the carrying-cost run.
+
+**1. Decisive stand-down is much WORSE than the gate — on both rosters, both windows.**
+
+| | nothing | gate (no new buys) | **STAND DOWN (sell all)** |
+|---|---|---|---|
+| nine, calendar 2022 | −13.8% DD 23.7 | **+1.7% DD 15.7** | **−15.1% DD 16.7** |
+| AI six, calendar 2022 | −25.1% DD 33.8 | −7.0% DD 22.1 | −18.9% DD 21.1 |
+| nine, full span | +0.8% | **+17.8%** | **−11.8%** |
+| AI six, full span | −4.8% | +14.6% | −6.7% |
+
+Selling into a grinding bear crystallises losses the model would otherwise have exited at target,
+and then misses the recovery — the signal is on for **213 of 251 sessions in 2022**, so standing
+down means being flat for most of the year including the turn. This is the exit family's verdict
+again (§3.13 price stop, §3.24 week-end exit): **the gate — stop buying, hold to target — already
+IS the optimal response to spotting a bear.** The user's instinct is right; the instrument that
+expresses it is the one already deployed.
+
+**2. The detection lag is the honest limit.** The breadth signal first fired **28 Jan 2022, 18
+sessions in**, with the equal-weight index already **−12.4% from its peak** (nine) / −15.1%
+(AI six) — **47% of the total fall was already done** before any stand-down could act. "We can spot
+it" is true; "we can spot it early" is not, on a mechanical benchmark.
+
+**3. The premise that the diversifiers drag returns is WRONG — and this is the decisive number.**
+2024–26, live config, the regime most favourable to an AI-only book:
+
+| roster | n | full | train | test | maxDD | fills |
+|---|---|---|---|---|---|---|
+| nine (current) | 9 | **73.4** | **45.4** | 105.1 | **24.2** | 1235 |
+| **AI six only** | 6 | **66.1** | **32.7** | 105.7 | **35.2** | 949 |
+| AI six + CF | 7 | 65.5 | 41.4 | 92.2 | 30.0 | 1008 |
+| AI six + VLO | 7 | 72.6 | 34.3 | 119.2 | 31.1 | 1035 |
+| AI six + GM | 7 | 72.3 | 49.8 | 97.0 | 29.0 | 1088 |
+
+Dropping the three costs **−7.4pp full, −12.7pp train, +10.9pp of drawdown**, and fills fall 1235 →
+949 (−23%). **There is no carry to harvest: the one-year view would give up return AND take more
+drawdown.**
+
+*Why the per-slot figure misled us both:* §3.41 measured the diversifiers at 49% of an AI name's
+P&L rate per slot, which looked like drag. It ignored that they are also CAPACITY. The book is
+constrained by sleeve occupancy, not by opportunity (§3.30): when the six AI names — which
+correlate 0.61–0.85 with each other — are simultaneously held or gated, capital with nowhere to go
+idles at 3.14%. Nine names give it somewhere to work. This is §3.28's counter-cyclical pooling
+uplift seen from the other side. Note the comparison is already generous to the AI-only case:
+giving the six the full capital rather than six-ninths would idle MORE of it, not less.
+
+**Verdict.** Three of the four premises now fail: the diversifiers do not drag returns (they add
+7.4pp and remove 10.9pp of drawdown even in an AI bull), spotting the bear is late (47% of the fall),
+and acting decisively on the spot is far worse than the gate already deployed. What survives is
+real and worth saying plainly: **this IS an AI-driven strategy** (80% of live P&L from the AI six),
+**hunting for more diversifiers is finished** (seven failures), and **the three incumbents are not
+interchangeable** — GM is the one the bear evidence questions (§3.41), CF the one it vindicates.
+
+
 ---
 
 ## 4. Live workbook state and known issues

@@ -1,0 +1,50 @@
+{
+ "CALENDAR 2022|nine (current book)|1": {
+  "total": -0.1379047785136569,
+  "maxdd": 0.236777648082297
+ },
+ "CALENDAR 2022|nine (current book)|2": {
+  "total": 0.01702428300669201,
+  "maxdd": 0.15691057226906646
+ },
+ "CALENDAR 2022|nine (current book)|3": {
+  "total": -0.1514380167687438,
+  "maxdd": 0.16735885978079973
+ },
+ "CALENDAR 2022|AI six only|1": {
+  "total": -0.2506632985063345,
+  "maxdd": 0.33821216693418793
+ },
+ "CALENDAR 2022|AI six only|2": {
+  "total": -0.06981956858169802,
+  "maxdd": 0.22119252287354269
+ },
+ "CALENDAR 2022|AI six only|3": {
+  "total": -0.18947988714957864,
+  "maxdd": 0.21111038694836304
+ },
+ "FULL SPAN Jan 2022 - Jun 2023|nine (current book)|1": {
+  "total": 0.008457006430375724,
+  "maxdd": 0.236777648082297
+ },
+ "FULL SPAN Jan 2022 - Jun 2023|nine (current book)|2": {
+  "total": 0.17821771422744415,
+  "maxdd": 0.15691057226906646
+ },
+ "FULL SPAN Jan 2022 - Jun 2023|nine (current book)|3": {
+  "total": -0.11795367639833132,
+  "maxdd": 0.16735885978079973
+ },
+ "FULL SPAN Jan 2022 - Jun 2023|AI six only|1": {
+  "total": -0.04774995075364885,
+  "maxdd": 0.33821216693418793
+ },
+ "FULL SPAN Jan 2022 - Jun 2023|AI six only|2": {
+  "total": 0.1457310596935013,
+  "maxdd": 0.22119252287354269
+ },
+ "FULL SPAN Jan 2022 - Jun 2023|AI six only|3": {
+  "total": -0.0671370995190993,
+  "maxdd": 0.21111038694836304
+ }
+}
