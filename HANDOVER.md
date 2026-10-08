@@ -1791,6 +1791,61 @@ the pipeline actually reads (04:00–16:00), reporting after-hours faults withou
 All seven files were re-imported on that basis so the archive is uniform.
 
 
+### 3.45 G1 on HOOD: it is an AI name, and my candidate set was AI-correlated by construction — but the low-correlation names rescue the idea, and RTX weekly is the best result in this book (8 Oct)
+
+**HOOD fails, decisively.** AI beta **0.71** (s.e. 0.053, CI 0.60–0.81), book correlation 0.50,
+**R² 0.234 — the highest of anything screened here**, against NEM's 0.097. Stable across halves
+(0.78 / 0.60), rolling 0.45–1.16, never near zero, and **the relationship STRENGTHENS without crash
+days (ex-shock 0.84)**. Robinhood is a retail risk-appetite proxy, and in this era the AI trade IS
+the retail risk-appetite trade. §3.43's case for a second cadence was that it must add capacity
+WITHOUT adding AI concentration; HOOD adds both. **Declined.**
+
+**And the whole §3.44 set fails the same way**: PLTR 0.50, TSLA 0.60, MSTR 0.65, COIN 0.68,
+ARM 0.97, SMCI 1.06. **My error**: I selected those names on HIGH VOLATILITY, and §3.14 had already
+established that in this era volatility and AI correlation are the same axis. The candidate set was
+AI-correlated by construction and I walked into a finding already in this file.
+
+**Re-run on the LOW-CORRELATION names — which were sitting in `data_5min/` the whole time:**
+
+| stock | AI beta | frozen | optimised | **nbhd median** | 25th | within 10pp | **WF** | consensus |
+|---|---|---|---|---|---|---|---|---|
+| **RTX** | **0.09** | 10.7% | 56.9% | **47.7%** | **45.9%** | 57/169 | **3/3 (+14.5pp)** | **3/3 (+14.5pp)** |
+| **NEM** | 0.27 | 23.4% | 76.2% | **57.5%** | **50.9%** | 28/169 | 2/3 (+11.5pp) | 2/3 (+17.9pp) |
+| DE | 0.14 | 22.4% | 35.2% | 27.7% | 23.0% | 81/169 | 2/3 (+1.6pp) | 3/3 (+4.2pp) |
+| NOC | −0.05 | 2.5% | 22.1% | 17.5% | 7.0% | 81/169 | 1/3 | 1/3 |
+| STNG | 0.13 | 8.5% | 25.4% | 16.2% | 13.9% | 53/169 | 2/3 | 2/3 |
+| LEN | 0.09 | −19.5% | −12.2% | −14.3% | −16.7% | 169/169 | 1/3 | 1/3 |
+
+**RTX on the weekly clock is the strongest single result this book has produced.**
+- **Walk-forward 3/3, mean +14.5pp — and the consensus vector also 3/3.** Set against §3.1, where
+  weekly refitting beat frozen in **1 fold of 18**, a clean 3/3 is unprecedented here.
+- The plateau is nearly flat: median 47.7%, **25th percentile 45.9%**, peak 59.0%. The premium
+  profile is a shelf (33/50/53/47/43/42/46/41), not a spike.
+- **Anchor-invariant**: 57/54/51/51/53% Mon–Fri.
+- **AI beta 0.09, book correlation 0.21** — genuinely uncorrelated, so it is capacity WITHOUT
+  concentration, which is exactly what §3.43 required.
+- Liquidity comfortable ($1m = 0.5% of median at-bid, 3.2% thin). Terminal mark −20% takes
+  56.9% → 42.7%.
+- Binding constraint **athcap 87%** — it is buying dips below the running high, not the open.
+
+**The structural finding, and it reframes §3.38.** RTX was ambiguous in the DAILY book (G5
+disagreed: A +1.5, B −3.1) and is unambiguous in the WEEKLY one. NEM was declined daily and is
+strong weekly (57.5% median, consensus 2/3 +17.9pp). **The question was never "should RTX replace
+CF" — it was "what cadence does RTX want".** A name that does not suit the daily clock can suit the
+weekly one, and the daily programme's seven failures may partly have been a cadence mismatch rather
+than seven bad names.
+
+**Caveats.** Three folds is not eighteen. All of it is the 2024–26 bull. RTX's optimised run ends
+100% invested with a 95th-percentile hold of 149 days, so the 26-week cap (§3.6) is load-bearing and
+this is committed capital. And 47.7% is below the daily book's 74% plan — the case is that it earns
+that on capital the daily book cannot absorb (§3.43), not that it is a better use of a marginal
+dollar.
+
+**Next:** a proper half-sample freeze on RTX and NEM rather than the 3-fold walk-forward; then a
+pooled weekly book sim; then the AVGO conflict (it runs the weekly model and sits in the daily
+book). Results in `premarket_study/weekly_candidates.json` (13 names, tracked).
+
+
 ---
 
 ## 4. Live workbook state and known issues
