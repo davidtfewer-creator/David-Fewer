@@ -1726,6 +1726,71 @@ reports both by design), and apply the liquidity gate — it matters more here, 
 position is held for weeks rather than days.
 
 
+### 3.44 Weekly cadence, seven candidates: HOOD is the find, and it is the strongest candidate this book has produced (8 Oct)
+
+First use of the repaired weekly pipeline (§3.43) as a candidate programme, on the high-volatility
+names the daily model rejected. All seven pulled from Box (§3.34). Results:
+`premarket_study/weekly_candidates.json` (tracked, per §3.28d's lesson about
+gitignored result files being lost).
+
+| stock | frozen (NVDA params) | optimised | **nbhd median** | 25th | WF | consensus |
+|---|---|---|---|---|---|---|
+| **HOOD** | 27.9% | 91.3% | **80.8%** | **76.5%** | **2/3 (+12.7pp)** | **2/3 (+16.0pp)** |
+| PLTR | 29.5% | 123.9% | 94.4% | 81.5% | **1/3 (−7.4pp)** | 1/3 |
+| TSLA | 18.7% | 47.1% | 19.4% | 13.3% | 2/3 | 1/3 |
+| ARM | 1.4% | 38.3% | 19.1% | 10.9% | 1/3 | 1/3 |
+| COIN | −22.3% | 1.8% | −10.3% | −15.0% | 2/3 | 2/3 |
+| MSTR | −36.6% | −5.7% | −14.5% | −24.7% | 2/3 | 2/3 |
+| SMCI | −18.3% | −5.0% | −8.0% | −13.1% | 2/3 | 2/3 |
+
+**Rejected outright: COIN, MSTR, SMCI** — negative at frozen parameters AND negative neighbourhood
+medians. The crypto proxies and SMCI trend rather than mean-revert on a weekly clock; the model has
+nothing to harvest.
+
+**Not worth a slot: TSLA, ARM.** Neighbourhood medians ~19%, far below the daily book's 74% plan,
+and their optimised peaks are spikes (TSLA within-10pp 8/169, 25th percentile 13.3%).
+
+**PLTR: high but it does not transfer.** A broad high plateau in sample (median 94.4%, 25th 81.5%)
+and the best raw number of the seven — but the walk-forward is **1/3, mean −7.4pp**. The plateau is
+an in-sample object; the walk-forward is the out-of-sample evidence, and it says refitting fails.
+The trustworthy figure is the frozen 29.5%.
+
+**HOOD is the find, and by this book's standards it is unusually clean:**
+- **Neighbourhood median 80.8%, 25th percentile 76.5%, peak 91.6%** — the plateau is high AND
+  broad (within-10pp of peak: **80 of 169 cells**, against TSLA's 8 and PLTR's 8). The premium
+  profile climbs monotonically (18 → 48 → 56 → 72 → 73 → 78 → 90) rather than spiking.
+- **The walk-forward is POSITIVE — 2/3, mean +12.7pp; the consensus vector 2/3, +16.0pp.** Set
+  against §3.1, where weekly refitting beat frozen in **1 fold of 18** across six experiments, a
+  2/3 with a double-digit mean is the first time refitting has transferred in this model.
+- **Anchor-robust**: 91/96/85/122/92% across Mon–Fri, so it does not depend on the Monday anchor
+  (§3.7's advantage is a bonus here, not a crutch).
+- **Liquidity is ample**: $1.66bn ADV, $1m = 0.2% of median at-bid volume — twentyfold more
+  headroom than CF, which binds the daily book.
+- **Terminal-mark robust**: marking the open positions down 20% takes 91.3% → 73.7%.
+
+**Planning figure by the §5 convention** (parameter-neighbourhood median) is **≈80%/yr** — above the
+daily book's 74% plan, on capital the daily book cannot absorb (§3.43).
+
+**Caveats, and they are not small.** The walk-forward is three folds, not eighteen — a 2/3 is
+encouraging, not established. All of it is a 2024–26 bull. Every run ends 100% invested with a
+95th-percentile hold of 113 days, so this is committed capital and the 26-week cap (§3.6) is
+load-bearing. And HOOD is a retail-brokerage proxy whose correlation with the AI complex has not
+been measured — G1 has NOT been run on it, which matters because §3.43's whole argument for a
+second cadence is that it must add capacity WITHOUT adding AI concentration.
+
+**Next steps, in order:** (1) G1 on HOOD — if it is just another AI-beta name the capacity argument
+collapses; (2) a proper half-sample freeze rather than the 3-fold walk-forward; (3) resolve the AVGO
+conflict (it runs the weekly model and now sits in the daily book); (4) only then a pooled weekly
+book sim.
+
+**Importer hardening, forced by the data.** SMCI's Box export is defective: the 19:00–19:55
+after-hours block appears TWICE with DIFFERENT prices on 6 Nov in BOTH 2024 and 2025 — two series
+spliced. The importer refused it, correctly. On inspection all 24 duplicates sit after 16:00 and the
+regular-hours daily bars are clean, so `box_5min_import.py` now validates and writes only the window
+the pipeline actually reads (04:00–16:00), reporting after-hours faults without failing on them.
+All seven files were re-imported on that basis so the archive is uniform.
+
+
 ---
 
 ## 4. Live workbook state and known issues

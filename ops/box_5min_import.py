@@ -73,8 +73,29 @@ def read_extract(path):
     return rows
 
 
+USED0, USED1 = dt.time(4, 0), dt.time(16, 0)
+
+
 def validate(rows, ticker):
+    """Integrity of the windows the pipeline actually reads: pre-market from
+    04:00 for the PM cache and regular hours to 16:00 for the daily bars.
+    Faults in the after-hours tail are REPORTED but do not refuse the file —
+    SMCI's Box export splices two different series over 19:00-19:55 on 6 Nov in
+    both 2024 and 2025, which is real, but no part of the pipeline reads it."""
     errs = []
+    used = [r for r in rows if USED0 <= r[0].time() < USED1]
+    tail = len(rows) - len(used)
+    seen_t, dup_t = set(), 0
+    for r in rows:
+        if not (USED0 <= r[0].time() < USED1):
+            if r[0] in seen_t:
+                dup_t += 1
+            seen_t.add(r[0])
+    if dup_t:
+        print(f'  NOTE: {dup_t} duplicate timestamps in the after-hours tail '
+              f'({tail} bars outside 04:00-16:00) — reported, not fatal; the '
+              f'pipeline does not read them')
+    rows = used
     if len(rows) < 1000:
         errs.append(f'only {len(rows)} bars — too few for a 2-year 5-minute file')
     seen, prev = set(), None
@@ -96,7 +117,7 @@ def validate(rows, ticker):
         errs.append(f'{ohlc} bars where high/low do not bracket open/close')
     days = {d.date() for d, *_ in rows}
     pre = sum(1 for d, *_ in rows if d.time() < dt.time(9, 30))
-    print(f'  {ticker}: {len(rows)} bars over {len(days)} sessions, '
+    print(f'  {ticker}: {len(rows)} bars in 04:00-16:00 over {len(days)} sessions, '
           f'{rows[0][0]} -> {rows[-1][0]}, {pre} pre-market')
     return errs
 
@@ -143,6 +164,7 @@ def main():
     if not rows:
         sys.exit('no parseable rows — check the file is a 5-minute extraction')
     errs = validate(rows, a.ticker)
+    rows = [r for r in rows if USED0 <= r[0].time() < USED1]
     if a.check_against and not check_against(rows, a.check_against):
         errs.append('does not match the reference file')
     if errs:
