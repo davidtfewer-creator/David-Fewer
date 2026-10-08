@@ -1472,6 +1472,60 @@ after seven attempts: **in this era and this universe, a name that does not move
 earns in bursts, and no screen predicts which ones will earn at all.**
 
 
+### 3.40 Is NEM really "AI-related"? The relationship is real, the threshold was not — and it changes nothing (8 Oct)
+
+User challenge: NEM is a gold miner, 35.0/39.8 looks good, and it only failed at G5 — what is the
+basis for the classification, and is it worth reconsidering? Scripts: `beta_stability.py`,
+`nem_add_honest.py`.
+
+**1. The basis is stronger than the §3.14 note's own aside ("even gold miners") suggests.**
+
+| | beta | s.e. | 95% interval | R² | train | test | roll min/max | **ex-shock** |
+|---|---|---|---|---|---|---|---|---|
+| **NEM** | **0.27** | 0.034 | +0.20 to +0.34 | **0.097** | 0.19 | 0.39 | −0.22 / +0.59 | **0.30** |
+| RTX | 0.09 | 0.021 | +0.05 to +0.13 | 0.031 | 0.12 | 0.05 | 0.00 / 0.28 | 0.05 |
+| DE | 0.14 | 0.024 | +0.10 to +0.19 | 0.057 | 0.16 | 0.12 | −0.03 / 0.36 | 0.12 |
+| LEN | 0.09 | 0.030 | +0.03 to +0.15 | 0.016 | 0.09 | 0.09 | −0.16 / 0.28 | 0.08 |
+| [GM] | 0.18 | 0.029 | +0.12 to +0.23 | 0.059 | 0.21 | 0.13 | −0.02 / 0.37 | 0.17 |
+| [VLO] | 0.11 | 0.030 | +0.05 to +0.17 | 0.021 | 0.21 | −0.04 | −0.22 / 0.54 | **−0.00** |
+| [CF] | −0.02 | 0.031 | −0.08 to +0.04 | 0.000 | 0.08 | −0.15 | −0.36 / 0.19 | −0.10 |
+
+NEM's beta is statistically solid (t ≈ 8), carries **the highest R² of any candidate or incumbent
+diversifier**, and — the test that matters — **survives removal of the 5% largest factor-move days
+at 0.30**, slightly higher than the full-sample estimate. So it is not risk-off co-movement, which
+every equity shares; it is a persistent relationship. By contrast incumbent **VLO's apparent 0.11
+beta vanishes ex-shock (−0.00) and flips sign between halves (0.21 → −0.04)** — VLO's factor link
+is the artefact, not NEM's. The direction of the §3.14 call was right.
+
+**2. But the threshold was never derived, and the number is not precise.** NEM's beta travels
+0.19 → 0.39 across the halves and −0.22 to +0.59 across rolling windows, and 0.27 sits much nearer
+GM's 0.18 (an incumbent) than UAL's 0.43, yet §3.14 grouped it with UAL. On the corrected
+classifier (§3.39, which keys on beta and flags 0.09–0.27 as ambiguous) **NEM reads BORDERLINE, not
+AI-related.** That is the same correction made for DE, and the user was right to ask for it.
+
+**3. It changes nothing, because the gate only touches G2 and NEM failed G5.** On a 30% gate NEM's
+35.0/39.8 passes G2 comfortably. G5 — the binding gate (§3.14a) — does not reference the
+classification at all, and NEM fails it in both configurations on honest vectors:
+
+| swap CF → NEM | full | train | test |   | add NEM as a tenth | full | train | test | maxDD |
+|---|---|---|---|---|---|---|---|---|---|
+| variant A | −1.5 | −0.0 | **−3.4** |   | variant A | −2.6 | +1.7 | **−8.1** | −2.3 |
+| variant B | −0.4 | +1.6 | **−3.1** |   | variant B | −2.6 | +2.2 | **−8.7** | −1.9 |
+
+The add-as-tenth case on honest vectors was the one gap left by §3.33 (it had been run on the
+full-sample reference only, where it looked like −3.5 for −2.3pp of drawdown). Closed here: it is
+**−8 to −9pp of tested-half return** for about 2pp of drawdown. Decisively bad.
+
+**4. And it would not fix the original complaint.** NEM's top-third share is 97% on the reference,
+117% on A, 93% on B — as concentrated as CF's 102%. RTX (66%) remains the only candidate that
+addresses predictability.
+
+**Verdict: NEM is reclassified BORDERLINE rather than AI-related, and still declined.** Its
+standalone return is genuinely respectable; it simply does not survive contact with the book, in
+either the swap or the add configuration, on either honest vector. The reclassification is worth
+recording because it corrects the reasoning, not the outcome.
+
+
 ---
 
 ## 4. Live workbook state and known issues
