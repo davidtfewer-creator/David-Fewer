@@ -666,7 +666,8 @@ run is currently possible (book_sim.load_all, minute_index, PM rule all need tho
 studies fell back to DAILY data read from the user's attached workbook Query sheet
 (`disc_structure.load_from_workbook(path)` — reusable loader). To restore full capability the user
 must re-upload the 5-minute files (Box holds them: "TICKER 5min Apr2024-Aug2026.xlsx" etc. — Box
-MCP can search/list but CANNOT download binaries). Also: `fresh_opt_cands.json` was gitignored
+MCP can search/list but CANNOT download binaries). **[SUPERSEDED 8 Oct — see §3.34: Box CAN serve
+these files, exactly, via get_file_content. Re-uploading by hand is no longer necessary.]** Also: `fresh_opt_cands.json` was gitignored
 (early-era rule) AND lost locally — REBUILT 10 Sep from the live workbook's Model sheets + session
 record (MRVL + AVGO reference vectors only, verified exact vs workbook cells), un-ignored, now
 TRACKED. The original's candidate A/B variants and declined-name entries are still missing —
@@ -1217,6 +1218,43 @@ inherently bursty and judge it on drawdown contribution rather than predictabili
 slot entirely (eight names: +2.3pp/yr at +2.2pp of drawdown) as a priced risk decision. A genuinely
 different return source — not a US equity in this regime — is the only thing that would change the
 answer.
+
+
+### 3.34 Box serves the 5-minute archive after all — the data-loss exposure is closed (8 Oct)
+
+User asked whether he could give access to a Box folder of 5-minute data for a wider candidate
+round. He already has: the Box MCP connection is live on his own account. **And §3.28d's note that
+Box "can search/list but CANNOT download binaries" is wrong.** `get_file_content` returns the
+sheet's extracted text, the harness writes it to disk when large, and the result is **exact**.
+
+**Verification, on a file held both ways.** LEN pulled from Box against the hand-uploaded copy:
+**53,643 of 53,643 bars identical, zero mismatches.** Round-tripped through the importer and read
+back through the real pipeline: daily OHLC identical on all 596 sessions, and the verified-fill
+checker agrees on 595 of 595. A Box-sourced file is indistinguishable from an uploaded one.
+
+**Tooling: `ops/box_5min_import.py`.** The Box calls are the assistant's (search/list for the file
+id, `get_file_content` to land the text on disk); the script converts that text to
+`data_5min/<TICKER>_5min.xlsx` in the layout `minute_index` and `daily_from_5min` already read.
+Datetime rendering VARIES BETWEEN FILES because the extraction reflects each sheet's display format
+(LEN comes back "2024-04-01 7:35:00", SKHY "2026-07-13 04:00"), so the parser tries several.
+Validation refuses to write on too-few bars, duplicate or out-of-order timestamps, or bars whose
+high/low do not bracket open/close; `--check-against` compares to a reference file.
+
+**Consequence for §3.28d.** The container-recycle exposure is largely closed: `data_5min/` and
+`data_pm/` can both be rebuilt from Box without the user re-uploading anything (data_pm via
+`build_pm_cache.py`, which derives from the 5-minute files). Cost is one `get_file_content` call
+per ticker, so a session can comfortably restore or add ~10–20 names.
+
+**What Box holds** (`Bayesian Capital / 00 Live Trading / data / minute data /`, 38 ticker folders,
+plus `Pre market data/` and `2021 to 2023 bear market/`):
+- *in the book*: TSM, VRT, VST, AVGO, MU, GM, VLO, CF, MRVL
+- *already judged*: ALNY, RKLB, NVDA, PLTR, TSLA, SOFI, SPOT, FCX, NEM, UAL, LEN, MRNA, OXY, FSLR,
+  DVN, COIN, AMD, SMCI, CEG
+- *staged and never tested*: **ARM, DE, HOOD, MSTR, NOC, RBLX, RTX, SHOP, SKHY, STNG** — the folder
+  ids of DE/NOC/RTX/STNG are adjacent to FCX/NEM/UAL/LEN's, so they were staged as the next
+  candidate round. On the §3.32 reading the non-AI ones are the interesting set: **DE** (agriculture
+  / industrial), **NOC** and **RTX** (defence), **STNG** (tankers). SKHY has only Jul–Aug 2026 and
+  is too short to fit.
 
 
 ---
