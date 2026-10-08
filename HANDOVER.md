@@ -1655,6 +1655,77 @@ real and worth saying plainly: **this IS an AI-driven strategy** (80% of live P&
 interchangeable** — GM is the one the bear evidence questions (§3.41), CF the one it vindicates.
 
 
+### 3.43 Capacity without leverage: the daily book is near its equal-weight liquidity ceiling, and every way of raising it concentrates the AI trade — which is the real case for a second cadence (8 Oct)
+
+User wants to deploy more capital without leverage and proposes a different trading cadence —
+weekly, larger premia, on names the daily book does not hold. Three things were established.
+
+**1. The daily book is close to its ceiling, and CF sets it.** Applying §3.37's gate (an order
+under ~1% of the median at-bid dollar volume and ~10% on a thin fill day) name by name:
+
+| | median at-bid | thin day | max name order | binds on |
+|---|---|---|---|---|
+| AVGO | 2064.9m | 219.4m | **20.65m** | median |
+| TSM | 1752.1m | 191.2m | **17.52m** | median |
+| MU | 1711.2m | 185.1m | 17.11m | median |
+| MRVL | 623.7m | 68.2m | 6.24m | median |
+| VRT | 480.3m | 35.6m | 3.56m | thin day |
+| VST | 307.3m | 41.3m | 3.07m | median |
+| GM | 245.4m | 33.3m | 2.45m | median |
+| VLO | 189.3m | 14.4m | 1.44m | thin day |
+| **CF** | 105.0m | 8.1m | **0.81m** | thin day |
+
+**Under equal weights the thinnest name binds the whole book: CF caps a name-order at $0.81m, so
+the equity ceiling is ~$7.3m against today's ~$5.4m — about 1.3× headroom.** (Conservative: it
+assumes every name funded at once, where a typical morning funds about six sleeves.)
+
+**2. A per-name liquidity cap would raise the ceiling roughly 10×, to ~$73m — but it is not free.**
+Letting each name take what it can absorb concentrates the book mechanically into the liquid AI
+names (AVGO, TSM and MU alone absorb $55m of the $73m). That reintroduces exactly the
+concentration §3.42 measured as costing **7.4pp of return and 10.9pp of drawdown**. Note this is a
+different question from §3.18, which asked whether unequal weights EARN more at fixed capital (they
+do not); this asks how much capital the book can CARRY, and there the answer differs. The cap is
+worth testing on its own, but as a capacity instrument it buys room by taking AI beta.
+
+**3. Which is the real argument for a second cadence — better than the one offered.** It is not
+that the daily book cannot take more capital; it is that **every route to making it take more
+concentrates it into the AI trade**, and that has just been measured as expensive. A weekly book on
+names the daily model rejects is the only route that adds capacity without adding concentration.
+
+**The weekly model's state, recovered.** It exists, is validated, and runs NVDA and AVGO live
+(AVGO now also sits in the daily book — a conflict to resolve before any expansion). Two real
+structural advantages over the daily model:
+- **Only TWO parameters are fitted** (cap and premium), because the mean-reversion term is dormant
+  — reconfirmed on a fresh name today: *"binding constraint: formula 0%, open 80%, athcap 20%"*.
+  Against §3.1's record of fitting failures, a 2-parameter search is far more defensible than a
+  10-parameter one.
+- **It barely loses anything to fill verification.** Only Monday fills are same-day ambiguous;
+  Tue–Fri exits are provable from daily bars. The daily model loses roughly half its sheet return
+  to this (§3.5, RKLB 508% → 158%).
+
+**Against it:** its own fragility record (implementation spec lists the weekly premium ranging
+0.06–0.20 on one name, and weekly experiments pinning to a grid boundary, as overfitting tells;
+§3.1 — weekly refitting beat frozen in 1 of 18 folds); its planning figures are LOWER than the
+daily book's (NVDA 58%, AVGO 60% against the daily plan of 74%); and **its capital profile is
+committed, not liquid** — today's smoke test ended with 3 of 3 tranches still holding, 100% of
+terminal value in open positions, median hold 18 days but a 95th percentile of **562 days**, which
+is what the 26-week cap exists to bound.
+
+**Infrastructure repaired (it was dead).** `weekly_name.py` — "run any name through the full weekly
+pipeline" — failed at import through three modules, all tracing to the 2025 upload path that died
+with the container: `stop_sweep.load_book` (now discovers the workbook like `live5_load` and reads
+its roster from the Query headers), `weekly_mr`'s NVDA-specific module globals (now tolerate a
+roster without NVDA), and `five_min.make_checker` → `minute_index.make_checker` (different return
+signature). It now runs end to end on any ticker with a 5-minute file.
+
+**Proposed next step.** Candidates should be the HIGH-VOLATILITY names the daily model rejected,
+since the weekly premia that fit are 6–20% and need names that move: TSLA and PLTR (which already
+have weekly vectors in `weekly_params.json`), plus COIN, MSTR, SMCI, ARM, HOOD from Box. Run them
+through `weekly_name.py`, judge on the NEIGHBOURHOOD MEDIAN rather than the fitted peak (the script
+reports both by design), and apply the liquidity gate — it matters more here, since a weekly
+position is held for weeks rather than days.
+
+
 ---
 
 ## 4. Live workbook state and known issues

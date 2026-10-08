@@ -8,8 +8,25 @@ trustworthy out of sample, or does frozen 50 hold up?
 import openpyxl, datetime, copy
 from engine import Params, run_model
 
-F = '/root/.claude/uploads/2d71f10a-e19f-51b2-8457-2cd547c34dff/602b5e6f-Hybrid9_Bayesian_OULIVE_PLTR_nopq.xlsx'
-STOCKS = ['NVDA', 'TSM', 'TSLA', 'VRT', 'VST', 'AVGO', 'PLTR', 'RKLB', 'SOFI', 'SPOT']
+# Repaired 8 Oct 2026: this pointed at a 2025 upload that died with the
+# container, and carried the original ten-name Hybrid9 roster. The workbook is
+# discovered the same way live5_load does it, and the roster is read from the
+# workbook's own Query headers so it tracks whatever book is live.
+from live5_load import _find_workbook
+
+F = _find_workbook()
+
+
+def _roster(path=None):
+    wb = openpyxl.load_workbook(path or F, data_only=True, read_only=True)
+    q = wb['Query']
+    head = next(q.iter_rows(values_only=True))
+    names = [h[:-2] for h in head if isinstance(h, str) and h.endswith('_O')]
+    wb.close()
+    return names
+
+
+STOCKS = _roster()
 GRID = [10, 15, 20, 25, 30, 40, 50, 60, 75, 90, 120, 150, 10_000]  # 10000 = effectively no stop
 
 

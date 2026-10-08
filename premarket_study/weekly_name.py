@@ -20,12 +20,26 @@ Same-day exits are verified against each name's 5-minute bars; sessions outside 
 fall back to the provable at-open case only.
 """
 import statistics, math, sys
-from stop_sweep import load_book
 from weekly_anchor_test import group_weeks, wstats, tranche, DAY
 from weekly_mr import P
-from five_min import make_checker
+from minute_index import make_checker
 
-DATA, _P, _C = load_book()
+# Data source repaired 8 Oct 2026. It used stop_sweep.load_book(), which reads a
+# 2025 upload path that died with the container and carries the pre-AVGO roster.
+# Names now come from data_5min/ via the same loader the rest of the pipeline
+# uses, so any ticker with a 5-minute file can be run -- which is the point of
+# this script. minute_index.make_checker replaces five_min's; same signature.
+from fresh_opt_cands import daily_from_5min
+
+
+class _Lazy(dict):
+    """data_5min/ on demand, so a run does not load every name."""
+    def __missing__(self, k):
+        self[k] = daily_from_5min(k)
+        return self[k]
+
+
+DATA = _Lazy()
 CAPS = [round(0.02 + 0.005*i, 4) for i in range(37)]       # 0.020 .. 0.200
 PREMS = [round(0.02 + 0.005*i, 5) for i in range(37)]      # 0.020 .. 0.200
 PERT = (0.97, 1.03)
@@ -41,7 +55,7 @@ class Name:
         self.stock = stock
         self.S = DATA[stock]
         self.DTS, self.O, self.H, self.L, self.C = self.S
-        self.check, self.idx = make_checker(stock, self.DTS, self.O)
+        self.check = make_checker(stock, self.DTS, self.O)
         self.anchors = {a: [wstats(w, *self.S[1:]) for w in group_weeks(self.DTS, a)]
                         for a in range(5)}
         self.WS = self.anchors[0]
@@ -122,7 +136,7 @@ def report(stock):
     rw, tw = nm.seg(P, 1, N-1)
     base = nm.ann(rw, 1, N-1)*100
     floor = max(8, int(0.4*tw))
-    print(f'\n{"="*78}\n{stock}: {N} weeks, 5-min coverage {len(nm.idx)} days', flush=True)
+    print(f'\n{"="*78}\n{stock}: {N} weeks, {len(nm.DTS)} sessions', flush=True)
     print(f'at the NVDA parameters (Monday anchor): {base:.1f}% ann, {tw} trades; '
           f'trade floor {floor}', flush=True)
 

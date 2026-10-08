@@ -21,8 +21,15 @@ from minute_engine import build_index
 import numpy as np
 
 data, params, cached = load_book()
-DTS, O, H, L, C = data['NVDA']
-IDX = build_index()
+# NVDA ran the weekly model but is not in the current daily workbook, so these
+# module globals (used only by verify_same_day, which is NVDA-specific) may be
+# unavailable. Importers that supply their own checker — weekly_name.py does —
+# must not break on that.
+try:
+    DTS, O, H, L, C = data['NVDA']
+    IDX = build_index()
+except (KeyError, FileNotFoundError):
+    DTS = O = H = L = C = IDX = None
 COMM = 0.005
 INTEREST = 0.0314
 
@@ -43,7 +50,7 @@ def build_weeks():
     return [w for w in wk if len(w) >= 2]
 
 
-WEEKS = build_weeks()
+WEEKS = build_weeks() if C is not None else []
 
 
 def wk_stats(idxs):
@@ -56,6 +63,9 @@ WS = [wk_stats(w) for w in WEEKS]
 
 def verify_same_day(i, buy, target):
     """True if, on session i, the target was reached at or after the fill (minute bars)."""
+    if IDX is None:
+        raise RuntimeError('verify_same_day needs NVDA bars, which this roster '
+                           'does not carry — pass your own checker instead')
     e = IDX.get(DTS[i])
     if e is None:
         return None                      # no coverage -> caller decides
