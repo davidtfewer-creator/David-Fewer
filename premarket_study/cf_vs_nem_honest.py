@@ -1,6 +1,6 @@
 """
-cf_vs_nem_honest.py — the symmetric test: CF and NEM each on their OWN
-train-half vectors (7 Oct 2026).
+cf_vs_nem_honest.py — the symmetric test: CF and a candidate each on their
+OWN train-half vectors (7 Oct 2026; generalised to any candidate 8 Oct).
 
 §3.33 declined NEM because the swap only won on NEM's full-sample reference
 vector and lost the tested half on its honest train-half fits. That comparison
@@ -18,9 +18,11 @@ halves), so CF's A is 8-dim and B 6-dim, while NEM — having no prior reference
 conservative fit, so if anything this understates CF's train-half edge and
 flatters NEM's.
 
-Usage: BAYES_WORKBOOK=<workbook.xlsx> python cf_vs_nem_honest.py
+Usage: BAYES_WORKBOOK=<workbook.xlsx> python cf_vs_nem_honest.py [CANDIDATE]
+       (default NEM; pass e.g. RTX for a later round)
 """
 import json
+import sys
 
 from fresh_opt import a_params, b_params
 from fresh_opt_cands import aw_params, ref_params
@@ -32,22 +34,23 @@ OUT = 'cf_vs_nem_honest.json'
 
 
 def main():
+    cand = (sys.argv[1] if len(sys.argv) > 1 else 'NEM').upper()
     c = json.load(open('fresh_opt_cands.json'))
     po0 = {'MRVL': aw_params(c['MRVL']['reference']['vec'], t0()),
            'AVGO': aw_params(c['AVGO']['reference']['vec'], t0())}
-    nem_ref = aw_params(c['NEM']['reference']['vec'], t0())
+    cand_ref = aw_params(c[cand]['reference']['vec'], t0())
     vec = {
         ('CF', 'A'): lambda: a_params(c['CF']['A']['vec'], ref_params('CF')),
         ('CF', 'B'): lambda: b_params(c['CF']['B']['vec'], ref_params('CF'),
                                       c['CF']['B']['mle']),
-        ('NEM', 'A'): lambda: a_params(c['NEM']['A']['vec'], nem_ref),
-        ('NEM', 'B'): lambda: b_params(c['NEM']['B']['vec'], nem_ref,
-                                       c['NEM']['B']['mle']),
+        (cand, 'A'): lambda: a_params(c[cand]['A']['vec'], cand_ref),
+        (cand, 'B'): lambda: b_params(c[cand]['B']['vec'], cand_ref,
+                                      c[cand]['B']['mle']),
     }
 
     print('captive, verified fills (straight from the fits):')
     print(f'  {"":5s}{"reference full":>16s}{"A train/test":>16s}{"B train/test":>16s}')
-    for s in ('CF', 'NEM'):
+    for s in ('CF', cand):
         r = c[s]
         print(f'  {s:5s}{r["reference"]["full"]*100:>15.1f}%'
               f'{r["A"]["train"]*100:>9.1f}/{r["A"]["test"]*100:<6.1f}'
@@ -58,8 +61,8 @@ def main():
           f'{"fills":>7s}{"/yr":>6s}{"top3rd":>8s}')
     res, rows = {}, {}
     for var in ('A', 'B'):
-        for nm in ('CF', 'NEM'):
-            names = ROSTER if nm == 'CF' else [n for n in ROSTER if n != 'CF'] + ['NEM']
+        for nm in ('CF', cand):
+            names = ROSTER if nm == 'CF' else [n for n in ROSTER if n != 'CF'] + [cand]
             po = dict(po0)
             po[nm] = vec[(nm, var)]()
             d, sl, cal = load_all(names=names, params_override=po)
@@ -72,16 +75,17 @@ def main():
             print(f'  {f"{nm} on its variant {var}":32s}{r["full"]*100:>7.1f}'
                   f'{r["train"]*100:>7.1f}{r["test"]*100:>7.1f}{r["maxdd"]*100:>7.1f}'
                   f'{r["fills"]:>7d}{sh["per_yr"]:>6.0f}{(sh["top3"] or 0)*100:>7.0f}%')
-        a, b = rows[('CF', var)], rows[('NEM', var)]
-        print(f'  {"   swap delta (NEM - CF)":32s}{(b["full"]-a["full"])*100:>+7.1f}'
+        a, b = rows[('CF', var)], rows[(cand, var)]
+        print(f'  {f"   swap delta ({cand} - CF)":32s}{(b["full"]-a["full"])*100:>+7.1f}'
               f'{(b["train"]-a["train"])*100:>+7.1f}{(b["test"]-a["test"])*100:>+7.1f}'
               f'{(b["maxdd"]-a["maxdd"])*100:>+7.1f}\n')
         res[f'delta {var}'] = dict(full=b['full'] - a['full'], train=b['train'] - a['train'],
                                    test=b['test'] - a['test'], maxdd=b['maxdd'] - a['maxdd'])
 
-    with open(OUT, 'w') as f:
+    out = OUT if cand == 'NEM' else f'cf_vs_{cand.lower()}_honest.json'
+    with open(out, 'w') as f:
         json.dump(res, f, indent=1, default=str)
-    print(f'saved {OUT}')
+    print(f'saved {out}')
 
 
 if __name__ == '__main__':

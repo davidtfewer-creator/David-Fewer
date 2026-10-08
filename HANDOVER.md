@@ -1370,6 +1370,62 @@ Note the gate TIGHTENS as the book grows: at double the equity STNG's thin-day s
 100%, and even CF's would pass 25%.
 
 
+### 3.38 NOC declined; RTX is the first genuine contender — it fixes CF's concentration but G5 will not confirm it (8 Oct)
+
+**NOC: declined at G2, decisively.** Reference (full-sample, flagged) 12.6% full / 2.2 train /
+23.4 test; **variant A −1.9% on the tested half, variant B −7.2%** — both honest vectors NEGATIVE
+out of sample, against a 30% gate. Pooled swap CF→NOC is −5.9 full / −7.1 train / −4.2 test. The
+purest correlation ever screened here (book corr −0.07) and it earns nothing: §3.32's trade-off at
+its most extreme. Its quiet tape (dip+rec 8.2%) did predict this, but only by luck — see STNG
+(§3.36), where the same screen pointed the opposite way and was wrong.
+
+**RTX: clears every gate up to the last one.**
+
+| captive, verified fills | reference full | A train/test | B train/test |
+|---|---|---|---|
+| CF | 46.9% | 43.4 / 52.9 | 44.4 / 42.4 |
+| **RTX** | **51.9%** | **36.7 / 47.2** (69 buys) | **34.3 / 49.7** (42 buys) |
+
+**RTX is the first candidate whose two honest variants both clear its gate on both halves** (34–50%
+against 30%). NEM's agreed but under a 50% gate it could not clear; LEN's and NOC's collapsed
+negative. It also passes G0b comfortably (§3.37: $1m is 0.5% of at-bid volume on a median fill day,
+3.2% on a thin one) and G1 cleanly (beta 0.09, book corr 0.21).
+
+**And it fixes the thing the user actually complained about.** Top third of P&L: **RTX 66% on the
+reference, 84% and 81% on A and B — against CF's 102%, 117% and 107%.** On every vector tested,
+RTX's return is far more evenly spread than CF's. It is the first candidate to come in under
+§3.32's 80% concentration bar at all, and the reference figure sits among the AI names (MU 53%,
+VLO 64%, TSM 68%). Stress windows improve across the board (Jan–Apr 2025 −6.6% → **+1.5%**;
+Feb–Jun 2025 +12.8 → +17.2; Jun–Jul 2026 +35.9 → **+49.6**).
+
+**But G5 will not confirm it.** On the reference vector the swap is +1.7 full / +0.5 train / +3.1
+test at maxDD +0.0 — a clean win. On the honest vectors, symmetric (each name on its own, variant
+against matching variant):
+
+| | full | train | test | maxDD | RTX /yr | top 3rd |
+|---|---|---|---|---|---|---|
+| swap on variant A | **+1.5** | **+1.0** | **+2.0** | −0.6 | 50 | 84% |
+| swap on variant B | **−3.1** | **−4.9** | **−0.5** | +0.7 | 32 | 81% |
+
+**A says swap, B says do not.** That is the §3.27 shape — directions disagree, so no adoption. The
+disagreement is driven by CF's own B being an unusually strong configuration (75.8 / 49.1 / 105.7 at
+maxDD 22.9), not by RTX being weak. RTX also only sometimes clears the ≥50/yr half of the bar
+(50/yr on A, 32 on B, 24 on the reference) and holds 16 days on the reference, longer than CF's 12.
+
+**Verdict and the shape of the decision.** Not adoptable on the protocol: the binding gate does not
+agree with itself. But this is the first time the trade-off has been clean enough to put as a
+choice rather than a verdict, because **the two objectives now separate**:
+- On RETURN the evidence is a coin flip (+1.5 on A, −3.1 on B, +1.7 on the lookahead reference).
+- On PREDICTABILITY — the user's actual objection — the evidence is **one-sided for RTX on every
+  vector**, and drawdown is neutral-to-better throughout.
+
+So the honest options are (a) keep CF and leave RTX on the watch list for a re-test when more data
+accumulates, as NEM was; or (b) swap on the risk argument — trading roughly neutral expected return
+for materially more evenly distributed P&L and slightly better drawdown — as a priced decision in
+the shape of the RKLB→AVGO call (§3.28), explicitly NOT a model verdict. **Six candidates have now
+been tested against this slot; RTX is the first that could be defended either way.**
+
+
 ---
 
 ## 4. Live workbook state and known issues
