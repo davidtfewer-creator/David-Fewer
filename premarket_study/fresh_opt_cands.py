@@ -67,7 +67,7 @@ REF = {
     'STNG': None,
     'NOC':  None,
     'RTX':  None,
-    'DE':   None,   # Box item erroring, data not yet retrievable (3.35)
+    'DE':   None,   # uploaded by hand 8 Oct after the Box item errored (3.35)
 }
 
 AW_BOUNDS = A_BOUNDS + [(30, 150)]              # + ou_W

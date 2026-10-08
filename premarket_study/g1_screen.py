@@ -81,7 +81,16 @@ def main():
         rng = float(np.mean([(H[i] - L[i]) / C[i] for i in range(n)]))
         absm = float(np.nanmean(np.abs(R[nm])))
         _, hit = dip_recover(O, H, L, C)
-        cls = 'uncorrelated (30%)' if (beta < 0.25 and cb < 0.30) else 'AI-related (50%)'
+        # §3.14 classified on AI BETA, not on book correlation: FCX 0.49, UAL
+        # 0.43 and NEM 0.27 were called AI-related; LEN at 0.09 uncorrelated.
+        # Book correlation is context — GM (0.35) and VLO (0.31) sit in the
+        # book as diversifiers, so a correlation threshold near 0.30 would
+        # exclude incumbents. Anything between LEN's 0.09 and NEM's 0.27 is
+        # genuinely borderline and is flagged rather than decided.
+        cls = ('uncorrelated (30%)' if beta < 0.20 else
+               'AI-related (50%)' if beta >= 0.27 else 'BORDERLINE')
+        if cls == 'BORDERLINE':
+            cls = f'BORDERLINE (beta {beta:.2f} between LEN 0.09 and NEM 0.27)'
         tag = nm if nm in cands else f'[{nm}]'
         rows.append((nm, beta, ca, cb, rng, absm, hit, cls))
         print(f'  {tag:6s}{beta:>9.2f}{ca:>9.2f}{cb:>11.2f}{n:>10d}{rng*100:>9.2f}'

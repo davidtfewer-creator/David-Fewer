@@ -1426,6 +1426,52 @@ the shape of the RKLB→AVGO call (§3.28), explicitly NOT a model verdict. **Si
 been tested against this slot; RTX is the first that could be defended either way.**
 
 
+### 3.39 DE declined at G2; the candidate programme closes at seven names, one contender
+
+DE arrived by hand upload after its Box item kept erroring (§3.35). It clears the cheap gates
+easily — liquidity $459m ADV, $1m = 0.5% of at-bid volume on a median fill day and 3.4% on a thin
+one, better than CF; and G1 beta 0.14, between LEN's 0.09 and GM's 0.18, with a book correlation of
+0.30 that matches incumbent VLO's 0.31. So: uncorrelated, 30% gate.
+
+| DE | train | test | buys |
+|---|---|---|---|
+| reference (full-sample, flagged) | 31.2% | 37.6% | 88 (~37/yr) |
+| A | 39.3% | **16.8%** | 27 |
+| B | 38.7% | **22.7%** | 40 |
+
+**Declined at G2.** The reference's halves are balanced and it trades 37/yr, which is the most
+promising-looking reference of the round — but it is a full-sample fit, and both honest vectors
+land at **16.8% and 22.7% against the 30% gate**. They at least agree with each other and decay in
+the honest direction (train ~39 → test ~17–23) rather than inverting, so this is an ordinary
+shortfall rather than a mirage. It is simply not enough.
+
+**A correction made in passing.** `g1_screen.py` had classified DE as AI-related on a
+book-correlation threshold of 0.30 that I introduced this session. §3.14 classified on AI BETA
+(FCX 0.49, UAL 0.43, NEM 0.27 → AI-related; LEN 0.09 → uncorrelated), and a 0.30 correlation cut
+would exclude incumbents GM (0.35) and VLO (0.31) from their own slot class. The script now keys on
+beta, with book correlation as context, and flags anything between 0.09 and 0.27 as BORDERLINE
+rather than deciding it. DE reads uncorrelated either way once the threshold is the documented one.
+
+**The programme, settled.** Seven candidates have now been tested against CF's slot:
+
+| | G1 | liquidity | G2 (honest test half) | G5 |
+|---|---|---|---|---|
+| FCX | AI-related | — | through-cycle 48.2% < 50% | declined (§3.14) |
+| UAL | AI-related | — | A clears, B collapses to 12.7% | declined (§3.14) |
+| NEM | AI-related | — | 35.0 / 39.8 vs 50% gate | **declined at G5**, both honest vectors (§3.33) |
+| LEN | uncorrelated | pass | 19.9 / **−8.0** vs 30% | declined at G2 (§3.33) |
+| STNG | uncorrelated | **FAIL** (53% of thin-day at-bid volume) | 13.4 / 4.1 vs 30% | declined twice (§3.36–37) |
+| NOC | uncorrelated | pass | **−1.9 / −7.2** vs 30% | declined at G2 (§3.38) |
+| DE | uncorrelated | pass | 16.8 / 22.7 vs 30% | declined at G2 (§3.39) |
+| **RTX** | uncorrelated | pass | **47.2 / 49.7 vs 30%** | **ambiguous — A +1.5, B −3.1** (§3.38) |
+
+Only RTX got past G2, and only RTX clears §3.32's concentration bar (top third 66% on the
+reference against CF's 102%). It remains the single open question and the only one defensible
+either way; everything else is closed. The structural reading of §3.32–3.33 stands unchallenged
+after seven attempts: **in this era and this universe, a name that does not move with the book
+earns in bursts, and no screen predicts which ones will earn at all.**
+
+
 ---
 
 ## 4. Live workbook state and known issues
