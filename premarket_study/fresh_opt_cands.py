@@ -61,6 +61,13 @@ REF = {
     'NEM':  None,   # (G1: AI-related, 50% gate)
     'UAL':  None,   # (G1: AI-related, 50% gate)
     'LEN':  None,   # (G1: uncorrelated, 30% gate)
+    # Oct 2026 round, sourced from Box (3.34); G1 in 3.35 -- all uncorrelated,
+    # 30% gate. STNG is the shape find (dip+rec 23.5%, the highest screened);
+    # NOC and RTX are the cleanest correlations but the quietest tapes.
+    'STNG': None,
+    'NOC':  None,
+    'RTX':  None,
+    'DE':   None,   # Box item erroring, data not yet retrievable (3.35)
 }
 
 AW_BOUNDS = A_BOUNDS + [(30, 150)]              # + ou_W

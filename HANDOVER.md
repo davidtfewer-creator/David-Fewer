@@ -1302,6 +1302,74 @@ responds normally. That is a Box-side problem with that item, not the integratio
 to Box under a new item, or attaching the file to chat, would both route around it.
 
 
+### 3.36 STNG declined twice over — the screen's best-ever prior produced the book's slowest fit, and the name cannot carry the size (8 Oct)
+
+**The fit (§3.14 path, `fresh_opt_cands.py STNG`).**
+
+| | train | test | buys (test) |
+|---|---|---|---|
+| reference (full-sample, flagged) | **−33.6%** | **+99.7%** | 51 |
+| A | 24.3% | **13.4%** | 16 |
+| B | 4.7% | **4.1%** | 15 |
+
+The reference's halves are violently inverted (−33.6 / +99.7), and the honest vectors earn
+**4–13% on the tested half against the 30% gate** STNG faces as an uncorrelated name. **Declined at
+G2**, more decisively than LEN (17–20%). The honest fits also trade only ~13/yr, below LEN's 19 and
+CF's 24.
+
+**This is the sharpest confirmation yet of §3.33's rule, and it arrived prospectively.** STNG had
+**the best price-behaviour prior any candidate has ever had** — dip-and-recover on 23.5% of
+sessions, the highest ever screened, above every incumbent and every prior candidate — and the fit
+turned it into **the slowest name in the comparison**. The screen was not merely imprecise; it was
+anti-predictive. Turnover follows the fitted premium, not the price series. Treat every future
+price screen as a way to order the queue, never as evidence.
+
+### 3.37 A liquidity gate is missing from the protocol — and it independently kills STNG
+
+User's question, prompted by STNG's thin tape: "if average volume is below 1m shares at $80, that is
+under $80m traded a day, and I want to buy $0.5–1m. Will my activity move the price?"
+Script: `liquidity_check.py`.
+
+**ADV is the wrong denominator here.** The model does not work an order through the day — it rests a
+LIMIT BUY below the market and is filled, if at all, by someone else's selling. What binds is the
+dollar volume that trades AT OR BELOW the bid, which is far smaller than ADV. Measured from the
+5-minute archive, regular hours, bid 2% below the previous close:
+
+| | median px | ADV $m | $1m / ADV | $ at bid (median fill day) | of which first hour | **$1m / at-bid** | **$1m / at-bid, thin day** |
+|---|---|---|---|---|---|---|---|
+| **STNG** | **61** | **39.1** | **2.56%** | **16.9m** | **1.6m** | **5.9%** | **53.2%** |
+| NOC | 522 | 309.1 | 0.32% | 95.5m | 13.2m | 1.0% | 7.3% |
+| RTX | 139 | 484.4 | 0.21% | 203.2m | 6.5m | 0.5% | 3.2% |
+| CF | 86 | 144.5 | 0.69% | 105.0m | 7.0m | 1.0% | 12.4% |
+| GM | 53 | 422.8 | 0.24% | 245.4m | 22.9m | 0.4% | 3.0% |
+| VLO | 154 | 336.5 | 0.30% | 189.3m | 10.9m | 0.5% | 7.0% |
+| VST | 155 | 624.7 | 0.16% | 307.3m | 71.0m | 0.3% | 2.4% |
+| TSM | 211 | 2641.1 | 0.04% | 1752.1m | 343.6m | 0.1% | 0.5% |
+| MU | 123 | 2509.0 | 0.04% | 1711.2m | 393.5m | 0.1% | 0.5% |
+
+- **The user's estimate was generous**: STNG's ADV is **$39m**, not $80m (median price $61, not $80).
+- **At $1m, STNG is 5.9% of the at-bid volume on a median fill day and 53% on a thin one.** Only
+  **$1.6m** trades at or below the bid in the first hour, where §3.20 showed 56–80% of fills occur.
+  At that share the order is not participating in the price, it IS the price.
+- **The book's incumbents are all fine.** The worst is CF at 1.0% / 12.4%; the AI names are
+  negligible at 0.1%. **NOC and RTX are fine too** (1.0% / 7.3% and 0.5% / 3.2%) — liquidity is not
+  what is wrong with them.
+- **It also makes STNG's backtest unreliable in the flattering direction.** The engine assumes a
+  FULL fill at the bid whenever the low touches it. Where an order is 5–50% of the volume available
+  at that price, real fills would be partial, so the simulation overstates both fill count and
+  return — for STNG and not for the book names.
+- **Where impact actually lives**: entries and take-profits are resting limits (passive; the failure
+  mode is a partial fill, not a worse price). The **50-day time stop sells AT THE OPEN** and is
+  marketable — that is the one genuinely impactful order, on ~4% of trades.
+
+**Proposed addition to the gates — G0b, liquidity, run before G2 because it is nearly free.** At the
+book's current ~$5.4m equity a funded sleeve is ~$430k and both sleeves of a name ~$860k, so test
+$1m. Admit only if **$1m ≤ ~1% of the median at-bid dollar volume AND ≤ ~10% on a thin (10th
+percentile) fill day** — which is where every current book name sits and where STNG plainly does not.
+Note the gate TIGHTENS as the book grows: at double the equity STNG's thin-day share would exceed
+100%, and even CF's would pass 25%.
+
+
 ---
 
 ## 4. Live workbook state and known issues
