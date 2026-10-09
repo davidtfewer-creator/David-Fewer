@@ -1846,6 +1846,73 @@ pooled weekly book sim; then the AVGO conflict (it runs the weekly model and sit
 book). Results in `premarket_study/weekly_candidates.json` (13 names, tracked).
 
 
+### 3.46 The half-sample blade on RTX and NEM weekly: both pass, on five cuts each — and RTX is the one that fits the profile you asked for (9 Oct)
+
+§3.45 rested on a three-fold walk-forward, which refits each fold and so can pass a name on the
+strength of three vectors none of which you would have been holding. This is the blade that chose
+the daily book instead (§5): **fit once on the first half, freeze, score the second with one vector
+chosen blind.** Split 2025-05-23 → cut week 60 (2025-05-27); train 59 weeks, test 64.
+
+| | NVDA params (no fit) | **FROZEN on test** | edge | frozen nbhd median | 25th | [lookahead] test optimum |
+|---|---|---|---|---|---|---|
+| **RTX** cap 0.050 prem 0.070 | 10.1% | **51.3%** | **+41.3pp** | **49.0%** | **46.0%** | 67.4% |
+| **NEM** cap 0.065 prem 0.150 | 19.6% | **77.3%** | **+57.7pp** | 55.3% | 47.6% | 125.5% |
+
+Both clear it, and clear it by a wide margin. The frozen vectors reached **76%** (RTX) and 62%
+(NEM) of what a cheat with hindsight could have taken from the test half. Neither is in-sample
+inflated — RTX scores *higher* on the half it never saw (train 46.2% → test 51.3%).
+
+**Split-date sensitivity, because one cut is one number.** Refit and rescore at cuts 44/52/60/68/76
+(`weekly_freeze_shift.py`). **Frozen beats the no-fit baseline on 5/5 cuts for both names.**
+
+| cut | RTX frozen (edge) | RTX pick | NEM frozen (edge) | NEM pick |
+|---|---|---|---|---|
+| 44 (Feb-25) | 47.8% (+34.9) | 0.020/0.035 | 59.6% (+29.2) | 0.070/0.110 |
+| 52 (Mar-25) | 62.4% (+49.9) | 0.030/0.070 | 59.8% (+30.7) | 0.070/0.110 |
+| 60 (May-25) | 51.3% (+41.3) | 0.050/0.070 | 77.3% (+57.7) | 0.065/0.150 |
+| 68 (Jul-25) | 50.2% (+39.2) | 0.030/0.070 | 34.0% (+11.8) | 0.070/0.110 |
+| 76 (Sep-25) | 37.0% (+24.6) | 0.050/0.070 | 34.3% (+8.6) | 0.070/0.110 |
+
+**A concern I raised and the sensitivity run retired.** At the base cut, NEM's train half picked
+0.065/0.150 and its test half 0.020/0.080 — opposite corners, which is normally the tell that a
+surface has moved rather than been measured. It is not: **the train-half pick is 0.070/0.110 at four
+of the five cuts.** What moved was the *test* half's own argmax, and that is a lookahead quantity
+with no standing. The fitted vector is stable; RTX's prem is 0.070 at three of five, cap drifts
+0.020–0.050.
+
+**The edge decays as the test half shortens** (RTX +49.9 → +24.6pp, NEM +57.7 → +8.6pp). Partly
+fewer trades (RTX 50 → 12), partly that later cuts score only the 2026 stretch. **Plan on the
+neighbourhood median across cuts — RTX ~49%, NEM ~50% — not on the base-cut headline**, and note
+NEM's spread across cuts is far wider (29.9–55.3%) than RTX's (38.8–62.9% but 48.8/49.0/49.4 at
+three of five).
+
+**Why RTX is the pick, on your own criterion.** You rejected CF because "with optimised parameters
+it relies on a small number of high margin trades… fast turnover stocks are a better fit." On the
+full sample at their frozen vectors:
+
+| | ann | trades/yr | per tranche | median hold | open at end | mark −20% | mark −40% |
+|---|---|---|---|---|---|---|---|
+| **RTX 0.050/0.070** | 52.9% | **17.9** | 6.0 | 26d | **0%** | **52.9%** | **52.9%** |
+| NEM 0.070/0.110 | 73.0% | 15.8 | 5.3 | 14d | 100% | 57.3% | 39.2% |
+| NEM 0.065/0.150 | 71.6% | 11.1 | 3.7 | 45d | 100% | 56.1% | 38.1% |
+
+**RTX's frozen run ends entirely in cash.** Its 52.9% is realised, not marked — the only result in
+this book with no terminal-mark exposure at all. NEM ends fully invested on all three tranches, so
+a −20% mark takes 73.0% → 57.3% and −40% → 39.2%. NEM at the base-cut vector is also the CF profile
+exactly: 11.1 trades/yr at a 15% premium with a 45-day median hold. **If NEM is run, run it at
+0.070/0.110** — the vector the train half actually picks four times out of five, 15.8 trades/yr,
+14-day median hold, and a higher full-sample return than the 0.150 cell.
+
+**Status.** RTX weekly is confirmed: the blade, five cuts, AI beta 0.09, comfortable liquidity, and
+a trade profile that matches what you said you want. NEM weekly passes too but is the weaker of the
+two — wider cut-to-cut spread, full terminal-mark exposure, AI beta 0.27 — and its case rests on the
+0.070/0.110 vector, not the one the base cut picked.
+
+**Not yet done:** the pooled weekly book sim, and the AVGO conflict (it runs the weekly model and
+now also sits in the daily book). Results in `premarket_study/weekly_freeze.json` and
+`weekly_freeze_shift.json` (tracked).
+
+
 ---
 
 ## 4. Live workbook state and known issues
