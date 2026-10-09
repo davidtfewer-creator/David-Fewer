@@ -2246,6 +2246,85 @@ the book's composition changes. Results in `screen_speed.json`, `ssf_a.json`, `s
 `screen_speed_slip.json`.
 
 
+### 3.51 G5 on speed-constrained CF: declined — the extra turnover is paid for out of the rest of the book, and it destroys the stress behaviour CF is carried for (9 Oct)
+
+The cleanest marginal test this book has run: **nothing changes except one name's parameter
+vector.** No roster change, no new data, no correlation argument — CF's AI beta, capacity and slot
+are held fixed by construction. Three arms, pooled nine-name book, live config with the PM rule.
+Deltas are quoted against **return-optimal**, not against deployed, because the deployed vector is
+a full-sample fit and §3.33 already made the mistake of setting an honest candidate against it.
+
+| CF vector | full | train | test | maxDD | fills | Δ vs return-optimal |
+|---|---|---|---|---|---|---|
+| deployed *[lookahead]* | 73.4 | 45.4 | 105.1 | 24.2 | 1234 | −1.0 / −2.3 / +0.8 / +0.9 |
+| **return-optimal** (train-half) | **74.4** | **47.7** | **104.4** | **23.4** | 1270 | — |
+| **speed-constrained** (train-half) | **70.6** | **42.8** | **102.2** | **24.6** | 1347 | **−3.8 / −4.9 / −2.2 / +1.2** |
+| drop CF (eight names) | 75.7 | 44.3 | 112.0 | 26.4 | 1171 | +1.3 / −3.4 / +7.6 / +3.0 |
+
+**It loses on all three windows and gives up drawdown.** §3.14a's standard is that a candidate must
+beat on BOTH halves without giving up drawdown; this does neither. **Declined at G5**, like every
+other candidate since.
+
+**1. The extra turnover is not free — it is paid for by the other eight names.** Captive, the speed
+vector cost CF 1.6pp (§3.50). Pooled it costs the book 3.8pp. The mechanism is the pooling loop
+itself: CF now fills on far more mornings, and every fill claims a share of the same pot the other
+eight names bid from. At +0.71% a trade, CF's capital earns less than the book's average use of it.
+**A name that trades more takes more capital from better names** — which is exactly the question
+G5 exists to ask, and exactly what a captive backtest cannot see.
+
+**2. It makes the original complaint worse, not better.** The §3.32 bar is two-legged — ≥50
+trades/yr AND the top third of trades carrying <80% of P&L:
+
+| CF vector | /yr | avg trade | hold | losers | **top third** | CF P&L | verdict |
+|---|---|---|---|---|---|---|---|
+| deployed | 24 | +3.12% | 12d | 14% | **102%** | $2.13m | fails the bar |
+| return-optimal | 41 | +1.81% | 4d | 11% | **118%** | $1.93m | fails the bar |
+| speed-constrained | **76** | +0.71% | **1d** | **4%** | **129%** | $1.59m | **fails the bar** |
+
+It clears the turnover leg handsomely and **fails worse on the concentration leg.** The session
+opened with *"CF relies on a small number of high margin trades"*; the fast vector gives **many tiny
+wins and a few large stops** — 4% losers but 8 stops, so the bottom two thirds of trades are net
+negative and the top third carries 129%. The dependence on a handful of trades did not go away; it
+got worse, and the P&L fell by half a million dollars.
+
+**3. The decisive one: it destroys the stress behaviour CF is carried for.**
+
+| CF vector | Jan–Apr 2025 (the AI drawdown) | Feb–Jun 2025 | Jun–Jul 2026 |
+|---|---|---|---|
+| deployed | −6.6% (DD 24.2) | +12.8% | +35.9% |
+| return-optimal | **−0.9%** (DD 23.4) | +14.6% | +36.2% |
+| **speed-constrained** | **−10.1%** (DD 24.6) | +10.7% | +37.8% |
+| drop CF (eight names) | −3.0% (DD 26.4) | +9.1% | +30.2% |
+
+**The fast CF is worse through the AI drawdown than having no CF at all** (−10.1% against −3.0%).
+CF is in the book as uncorrelated insurance (§6, §3.32); a vector that turns it into a loss-maker
+precisely when the book needs it has defeated the purpose of the slot. Plausible mechanism: at a
+0.71% premium with one-day holds it re-enters continuously into a falling tape and takes the stop,
+instead of holding a position through to recovery.
+*Caveat: Jan–Apr 2025 sits in the TRAIN half, so this window is in-sample for every train-fitted
+vector here (§6 flagged the same limitation). It is in-sample and still bad, which is the point.*
+
+**4. The methodological conclusion, which generalises beyond CF.** G4 is a good **screening
+descriptor** and a bad **objective constraint**. Fitting to it buys turnover the only way the model
+can — by cutting the premium — and a lower premium means thinner edge per trade, more capital
+claimed from the pool, and no cushion when the tape goes against the position. §3.50's four
+"rescues" should all be read this way until each has been through G5; CF was the cheapest of the
+four by far (−1.6pp captive against RTX's −22.2pp) and it still fails here.
+
+**5. And the premise deserved checking.** The nine-name book does **~537 fills a year**; CF
+contributes 41 of them at the return-optimal vector, **under 8%**. Making CF three times faster
+moves the book from ~537 to ~570 fills a year — **a 6% increase in trading activity for 3.8pp of
+return and 1.2pp of drawdown.** The trading character of the entity rests on the book, which holds
+for a median of one day and closes 76% of positions inside five days (§3.49); it was never going to
+rest on its slowest 8%.
+
+**Not a finding, but worth recording:** return-optimal CF and deployed CF are within ~1pp of each
+other on the tested half (104.4 vs 105.1), so the honest train-half refit neither helps nor hurts.
+There is no case here for changing the live CF vector.
+
+**Status: CF stays as it is.** Results in `premarket_study/cf_speed_g5.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -2456,6 +2535,9 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- A turnover gate is a screening **descriptor**, not an objective **constraint** (§3.51):
+  fitting to it cuts the premium, which in a pooled book takes capital from better names
+  and removes the cushion in a drawdown.
 - Turnover follows the **fitted premium**, not the name alone (§3.50): CF runs at
   25.7, 42.6 or 89.4 fills/yr on three different vectors. §3.49's "property of the name"
   was too strong.
