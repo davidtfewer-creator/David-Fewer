@@ -1992,6 +1992,69 @@ question, which none of this answers), and close out the AVGO conflict with the 
 Results in `premarket_study/weekly_book_sim.json`; AVGO and DE merged into `weekly_freeze.json`.
 
 
+### 3.48 The weekly "three tranches" are one position cut in three — they lock in week 4 and never separate again (9 Oct)
+
+Asked to explain the six sleeves of §3.47's book, I measured them instead of describing the intent,
+and the intent is not what happens.
+
+**What a weekly sleeve is.** It is NOT the daily book's Bayes/OU pair — those are two different
+models on one name. All three weekly sleeves of a name run the *same* model with the *same* fitted
+(cap, prem). They differ only in start week: tranche 0 prices its first bid in week 2, tranche 1 in
+week 3, tranche 2 in week 4, each with a third of the name's capital. Each holds at most one
+position; when free it bids `min(week open, ATH×(1−cap))` and sells at `bid + prev week close ×
+prem`.
+
+**They synchronise immediately and permanently.**
+
+| sleeve | first bid wk | weeks bidding | fills | exits | median hold | max hold |
+|---|---|---|---|---|---|---|
+| RTX t0 / t1 / t2 | 2 / 3 / 4 | 51 / 50 / 49 | 14 / 14 / 14 | 14 / 14 / 14 | 4w each | 20w each |
+| NEM t0 / t1 / t2 | 2 / 3 / 4 | 33 / 33 / 32 | 14 / 13 / 13 | 13 / 12 / 12 | 2w each | 23w each |
+
+Of RTX's 123 weeks, **49 have all three bidding, 72 have none, and exactly two have fewer than
+three — weeks 2 and 3, before tranche 2 has started.** NEM is the same. From week 4 (2024-04-29)
+the three never separate again, for 120 consecutive weeks. When two or more bid, the bids are
+**identical in 49/50 weeks (RTX) and 32/32 (NEM)**.
+
+**Why it is structural, not a quirk of these vectors.** Same parameters → same bid → they fill or
+fail to fill together → same target → they exit together → they come free together. There is no
+mechanism to desynchronise them. The initial stagger is the only source of difference and it is
+consumed in the first three weeks. This holds for **every name in `weekly_candidates.json`**, since
+`Name.seg` runs the identical construction.
+
+**Collapsing the structure costs nothing** (RTX+NEM, full sample, pooled):
+
+| structure | ann | maxDD | trades | open at end |
+|---|---|---|---|---|
+| 3 tranches, 1-week stagger | 66.2% | 15.6% | 79 | 48% |
+| **1 sleeve per name** | **66.2%** | **15.6%** | **27** | **48%** |
+| 3 tranches, 2-week stagger | 67.5% | 15.6% | 79 | 48% |
+| 3 tranches, 4-week stagger | 68.1% | 15.6% | 78 | 48% |
+
+Identical to the decimal, on a third of the trades. (Pooled mode is where this is exact: three
+synchronised sleeves each taking a sixth of the pool is the same order as one sleeve taking a
+third. Widening the stagger to 2 or 4 weeks buys 1–2pp by delaying the lock, which is a sample
+artefact, not a design.)
+
+**What this corrects in §3.45–3.47.**
+1. **Every weekly trade count in this file is inflated threefold.** RTX's "17.9 trades/yr" is
+   **6.0 distinct positions a year**, each entered in three identical pieces; NEM's 15.8 is 5.3.
+   The relative ordering survives (RTX still turns over faster than NEM, and far faster than NEM
+   at the base-cut 0.065/0.150 vector, which is 3.7), but **the absolute turnover is a third of
+   what I reported, and my "fast turnover, the profile you asked for" claim for RTX was made on
+   the inflated number.** Holding periods are unaffected: RTX 4 weeks median, NEM 2.
+2. **§3.47's book is two positions, not six.** The 15.6% max drawdown is a two-position path. That
+   is thinner than "six sleeves" sounds and the caveat should be read accordingly.
+3. **It is a second, sharper reason pooling adds nothing** (§3.47 found a sleeve is non-live only
+   when holding). The three sleeves of a name are not three claimants on the pool — they are one.
+
+**What to do about it.** Collapse to one sleeve per name in any live weekly book: same return, same
+drawdown, **a third of the commissions and a third of the manual IBKR entries**, which matters
+given the carve-out friction raised earlier. If entry-timing diversification is genuinely wanted it
+has to come from something that actually desynchronises — different premia per tranche, or a
+staggered re-entry delay after an exit — neither of which has been tested.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -2202,5 +2265,7 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- Weekly trade counts are **threefold inflated**: the three tranches of a name lock in
+  week 4 and trade identically forever (§3.48), so RTX's "17.9/yr" is 6.0 distinct positions.
 - GM trades **61** times a year on deployed parameters, not 94 (that was the tested-half figure on
   frozen first-half parameters).
