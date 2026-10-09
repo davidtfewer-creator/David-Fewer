@@ -2146,6 +2146,106 @@ slower than the book and nobody noticed until now. Two concrete next steps:
 Results in `premarket_study/two_day.json`; `two_day.py` and `book_turnover.py` are tracked.
 
 
+### 3.50 The screen with a turnover gate (G4): only GM passes, the fast names are all AI names — and CF does not need replacing, it needs refitting (9 Oct)
+
+**The gate.** Every candidate programme in this file judged names on return and AI correlation.
+§3.33 used turnover once, as an aside, against the wrong yardstick — LEN was declined partly for
+being "slower than the 24/yr CF it would replace" — and §3.49 showed CF is itself three times
+slower than the book it sits in. **The bar is the book, not CF**: measured at deployed parameters,
+the live five do 56–92 fills/yr, hold for a median of ONE day, and close 70–81% of positions inside
+five calendar days.
+
+**G4: ≥50 fills/yr, median hold ≤3 days, ≥70% closed within 5 days.** Measured on the unseen half
+at the frozen train-half vector. Run over all 17 names in `data_5min/` outside the book
+(`screen_speed.py`, harness = `two_day.Clock` at n=1, i.e. the daily model in §3.49's control).
+
+| name | AI beta | class | no-fit | frozen | G2 | fills/yr | med | ≤5d | G4 | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **GM** | 0.18 | uncorrelated | 39.1% | 42.7% | Y | **53.5** | **1d** | **83%** | **Y** | **PASS** |
+| VLO | 0.11 | uncorrelated | 106.3% | 47.6% | n | 25.1 | 4d | 60% | n | fails G2 |
+| RTX | 0.09 | uncorrelated | 41.9% | 43.1% | Y | 26.9 | 8d | 39% | n | **fails G4 only** |
+| CF | −0.02 | uncorrelated | 30.8% | 35.8% | Y | 42.6 | 5d | 59% | n | **fails G4 only** |
+| DE | 0.14 | uncorrelated | 19.5% | 24.6% | Y | 18.8 | 17d | 30% | n | **fails G4 only** |
+| LEN | 0.09 | uncorrelated | −3.9% | 16.5% | Y | 7.3 | 1d | 78% | n | **fails G4 only** |
+| STNG | 0.13 | uncorrelated | 30.8% | 12.6% | n | 9.0 | 0d | 91% | n | fails G2 |
+| NOC | −0.05 | uncorrelated | 21.5% | 7.0% | n | 15.5 | 1d | 74% | n | fails G2 |
+| MRVL | 1.18 | AI-related | 85.1% | 88.9% | Y | **68.6** | **0d** | **93%** | **Y** | G1 |
+| SMCI | 1.06 | AI-related | −27.8% | −1.1% | Y | **84.2** | **0d** | **93%** | **Y** | G1 |
+| TSLA | 0.60 | AI-related | 13.3% | 26.6% | Y | **63.5** | **1d** | **79%** | **Y** | G1 |
+| NEM 0.27 / ARM 0.97 / HOOD 0.71 / PLTR 0.50 / COIN 0.68 / MSTR 0.65 | | AI-related | | | | 14–33 | 2–7d | 32–72% | n | G1 |
+
+G1 reproduces the record exactly (ARM 0.97, CF −0.02, LEN 0.09, NEM 0.27, RTX 0.09), which is also
+a check on the restored factor.
+
+**1. One name passes all three, and it is already in the book.** GM: 53.5 fills/yr, median 1 day,
+83% within five days, AI beta 0.18, and it beats the no-fit baseline. **There is no undiscovered
+fast uncorrelated name in this universe.**
+
+**2. The fast names are the AI names.** MRVL, SMCI and TSLA are the only other G4 passes and all
+three fail G1. This is the **third** appearance of one axis: §3.14 found volatility and AI
+correlation are the same thing in this era, §3.45 found my candidate set was AI-correlated because
+I had selected on volatility, and now turnover — which follows from volatility, since a name that
+moves reaches both the bid and the target sooner — joins them. **Speed, volatility and AI
+correlation are one axis.** That is why every diversifier round has produced slow names.
+
+**Read G2 with caution.** The no-fit baseline is a single arbitrary seed vector (the median of the
+stored reference vectors) and it is noisy — VLO's no-fit 106.3% beats its own fitted 47.6%. G4 is a
+structural measurement and far more stable; the per-name G2 verdicts are not worth much weight.
+
+**3. The finding that matters: four names fail ONLY on speed, and all four can be refit to pass**
+(`screen_speed_fast.py` — G4 written into the objective the way the minimum-trade floor already is,
+fitted on the train half, scored on the unseen half):
+
+| | return-optimal (test) | **speed-constrained (test)** | cost | fills/yr | median | ≤5d |
+|---|---|---|---|---|---|---|
+| **CF** | 35.8% | **34.2%** | **−1.6pp** | **89.4** | **0d** | **79%** |
+| DE | 24.6% | 16.9% | −7.7pp | 51.4 | 1d | 83% |
+| RTX | 43.1% | 20.9% | −22.2pp | 65.2 | 0d | 81% |
+| LEN | 16.5% | −0.5% | −17.0pp | 56.3 | 0d | 74% |
+
+All four are feasible **out of sample** — the constraint was fitted on the train half and the test
+half still clears it. The price differs enormously, and **CF is nearly free.**
+
+**4. CF does not need replacing. It needs refitting.** The session opened with *"I'm not happy with
+CF's performance… it relies on a small number of high margin trades… fast turnover stocks are a
+better fit."* Everything since has looked for a replacement. The answer is that **CF's slowness was
+a parameter choice, not the name**: at its deployed vector it does 25.7 fills/yr on a 12-day median,
+at the return-optimal vector 42.6/yr on 5 days, and at the speed-constrained vector **89.4/yr on a
+median of zero days with 79% inside five days — the fastest diversifier in the book, for 1.6pp.**
+
+**Execution cost, because a 0.74% premium invites the question** (`screen_speed_slip.py`, nothing
+refitted, cost raised on both sides):
+
+| test half | 0.5c/share | 2c | 5c | 10c | 10c in bp |
+|---|---|---|---|---|---|
+| CF speed-constrained ($86) | 34.2% | 32.5% | 29.4% | 24.4% | 12bp |
+| CF return-optimal | 35.8% | 35.0% | 33.4% | 30.9% | 12bp |
+| DE speed-constrained ($474) | 16.9% | 16.7% | 16.2% | 15.6% | 2bp |
+| RTX speed-constrained ($139) | 20.9% | 20.1% | 18.4% | 15.9% | 7bp |
+| LEN speed-constrained ($122) | −0.5% | −1.4% | −3.2% | −6.0% | 8bp |
+
+It survives. At 2c/share the cost of putting CF on the book's profile is **2.5pp**, not 1.6. At
+10c — 12bp each way on an $86 stock, which would be poor execution — it is 6.5pp. **LEN is dead on
+any basis.**
+
+**A correction to §3.49.** I wrote there that "turnover is a property of the NAME, not the bar".
+The first half stands, the phrasing does not: turnover follows **the fitted premium**, and the name
+only sets the ceiling. `g1_screen.py`'s own docstring said this (§3.33, "no price screen predicts
+turnover — that follows the fitted premium") and I restated it too strongly. CF moved 25.7 → 42.6 →
+89.4 fills/yr without the name changing at all.
+
+**Caveats.** G5 — the marginal book test — has NOT been run on any of this, and §3.14a established
+G5 as the binding gate; every name declined since has died there, not at G2. The speed-constrained
+vectors are one fit on one half each. CF's 0.74% Bayes premium is roughly fifteen times the
+modelled commission, so it depends on getting the limit fill at the posted price, and its median
+hold of zero days leans on the 5-minute verification being a good proxy for intraday ordering.
+
+**Next:** run G5 on the speed-constrained CF against the deployed CF — a straight swap of the same
+name's vector, which is a cleaner marginal test than any swap attempted so far, since nothing about
+the book's composition changes. Results in `screen_speed.json`, `ssf_a.json`, `ssf_b.json`,
+`screen_speed_slip.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -2356,6 +2456,9 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- Turnover follows the **fitted premium**, not the name alone (§3.50): CF runs at
+  25.7, 42.6 or 89.4 fills/yr on three different vectors. §3.49's "property of the name"
+  was too strong.
 - Weekly trade counts are **threefold inflated**: the three tranches of a name lock in
   week 4 and trade identically forever (§3.48), so RTX's "17.9/yr" is 6.0 distinct positions.
 - GM trades **61** times a year on deployed parameters, not 94 (that was the tested-half figure on
