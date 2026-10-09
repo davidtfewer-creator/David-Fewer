@@ -142,6 +142,14 @@ if __name__ == '__main__':
         print(f'{r["stock"]:7s}{r["nvda_test"]:>7.1f}%{r["frozen_test"]:>8.1f}%'
               f'{r["edge_pp"]:>+7.1f}p{r["nbhd_test_median"]:>9.1f}%{r["nbhd_test_q25"]:>7.1f}%'
               f'{r["test_opt"]:>16.1f}%', flush=True)
+    # merge into the tracked record rather than overwriting it (HANDOVER 3.28d)
+    try:
+        prev = json.load(open('weekly_freeze.json'))
+    except (FileNotFoundError, ValueError):
+        prev = []
+    done = {r['stock'] for r in out}
+    merged = [r for r in prev if r['stock'] not in done] + out
+    merged.sort(key=lambda r: -r['frozen_test'])
     with open('weekly_freeze.json', 'w') as f:
-        json.dump(out, f, indent=1)
+        json.dump(merged, f, indent=1)
     print('DONE', flush=True)

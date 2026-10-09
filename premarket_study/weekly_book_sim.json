@@ -1,0 +1,723 @@
+{
+ "full:RTX": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 52.98351586402175,
+   "final": 2714840.2681018,
+   "trades": 42,
+   "fills": 42,
+   "trades_yr": 17.879370629370626,
+   "maxdd": 16.34967975358139,
+   "open_frac": 0.0,
+   "ann_mark20": 52.98351586402175,
+   "median_hold_wk": 3.5,
+   "still": 0,
+   "sleeves": 3,
+   "mean_free": 1.2195121951219512
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 52.94432283124526,
+   "final": 2713206.7252799785,
+   "trades": 42,
+   "fills": 42,
+   "trades_yr": 17.879370629370626,
+   "maxdd": 16.34967975358138,
+   "open_frac": 0.0,
+   "ann_mark20": 52.94432283124526,
+   "median_hold_wk": 3.5,
+   "still": 0,
+   "sleeves": 3,
+   "mean_free": 1.2195121951219512
+  },
+  "uplift_pp": 0.039193032776488224
+ },
+ "full:NEM": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "NEM"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 78.16736988032953,
+   "final": 3883420.5606365786,
+   "trades": 37,
+   "fills": 40,
+   "trades_yr": 15.750874125874125,
+   "maxdd": 28.45856331953541,
+   "open_frac": 100.00000000000003,
+   "ann_mark20": 62.021871435739854,
+   "median_hold_wk": 2,
+   "still": 3,
+   "sleeves": 3,
+   "mean_free": 0.7967479674796748
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "NEM"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 73.02605711556582,
+   "final": 3625283.969054453,
+   "trades": 37,
+   "fills": 40,
+   "trades_yr": 15.750874125874125,
+   "maxdd": 28.45856331953539,
+   "open_frac": 100.0,
+   "ann_mark20": 57.34646360801594,
+   "median_hold_wk": 2,
+   "still": 3,
+   "sleeves": 3,
+   "mean_free": 0.7967479674796748
+  },
+  "uplift_pp": 5.141312764763711
+ },
+ "full:RTX+NEM": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 66.22845662917918,
+   "final": 3299542.2096695453,
+   "trades": 79,
+   "fills": 82,
+   "trades_yr": 33.63024475524475,
+   "maxdd": 15.644676720549,
+   "open_frac": 47.68475367077,
+   "ann_mark20": 59.28511833980059,
+   "median_hold_wk": 3,
+   "still": 3,
+   "sleeves": 6,
+   "mean_free": 2.016260162601626
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 63.40169599091432,
+   "final": 3169245.347167216,
+   "trades": 79,
+   "fills": 82,
+   "trades_yr": 33.63024475524475,
+   "maxdd": 18.137708105003714,
+   "open_frac": 57.194750988509945,
+   "ann_mark20": 55.16645494605763,
+   "median_hold_wk": 3,
+   "still": 3,
+   "sleeves": 6,
+   "mean_free": 2.016260162601626
+  },
+  "uplift_pp": 2.826760638264858
+ },
+ "full:RTX+NEM+DE": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM",
+    "DE"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 56.53508440940125,
+   "final": 2865217.8603113117,
+   "trades": 91,
+   "fills": 97,
+   "trades_yr": 38.73863636363636,
+   "maxdd": 11.911980912136578,
+   "open_frac": 64.41015194214663,
+   "ann_mark20": 47.60993899548247,
+   "median_hold_wk": 3,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 3.2601626016260163
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM",
+    "DE"
+   ],
+   "weeks": 123,
+   "yrs": 2.349075975359343,
+   "ann": 55.512086315956125,
+   "final": 2821425.2750967015,
+   "trades": 91,
+   "fills": 97,
+   "trades_yr": 38.73863636363636,
+   "maxdd": 13.100665240043218,
+   "open_frac": 67.94519955064217,
+   "ann_mark20": 46.13745618444174,
+   "median_hold_wk": 3,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 3.2601626016260163
+  },
+  "uplift_pp": 1.0229980934451248
+ },
+ "full:RTX+NEM+AVGO": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO"
+   ],
+   "weeks": 121,
+   "yrs": 2.3107460643394937,
+   "ann": 64.4939290472418,
+   "final": 3158402.472558946,
+   "trades": 122,
+   "fills": 128,
+   "trades_yr": 52.7968009478673,
+   "maxdd": 12.746260505020423,
+   "open_frac": 61.712586934337445,
+   "ann_mark20": 55.37859903297371,
+   "median_hold_wk": 2.5,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 2.9834710743801653
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO"
+   ],
+   "weeks": 121,
+   "yrs": 2.3107460643394937,
+   "ann": 60.32126524679591,
+   "final": 2976339.3806021307,
+   "trades": 122,
+   "fills": 128,
+   "trades_yr": 52.7968009478673,
+   "maxdd": 16.330435389458852,
+   "open_frac": 69.65016880909884,
+   "ann_mark20": 50.24411882575175,
+   "median_hold_wk": 2.5,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 2.9834710743801653
+  },
+  "uplift_pp": 4.172663800445896
+ },
+ "full:RTX+NEM+AVGO+DE": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO",
+    "DE"
+   ],
+   "weeks": 121,
+   "yrs": 2.3107460643394937,
+   "ann": 57.78666860633847,
+   "final": 2868733.348951219,
+   "trades": 134,
+   "fills": 143,
+   "trades_yr": 57.9899289099526,
+   "maxdd": 10.079267590086904,
+   "open_frac": 71.44258466570031,
+   "ann_mark20": 47.601993926906715,
+   "median_hold_wk": 3.0,
+   "still": 9,
+   "sleeves": 12,
+   "mean_free": 4.24793388429752
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO",
+    "DE"
+   ],
+   "weeks": 121,
+   "yrs": 2.3107460643394937,
+   "ann": 54.92171006129545,
+   "final": 2749800.6344765117,
+   "trades": 134,
+   "fills": 143,
+   "trades_yr": 57.9899289099526,
+   "maxdd": 13.49684951473986,
+   "open_frac": 75.36237810237577,
+   "ann_mark20": 44.34682930008289,
+   "median_hold_wk": 3.0,
+   "still": 9,
+   "sleeves": 12,
+   "mean_free": 4.24793388429752
+  },
+  "uplift_pp": 2.8649585450430237
+ },
+ "test:RTX": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 58.69603655849565,
+   "final": 1770933.4472608985,
+   "trades": 22,
+   "fills": 22,
+   "trades_yr": 17.777654867256636,
+   "maxdd": 16.34967975358137,
+   "open_frac": 0.0,
+   "ann_mark20": 58.69603655849565,
+   "median_hold_wk": 3.0,
+   "still": 0,
+   "sleeves": 3,
+   "mean_free": 1.2153846153846153
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 53.09060851646679,
+   "final": 1693851.8085494689,
+   "trades": 22,
+   "fills": 22,
+   "trades_yr": 17.777654867256636,
+   "maxdd": 16.34967975358137,
+   "open_frac": 0.0,
+   "ann_mark20": 53.09060851646679,
+   "median_hold_wk": 3.0,
+   "still": 0,
+   "sleeves": 3,
+   "mean_free": 1.2153846153846153
+  },
+  "uplift_pp": 5.605428042028862
+ },
+ "test:NEM": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "NEM"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 62.923861671655025,
+   "final": 1829501.939170825,
+   "trades": 18,
+   "fills": 21,
+   "trades_yr": 14.545353982300885,
+   "maxdd": 28.45856331953541,
+   "open_frac": 100.00000000000003,
+   "ann_mark20": 36.04234679655838,
+   "median_hold_wk": 1.5,
+   "still": 3,
+   "sleeves": 3,
+   "mean_free": 1.1538461538461537
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "NEM"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 62.844639305678584,
+   "final": 1828401.1120631108,
+   "trades": 18,
+   "fills": 21,
+   "trades_yr": 14.545353982300885,
+   "maxdd": 28.4585633195354,
+   "open_frac": 100.0,
+   "ann_mark20": 35.97619567249575,
+   "median_hold_wk": 1.5,
+   "still": 3,
+   "sleeves": 3,
+   "mean_free": 1.1538461538461537
+  },
+  "uplift_pp": 0.07922236597644172
+ },
+ "test:RTX+NEM": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 58.8255528931295,
+   "final": 1772722.202818058,
+   "trades": 40,
+   "fills": 43,
+   "trades_yr": 32.323008849557525,
+   "maxdd": 15.644676720549022,
+   "open_frac": 47.68475367077002,
+   "ann_mark20": 46.46904482427709,
+   "median_hold_wk": 2.0,
+   "still": 3,
+   "sleeves": 6,
+   "mean_free": 2.3692307692307693
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 57.98550648233489,
+   "final": 1761126.4603062898,
+   "trades": 40,
+   "fills": 43,
+   "trades_yr": 32.323008849557525,
+   "maxdd": 16.762009805070477,
+   "open_frac": 51.90998923907829,
+   "ann_mark20": 44.593587922876374,
+   "median_hold_wk": 2.0,
+   "still": 3,
+   "sleeves": 6,
+   "mean_free": 2.3692307692307693
+  },
+  "uplift_pp": 0.8400464107946064
+ },
+ "test:RTX+NEM+DE": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM",
+    "DE"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 45.71618015006314,
+   "final": 1593464.0659757906,
+   "trades": 43,
+   "fills": 49,
+   "trades_yr": 34.747234513274336,
+   "maxdd": 11.911953956774246,
+   "open_frac": 64.4164444207804,
+   "ann_mark20": 30.34826688761818,
+   "median_hold_wk": 2,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 3.3846153846153846
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM",
+    "DE"
+   ],
+   "weeks": 65,
+   "yrs": 1.2375085557837098,
+   "ann": 45.50336180800292,
+   "final": 1590584.5704822864,
+   "trades": 43,
+   "fills": 49,
+   "trades_yr": 34.747234513274336,
+   "maxdd": 12.005077685340215,
+   "open_frac": 64.50253070509225,
+   "ann_mark20": 30.137106310338147,
+   "median_hold_wk": 2,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 3.3846153846153846
+  },
+  "uplift_pp": 0.212818342060217
+ },
+ "test:RTX+NEM+AVGO": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO"
+   ],
+   "weeks": 63,
+   "yrs": 1.1991786447638604,
+   "ann": 42.76227178898084,
+   "final": 1532530.5752148572,
+   "trades": 52,
+   "fills": 58,
+   "trades_yr": 43.363013698630134,
+   "maxdd": 10.941346297142896,
+   "open_frac": 61.712586934337466,
+   "ann_mark20": 27.910135053314278,
+   "median_hold_wk": 3.0,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 3.492063492063492
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO"
+   ],
+   "weeks": 63,
+   "yrs": 1.1991786447638604,
+   "ann": 40.77719634619701,
+   "final": 1507012.228268636,
+   "trades": 52,
+   "fills": 58,
+   "trades_yr": 43.363013698630134,
+   "maxdd": 11.965411835894491,
+   "open_frac": 62.5790781961084,
+   "ann_mark20": 25.92359748177575,
+   "median_hold_wk": 3.0,
+   "still": 6,
+   "sleeves": 9,
+   "mean_free": 3.492063492063492
+  },
+  "uplift_pp": 1.985075442783831
+ },
+ "test:RTX+NEM+AVGO+DE": {
+  "pooled": {
+   "mode": "pooled",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO",
+    "DE"
+   ],
+   "weeks": 63,
+   "yrs": 1.1991786447638604,
+   "ann": 36.89416277951345,
+   "final": 1457303.1229300075,
+   "trades": 55,
+   "fills": 64,
+   "trades_yr": 45.86472602739726,
+   "maxdd": 8.07856071448738,
+   "open_frac": 71.44620186067101,
+   "ann_mark20": 20.37680945563407,
+   "median_hold_wk": 3,
+   "still": 9,
+   "sleeves": 12,
+   "mean_free": 4.5396825396825395
+  },
+  "captive": {
+   "mode": "captive",
+   "names": [
+    "RTX",
+    "NEM",
+    "AVGO",
+    "DE"
+   ],
+   "weeks": 63,
+   "yrs": 1.1991786447638604,
+   "ann": 35.102742413195976,
+   "final": 1434464.0744195667,
+   "trades": 55,
+   "fills": 64,
+   "trades_yr": 45.86472602739726,
+   "maxdd": 9.753156255951968,
+   "open_frac": 70.51488369914324,
+   "ann_mark20": 19.016792661252047,
+   "median_hold_wk": 3,
+   "still": 9,
+   "sleeves": 12,
+   "mean_free": 4.5396825396825395
+  },
+  "uplift_pp": 1.7914203663174746
+ },
+ "maxhold:None": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 66.22845662917918,
+  "final": 3299542.2096695453,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 15.644676720549,
+  "open_frac": 47.68475367077,
+  "ann_mark20": 59.28511833980059,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626
+ },
+ "maxhold:26": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 66.22845662917918,
+  "final": 3299542.2096695453,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 15.644676720549,
+  "open_frac": 47.68475367077,
+  "ann_mark20": 59.28511833980059,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626
+ },
+ "maxhold:13": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 66.83239203884715,
+  "final": 3327771.4602107108,
+  "trades": 100,
+  "fills": 103,
+  "trades_yr": 42.56993006993007,
+  "maxdd": 14.540106298357214,
+  "open_frac": 50.59073724007561,
+  "ann_mark20": 59.42579302491535,
+  "median_hold_wk": 3.0,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.2113821138211383
+ },
+ "capfrac:None": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 66.22845662917918,
+  "final": 3299542.2096695453,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 15.644676720549,
+  "open_frac": 47.68475367077,
+  "ann_mark20": 59.28511833980059,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626,
+  "implied_book_usd": 2030000.0
+ },
+ "capfrac:0.5": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 66.22845662917918,
+  "final": 3299542.2096695453,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 15.644676720549,
+  "open_frac": 47.68475367077,
+  "ann_mark20": 59.28511833980059,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626,
+  "implied_book_usd": 4060000.0
+ },
+ "capfrac:0.3333333333333333": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 64.99527544818655,
+  "final": 3242329.115363895,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 15.644676720549,
+  "open_frac": 47.68475367077,
+  "ann_mark20": 58.10344695613965,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626,
+  "implied_book_usd": 6090000.0
+ },
+ "capfrac:0.25": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 57.238911606370024,
+  "final": 2895572.4899767367,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 14.239728521679284,
+  "open_frac": 44.253493378468974,
+  "ann_mark20": 51.15657948301362,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626,
+  "implied_book_usd": 8120000.0
+ },
+ "capfrac:0.16666666666666666": {
+  "mode": "pooled",
+  "names": [
+   "RTX",
+   "NEM"
+  ],
+  "weeks": 123,
+  "yrs": 2.349075975359343,
+  "ann": 48.87392255347889,
+  "final": 2546619.704227509,
+  "trades": 79,
+  "fills": 82,
+  "trades_yr": 33.63024475524475,
+  "maxdd": 12.967996552168525,
+  "open_frac": 35.107117875082466,
+  "ann_mark20": 44.33087709604979,
+  "median_hold_wk": 3,
+  "still": 3,
+  "sleeves": 6,
+  "mean_free": 2.016260162601626,
+  "implied_book_usd": 12180000.0
+ }
+}

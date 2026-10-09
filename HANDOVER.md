@@ -1913,6 +1913,85 @@ now also sits in the daily book). Results in `premarket_study/weekly_freeze.json
 `weekly_freeze_shift.json` (tracked).
 
 
+### 3.47 The pooled weekly book: RTX+NEM carries $4–6m at ~59% tested, pooling adds almost nothing here (and why), and AVGO's weekly slot fails the blade (9 Oct)
+
+Every weekly number before this one was a **captive** result — one name, three tranches, each
+owning a third of that name's capital and compounding alone. `weekly_book_sim.py` runs the book the
+way the daily book actually trades (§3.9): one pot of cash, and each Monday the free sleeves divide
+whatever is not already committed.
+
+**Validation first.** `mode='captive'` reproduces `Name.seg()` to **3.6e-15 on total return**, trade
+counts identical, for both names. No pooled number was read before that passed. (One real bug it
+caught: `Name.ann` measures from the first session of `w0` to the last of `w1`; annualising from
+week-*end* to week-end silently inflated everything by 0.3–0.4pp.)
+
+**The book, on frozen train-half vectors throughout — no lookahead anywhere below:**
+
+| | ann | maxDD | trades/yr | open at end | mark −20% |
+|---|---|---|---|---|---|
+| **RTX+NEM pooled, full** | **66.2%** | **15.6%** | 33.6 | 48% | 59.3% |
+| **RTX+NEM pooled, test half** | **58.8%** | **15.6%** | 32.3 | 48% | 46.5% |
+| RTX alone, test | 58.7% | 16.3% | 17.8 | 0% | 58.7% |
+| NEM alone, test | 62.9% | 28.5% | 14.5 | 100% | 36.0% |
+
+Pairing them is worth it on risk, not return: **max drawdown 28.5% → 15.6%** against NEM alone, and
+the terminal mark exposure halves. For scale, the daily book's tested maxDD is 24.7%.
+
+**Pooling adds almost nothing on the weekly clock — +2.8pp full, +0.8pp on the test half — and I
+had predicted the opposite.** The reason is structural and now measured, not guessed: across 246
+name-weeks there are **zero** weeks with a zero-range predecessor, so a weekly sleeve is non-live
+**only when it is holding** — and a holding sleeve has no cash to lend. The daily book's pooling
+uplift comes from sleeves that are *in cash but blocked* (earnings pause, ATH guard); the weekly
+model has no such block. Mean live sleeves 2.0 of 6. What uplift there is comes from recycling exit
+proceeds, which in captive mode sit idle in the selling sleeve's own pot until that sleeve next
+fills.
+
+**AVGO and DE fail the same blade RTX and NEM passed** (`weekly_freeze.py`, same protocol as §3.46):
+
+| | no fit | frozen on test | edge | train → test |
+|---|---|---|---|---|
+| AVGO | 33.0% | **30.9%** | **−2.0pp** | 106.1% → 30.9% |
+| DE | 22.3% | **20.1%** | **−2.3pp** | 60.5% → 20.1% |
+
+Both post a **negative** edge over not fitting at all, and AVGO's halves are inverted 3.4-fold —
+the §5 tell. **AVGO is the incumbent weekly name and it does not survive the protocol that chose
+the daily book.** That is evidence on the open AVGO conflict and it points one way: its weekly slot
+is not earned. (I have not yet run the daily-side comparison, so this is one side of that question.)
+
+Run anyway, as a measurement: adding them cuts the test half from 58.8% to **42.8%** (AVGO),
+**45.7%** (DE), **36.9%** (both), while cutting maxDD 15.6% → 8.1%. That is drawdown insurance
+bought at roughly 22pp of return — the same trade §3.42 priced and declined on the daily book.
+
+**The 26-week cap (§3.6) is free here**: identical to no cap, so no position reaches it at these
+vectors. A **13-week** cap is marginally better (66.8% vs 66.2%, maxDD 14.5% vs 15.6%, 100 trades
+vs 79) — one sample, flagged, not adopted.
+
+**Capacity, which is what §3.43 actually asked.** The liquidity gate (§3.37) binds on the single
+order: $2.03m for RTX, $2.89m for NEM. Uncapped pooling lets one sleeve claim the whole pot, so the
+*book* can be no bigger than one order. Capping a sleeve's share fixes that:
+
+| max share of pool | implied book | ann | cost |
+|---|---|---|---|
+| uncapped | $2.0m | 66.2% | — |
+| **0.50** | **$4.1m** | **66.2%** | **nil** |
+| 0.33 | $6.1m | 65.0% | −1.2pp |
+| 0.25 | $8.1m | 57.2% | −9.0pp |
+| 0.17 | $12.2m | 48.9% | −17.3pp |
+
+**$4m is free and $6m costs a point.** Beyond that the cap starts refusing capital at the moment
+it is most wanted and the return falls away fast. So the weekly cadence adds roughly **$4–6m of
+capacity at ~59% tested, uncorrelated with the AI trade** (RTX AI beta 0.09, NEM 0.27) — which is
+precisely the thing §3.43 said the daily book could not do at any price.
+
+**Caveats.** Two names and six sleeves is a thin book; the maxDD figures especially are one path.
+All of it is the 2024–26 bull. And 48% of the test-half ending value sits in open positions, all of
+it NEM's — a −20% mark takes 58.8% to 46.5%.
+
+**Next:** correlate the weekly book's equity curve against the daily book's (the combined-book
+question, which none of this answers), and close out the AVGO conflict with the daily side.
+Results in `premarket_study/weekly_book_sim.json`; AVGO and DE merged into `weekly_freeze.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
