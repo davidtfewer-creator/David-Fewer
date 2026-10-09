@@ -2055,6 +2055,97 @@ has to come from something that actually desynchronises — different premia per
 staggered re-entry delay after an exit — neither of which has been tested.
 
 
+### 3.49 The 2-day clock on RTX: it lengthens holds rather than shortening them, and the benchmark says turnover is a property of the NAME, not the bar (9 Oct)
+
+The weekly model was declined on holding period, not return. The 2-day clock asks the other
+question: keep the daily Bayes/OU architecture and slow only the bar. `two_day.py` does that —
+the engine needed no change, since it already measures interest and the 50-day stop in **calendar**
+days off the `dates` array rather than in rows, so bars stamped with each block's last session are
+correct by construction. Two things did need building:
+
+- **A block-aware fill verifier.** On a 2-session bar most same-bar ambiguity disappears: a bid
+  touched in session 1 with the target high in session 2 is **provable from daily bars**. Only a
+  round trip inside one session still needs the 5-minute checker. So the 2-day clock is verified
+  at least as strictly as the daily book, not less.
+- **Phase.** An n-session clock has n phases. Phase is a free parameter and fitting it is
+  overfitting, so every phase is run.
+
+RTX, n = 1 (the control, same harness), 2 and 3, all phases, scored on the half-sample blade:
+
+| clock | no-fit test | **frozen test** | fills/yr | **median hold** | full fit | hold |
+|---|---|---|---|---|---|---|
+| n=1 ph0 | 41.9% | **43.1%** | 27.7 | **12d** | 51.5% | 15d |
+| n=2 ph0 | 28.4% | **54.9%** | 18.1 | **28d** | 50.5% | 15d |
+| n=2 ph1 | 30.9% | **36.6%** | 14.7 | **22d** | 48.9% | 25d |
+| n=3 ph0 | 15.5% | 48.7% | 16.6 | 20d | 46.5% | 35d |
+| n=3 ph1 | 16.9% | 44.9% | 17.2 | 24d | 47.8% | 24d |
+| n=3 ph2 | 14.8% | 31.0% | 13.2 | 22d | 51.2% | 23d |
+
+**1. It does the opposite of what was wanted. Median hold goes 12d → 22–28d.** The reason was
+predicted and is confirmed: the clock does not set the holding period, the **premium** does, and
+the fit raises the premium when the bar widens (daily 0.036/0.034 → 2-day 0.067/0.067). The 95th
+percentile is 50–54d on *every* clock — that is the 50-calendar-day stop, i.e. the stop is doing
+the exiting, not the target.
+
+**2. The "edge" column is my own artefact and should be ignored.** The no-fit baseline is a daily
+seed vector mechanically rescaled by √n, and it degrades as the bar widens (41.9% → ~30% → ~16%),
+so n=2's "+26.5pp edge" is mostly the baseline falling, not the fit rising. Compare **levels**
+instead: frozen test n=1 43.1%, n=2 average 45.8%, n=3 average 41.5%. **Flat.**
+
+**3. Phase dependence sinks it anyway.** n=2 phase 0 gives 54.9% and phase 1 gives 36.6% — **18pp
+on which session you start counting from.** By the rule written into the module before the run, a
+result that depends on phase is not a result.
+
+**4. The sample cost is severe.** Slowing the clock halves the bars. The n=2 train half is 144 bars
+carrying 11–23 fills, fitted with **ten** parameters. Boundary hits across runs on `lam`, `k`,
+`phi_L`, `ou_prem`, `ou_buf_k`, `ou_W`; seed-to-seed spread 1–4pp. Against §3.1's record this is
+not a measurement.
+
+**The benchmark that reframes the question** (`book_turnover.py`, live book at deployed parameters):
+
+| | fills/yr | median | 75th | 95th | ≤5 days | |
+|---|---|---|---|---|---|---|
+| TSM / VRT / VST / AVGO / MU | 91.5 / 69.6 / 74.8 / 59.7 / 56.1 | **1d** | 3–6d | 22–40d | 70–81% | |
+| **book, all trades** | **351.7** | **1d** | **5d** | 29d | **76%** | |
+| GM (reference vector) | 60.3 | 1d | 5d | 35d | 76% | matches the book |
+| VLO | 34.6 | 5d | 25d | 50d | 52% | |
+| **CF** | **25.7** | **12d** | 28d | 50d | **35%** | |
+| **RTX daily (frozen)** | **27.7** | **12d** | — | 50d | — | **CF's profile** |
+| RTX 2-day (frozen) | 14.7–18.1 | 22–28d | — | 53d | — | |
+
+**The live book turns over in a day.** Median hold 1 day, 76% of trades closed within 5 calendar
+days, 352 fills a year across five names. That is the thing that is working, and it is very fast.
+
+**CF's rejection is now quantified**: 25.7 fills/yr, median hold 12 days, only 35% inside 5 days
+against the book's 76%. The intuition behind *"relies on a small number of high margin trades…
+fast turnover stocks are a better fit"* was correct and is now a number.
+
+**And RTX on the daily clock has exactly CF's profile** — 27.7 fills/yr, 12-day median. **RTX was
+never going to be the complementary name wanted, on any clock.** The weekly result (§3.45–3.46) was
+real, and it was real for a name whose turnover was always wrong for this purpose. Slowing the
+clock only moved it further away.
+
+**The conclusion that matters.** Turnover is a property of **the name and its fitted premium**, not
+of the bar. A slow name cannot be made fast by changing the clock, and the clock change costs
+sample, costs phase-robustness, and lengthens the hold. **The 2-day cadence is declined.**
+
+**What to do instead — the screen has never had a speed gate.** Every candidate programme in this
+file (§3.14, §3.38–3.45) judged names on return and on AI correlation. None judged them on fills
+per year or holding period, which is why two of the three stored candidates (CF, VLO) are far
+slower than the book and nobody noticed until now. Two concrete next steps:
+
+1. **Add a turnover gate to the candidate screen** — something like ≥50 fills/yr, median hold ≤3
+   days, ≥70% of trades inside 5 calendar days (the book's own profile; GM passes it, VLO and CF
+   fail it) — and re-run selection on the low-AI-correlation names with that gate alongside G1.
+2. **Or force the fast regime directly**: on the DAILY clock, constrain the premium and shorten
+   `stop_days`, and measure the return available at each median holding period. That turns
+   "what does the entity need" into a frontier you pick a point on, rather than a hope about the
+   optimiser. The data above says the lever is the premium and the stop, both of which are already
+   in the model.
+
+Results in `premarket_study/two_day.json`; `two_day.py` and `book_turnover.py` are tracked.
+
+
 ---
 
 ## 4. Live workbook state and known issues
