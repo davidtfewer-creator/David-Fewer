@@ -15,7 +15,14 @@ should classify AI-related and the consumer names should not.
 
 Gates, cheapest first, same definitions as §3.50:
   G1  AI beta  (<0.20 uncorrelated, >=0.27 AI-related, between = borderline)
-  G2  frozen train-half vector beats the no-fit baseline on the unseen half
+  G2  §3.14's RETURN HURDLE on the unseen half: 30% for an uncorrelated name,
+      50% for an AI-related one. (screen_speed.py used "beats the no-fit
+      baseline" instead. That is not §3.14's gate, and on this universe it gives
+      the wrong answer twice: it passes TEAM at -3.6% because an arbitrary seed
+      vector did worse, and fails PARR at +46.1% because the same arbitrary
+      vector happened to do well. §3.50 already warned the no-fit baseline is
+      noisy -- VLO's beat its own fit -- so it is reported here as a diagnostic
+      and never as a verdict.)
   G4  the book's own profile: >=50 fills/yr, median hold <=3d, >=70% within 5d
 
 Only names that clear G1 are fitted, because a fit costs ~5 minutes and G1 costs
@@ -102,7 +109,7 @@ def main():
         cls = classify(b)
         rows.append(dict(name=nm, beta=b, corr=rho, n=n, sessions=len(dts), g1=cls))
         print(f'{nm:6s}{b:>9.2f}{rho:>8.2f}{n:>7d}{len(dts):>10d}   {cls}', flush=True)
-    with open('screen_universe.json', 'w') as f:
+    with open(os.environ.get('OUT', 'screen_universe.json'), 'w') as f:
         json.dump(rows, f, indent=1)
     passers = [r for r in rows if r['g1'] != 'AI-related']
     print(f'\n  {len(passers)} of {len(rows)} clear G1: '
@@ -136,16 +143,18 @@ def main():
                         hd.append((c.D[i] - c.D[e]).days)
                     e = None
         fy, md, w5 = turnover(hd, y_te)
-        g2 = a_te > a_no
+        hurdle = 30.0 if r['g1'] == 'uncorrelated' else 50.0
+        g2 = a_te >= hurdle
         g4 = fy >= G4_FILLS_YR and md is not None and md <= G4_MED_D and w5 >= G4_WITHIN5
-        r.update(nofit_test=a_no, frozen_test=a_te, g2=bool(g2), fills_yr=fy,
+        r.update(nofit_test=a_no, frozen_test=a_te, g2=bool(g2), hurdle=hurdle,
+                 beats_nofit=bool(a_te > a_no), fills_yr=fy,
                  med=md, within5=w5, g4=bool(g4), vec=[float(x) for x in v],
                  bound=c.on_bound(v))
         print(f'{nm:6s} beta {r["beta"]:+.2f} | G2 {"pass" if g2 else "FAIL"} '
-              f'({a_te:6.1f}% vs {a_no:6.1f}% no-fit) | G4 {"pass" if g4 else "FAIL"} '
+              f'({a_te:6.1f}% vs {hurdle:.0f}% hurdle; no-fit {a_no:6.1f}%) | G4 {"pass" if g4 else "FAIL"} '
               f'({fy:5.1f}/yr, med {md}d, {w5:3.0f}% <=5d)'
               f'{"   PASS ALL" if (g2 and g4) else ""}', flush=True)
-        with open('screen_universe.json', 'w') as f:
+        with open(os.environ.get('OUT', 'screen_universe.json'), 'w') as f:
             json.dump(rows, f, indent=1)
     print('\nDONE', flush=True)
 

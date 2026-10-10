@@ -2374,6 +2374,73 @@ high-beta set that serves as a control. `screen_universe.py` runs G1 on them wit
 and fits only the G1 survivors, because a fit costs five minutes and G1 costs nothing.
 
 
+### 3.53 A universe that was never selected for volatility: PARR is the first name to clear G1+G2+G4 — and my G2 gate was wrong (10 Oct)
+
+§3.50 closed with "no undiscovered fast uncorrelated name in this universe" and flagged that the
+universe was 17 names picked for other reasons. Box held 19 that had never been through a gate.
+`screen_universe.py` runs them, building the AI factor from its six constituents' own 5-minute
+files so it needs no workbook.
+
+**G1 — and the screen validates itself.** The high-beta names classify AI-related exactly as they
+should (AAOI 1.46, APLD 1.21, OKLO 1.19, NVTS 1.08, QBTS 0.98, AXTI 0.97, LUNR 0.84), and NEM
+reproduces at **0.27**, the recorded value to the decimal. **11 of 19 clear G1**, several at a beta
+the old universe could not reach: HUM 0.01, CHTR −0.02, DLTR 0.07, ALNY 0.08, PARR 0.08, RKT 0.15,
+CELH/LULU/TEAM 0.17, EXPE/SPOT 0.21. **§3.50 was right that its universe was the weak point — at
+G1.**
+
+**I had the G2 gate wrong, and it took this universe to show it.** `screen_speed.py` implemented G2
+as "the frozen vector beats the no-fit baseline". **That is not §3.14's gate**, which is a RETURN
+HURDLE: 30% for an uncorrelated name, 50% for an AI-related one. On this universe the proxy fails
+in both directions — it passes TEAM at **−3.6%** because an arbitrary seed vector did worse, and
+fails PARR at **+46.1%** because the same arbitrary vector happened to do well. §3.50 itself said
+the baseline was noisy and "not worth much weight"; I should have replaced it then instead of
+writing a caveat. Corrected in `screen_universe.py`; the baseline is now a printed diagnostic only.
+
+**This changes three verdicts in §3.50** (the headline does not move — GM is still the only full
+pass there):
+- **VLO** 47.6% clears the 30% hurdle. It was recorded as "fails G2"; it fails **G4 only**.
+- **DE** 24.6% and **LEN** 16.5% do **not** clear it. They were recorded as "fails G4 only".
+- So §3.50's "four names fail only on speed" is **three** — RTX, CF, VLO. §3.51's note that the
+  other three speed-rescues should be read like CF's applies only to RTX; **DE and LEN were never
+  eligible**, which is a cleaner reason to drop them than the one given.
+
+**The result on the new universe, with the correct hurdle:**
+
+| name | AI beta | frozen test | hurdle | G2 | fills/yr | med | ≤5d | G4 | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| **PARR** | **0.08** | **46.1%** | 30% | **Y** | **109.6** | **0d** | **95%** | **Y** | **PASS** |
+| EXPE | 0.21 | 23.2% | 30% | n | 17.6 | 5d | 54% | n | fails both |
+| DLTR | 0.07 | 22.7% | 30% | n | 32.3 | 3d | 64% | n | fails both |
+| HUM | 0.01 | 14.3% | 30% | n | 43.4 | 0d | 83% | n | fails both |
+| TEAM | 0.17 | −3.6% | 30% | n | 65.4 | 0d | 90% | **Y** | fails G2 |
+| ALNY 0.08 / CELH 0.17 / SPOT 0.21 / RKT 0.15 / LULU 0.17 / CHTR −0.02 | | −8% to −56% | 30% | n | 13–37 | 2–32d | 41–67% | n | fail both |
+
+**PARR is the first name in this project to clear G1, G2 and G4 together.** Beta 0.08, 46.1% on the
+half it never saw, and **109.6 fills a year on a median hold of zero days with 95% closed inside
+five** — faster than anything in the book (TSM is 91.5/yr). On the §3.49 profile it is more
+book-like than the book.
+
+**Two reasons not to get ahead of this.**
+1. **The no-fit baseline returned 114.5% on PARR** — the fitted vector *underperforms an arbitrary
+   vector out of sample by 68pp*. Either the name is so favourable in this window that almost
+   anything works (the 46.1% is then real but the fit is actively harmful and should be replaced by
+   something simpler), or the train half misled the optimiser. **That has to be resolved before
+   G5**, not after.
+2. **PARR is a refiner and VLO is already in the book.** §6 recorded VLO–CF at 0.41. A low AI beta
+   is not a low BOOK correlation, and this run could not report book correlation at all because
+   GM, VLO and CF were not among the names restored from Box. PARR could be a second helping of an
+   exposure the book already has.
+
+**What this does and does not do to §3.50's structural claim.** It weakens it: a genuinely
+different universe produced a candidate, so "the uncorrelated names are all slow and low-edge" was
+partly an artefact of where we were looking. It does not overturn it: **10 of 11 genuinely
+uncorrelated names still cannot clear a 30% hurdle with this model**, and seven of them lose money
+outright. Across both universes that is 36 names screened and two live candidates (GM, PARR).
+
+**Next, in order:** restore GM/VLO/CF and measure PARR's book correlation; explain the
+fit-versus-no-fit gap; then G5. Results in `premarket_study/screen_universe.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -2584,6 +2651,9 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- **G2 is §3.14's RETURN HURDLE** (30% uncorrelated / 50% AI-related), NOT "beats the
+  no-fit baseline" as screen_speed.py implemented it (§3.53). The proxy passes a name
+  losing 3.6% and fails one making 46.1%. It changes three §3.50 verdicts.
 - A turnover gate is a screening **descriptor**, not an objective **constraint** (§3.51):
   fitting to it cuts the premium, which in a pooled book takes capital from better names
   and removes the cushion in a drawdown.
