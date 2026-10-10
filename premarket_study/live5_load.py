@@ -30,7 +30,17 @@ def _find_workbook():
         'no workbook found: set BAYES_WORKBOOK or place premarket_study/workbook.xlsx')
 
 
-UPLOAD = _find_workbook()
+# Resolved on FIRST USE, not at import. Resolving at import time made every
+# module downstream of live5_load -- engine harnesses, candidate screens,
+# anything reaching daily_from_5min -- fail to import when the workbook was
+# absent, even though most of them never read it. After a container recycle
+# (the uploads directory dies with the container) that turned a missing
+# spreadsheet into a dead pipeline. PEP 562 keeps `live5_load.UPLOAD` working
+# for callers that do want the path; it just raises when asked, not on import.
+def __getattr__(name):
+    if name == 'UPLOAD':
+        return _find_workbook()
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 # the five daily names the workbook carries Feed/Model sheets for as the BOOK
 # core; GM/VLO/CF/MRVL join via book_sim.NAMES. AVGO took RKLB's slot on
 # 2 Sep 2026 (HANDOVER 3.28).
@@ -48,7 +58,7 @@ def _to_date(d):
 
 
 def load(path=None):
-    path = path or UPLOAD
+    path = path or _find_workbook()
     """Return (data, params, cached): data[name] = (dates, O, H, L, C)."""
     wb = openpyxl.load_workbook(path, data_only=True, read_only=True)
     q = wb['Query']

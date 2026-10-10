@@ -2325,6 +2325,55 @@ There is no case here for changing the live CF vector.
 **Status: CF stays as it is.** Results in `premarket_study/cf_speed_g5.json`.
 
 
+### 3.52 Container recycle: the 5-minute archive restores in one command now, and the workbook no longer blocks imports (10 Oct)
+
+The container recycled mid-session for the second time. `data_5min/`, `data_pm/` and the uploaded
+workbook are all gone again — gitignored by design, so this is expected rather than a fault, but it
+cost an hour the first time (§3.28d) and would cost it again every time.
+
+**Two repairs, both so the next recycle is cheap.**
+
+**1. `ops/box_5min_autoimport.sh`.** The §3.28d workflow was: call `get_file_content` on each Box
+file, let the harness save the extraction to disk, then run `box_5min_import.py <path> <TICKER>`
+once per name. The weak link was the TICKER argument — with several `get_file_content` calls in
+flight at once the saved paths come back in a different order from the calls, and a mis-mapped
+ticker is **silent data corruption, not an error**. Every extraction's first line carries its own
+ticker (`VRT 5min`), so the importer now reads the name out of the file instead of being told it,
+and imports every un-imported extraction in one pass. Restoring 25 names is now one command after
+the Box calls.
+
+**2. `live5_load.py` resolved the workbook at IMPORT time.** `UPLOAD = _find_workbook()` ran on
+module load, so *every* module downstream — `fresh_opt`, `fresh_opt_cands`, `daily_from_5min`,
+`two_day`, every candidate screen — failed to import at all when the workbook was absent, even
+though almost none of them read it. A missing spreadsheet killed the whole pipeline. Now resolved
+on first use via PEP 562 `__getattr__`, so `live5_load.UPLOAD` still works for the callers that
+want the path and raises only when asked. `load()` resolves explicitly.
+(First attempt at this was a `str` subclass with `__fspath__`; wrong, because openpyxl can take the
+`str` value directly and would have opened a file called `<workbook unresolved>`.)
+
+**Restore procedure, current:**
+1. `python3 -m pip install numpy scipy openpyxl` — note `pip` on this image targets 3.13 while
+   `python3` is 3.11, so plain `pip install` silently installs into the wrong interpreter.
+2. Box: `minute data/<TICKER>/<TICKER> 5min Apr2024-Aug2026.xlsx` holds the book names and
+   everything screened before; `data_5min/` (folder id 416953804140) holds ready-made
+   `<TICKER>_5min.xlsx` extractions. `get_file_content` on each.
+3. `ops/box_5min_autoimport.sh <tool-results dir>`.
+4. `python3 premarket_study/build_pm_cache.py` if the pre-market caches are needed.
+
+**Also recorded: the branch came back wrong.** The fresh checkout had
+`claude/live-model-handover-wgnrl8` pointing at another session's tip (two "Trading status" commits
+authored by Diarmuid Fewer). Nothing was lost — those commits live on
+`origin/claude/personal-account-session-v75of4`, and this line was intact on the remote — but
+**check `git log` against the remote before working after a recycle.**
+
+**And a new universe is staged.** Box `data_5min/` holds 19 names that have never been through any
+gate here: AAOI, ALNY, APLD, AXTI, CELH, CHTR, DLTR, EXPE, HUM, LULU, LUNR, NVTS, OKLO, PARR, QBTS,
+RKT, SPOT, TEAM (+NEM, already screened). The composition is the part §3.50 said was missing —
+consumer staples, managed care, media, telecom, travel, apparel, software, mortgage — alongside a
+high-beta set that serves as a control. `screen_universe.py` runs G1 on them without the workbook,
+and fits only the G1 survivors, because a fit costs five minutes and G1 costs nothing.
+
+
 ---
 
 ## 4. Live workbook state and known issues
