@@ -2441,6 +2441,78 @@ outright. Across both universes that is 36 names screened and two live candidate
 fit-versus-no-fit gap; then G5. Results in `premarket_study/screen_universe.json`.
 
 
+### 3.54 PARR: it is a second VLO, not a diversifier — and it is the first name whose train half ANTI-predicts its test half (10 Oct)
+
+Both questions §3.53 left open are answered, and both change what PARR is for.
+
+**A. PARR is a refiner and it trades like the refiner already in the book.**
+
+| PARR vs | corr | | PARR vs | corr |
+|---|---|---|---|---|
+| **VLO** | **0.72** | | TSM / VRT / VST / AVGO / MRVL | 0.03–0.06 |
+| CF | 0.35 | | MU | 0.13 |
+| GM | 0.06 | | **book average** | **0.20** |
+
+For scale: VLO–CF is 0.41 and the nine book names average **0.30** pairwise. **PARR–VLO at 0.72 is
+more than twice the book's internal correlation.** PARR clears the §3.32 ≤0.30 book-correlation bar
+only because the book is mostly AI names and PARR is uncorrelated with those (0.03–0.13); inside
+the diversifier slot it is the same trade as VLO. §6 already called VLO and CF "one-and-a-bit
+names"; adding PARR would make it one-and-a-bit-and-a-bit.
+
+**So the question is not "add PARR". It is "replace VLO with PARR"** — same exposure, and on the
+§3.49 profile a completely different animal: **PARR 109.6 fills/yr, median hold 0 days, 95% inside
+five days against VLO's 25.1/yr, 4 days, 60%.** That is a like-for-like swap where the case is
+entirely turnover, and it is a much cleaner test than anything the diversifier programme has run.
+
+**B. On PARR the train half ANTI-predicts the test half. The fit is worse than useless.**
+
+400 vectors drawn uniformly from the search bounds, each scored on both halves:
+
+| | tradeable | test median | 25th | 75th | max | **train→test rank corr** | seed vector on test |
+|---|---|---|---|---|---|---|---|
+| **PARR** | 400/400 | **63.5%** | 44.7% | 86.8% | 149.6% | **−0.53** | 114.5% (94th pct) |
+| GM (control) | 394/400 | 33.8% | 25.5% | 41.9% | 64.9% | **+0.33** | 39.1% (66th pct) |
+| CF (control) | 392/400 | 27.0% | 19.3% | 33.6% | 64.4% | **+0.08** | 30.8% (65th pct) |
+
+**−0.53 is not "fitting doesn't help", it is "fitting hurts".** A vector that wins the train half
+is systematically a loser on the test half, which explains §3.53's anomaly exactly: the optimiser
+picked a train-half winner and got 46.1% where the median *random* vector got 63.5%. **PARR's
+fitted result sits below its own 25th percentile.**
+
+The controls say this is PARR, not the model. GM at +0.33 is a name where fitting earns something;
+CF at +0.08 is near-useless to fit, which independently reproduces §6's finding that CF's "fits
+move a great deal between halves and the returns do not". Nothing in the record is as adverse
+as −0.53.
+
+**What follows for how PARR could ever be run.** It cannot be fitted — any deployed vector chosen
+by optimising the train half is, on this evidence, a vector chosen to fail. A vector must therefore
+come from somewhere that never saw PARR's history. The component-wise median of the stored
+reference vectors is exactly that, and it returns **114.5%** on the unseen half — a legitimate
+out-of-sample number, because that vector was never fitted to PARR in any way.
+
+**The planning figure should nonetheless be the 25th percentile, 44.7%**, not 63.5% and certainly
+not 114.5%. The argument: if we cannot fit, we cannot claim to land anywhere in particular in the
+distribution, so we should plan on landing badly. That still clears §3.14's 30% hurdle for an
+uncorrelated name.
+
+**The large caveat.** A median of 63.5% across *arbitrary* parameter vectors is not evidence of a
+63.5% edge; it says the test window was strongly favourable to long-only dip-buying in this one
+refiner. The negative rank correlation is itself the warning that PARR's regime changes between
+halves — and a name whose two halves disagree that violently is exactly the kind §3.1 warns about.
+One refiner, one 1.2-year window.
+
+**Blocked at G5, and the reason is worth fixing.** The marginal book test needs the pooled
+nine-name book, and `book_sim.load_all` reads the five core names' **deployed parameters out of the
+uploaded workbook**, which died with the container and cannot be restored from Box (the text
+extraction serves data sheets, not a live formula workbook). **The live book's deployed vectors
+exist in exactly one place, an upload that dies with every container.** `fresh_opt_cands.json`
+carries AVGO's and nothing else. That should be a tracked file regardless of PARR.
+
+**Next:** re-attach the workbook, then G5 as **VLO → PARR**, scored on the un-fitted reference
+vector rather than a train-half fit, with the swap judged on both halves and on drawdown as §3.14a
+requires. Results in `premarket_study/parr_check.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -2634,6 +2706,9 @@ precise, and do not re-fit expecting improvement. Only the OU lookback holds sti
 5. **Website copy** — four revised summary points were delivered as text; a five-point variant
    splitting robustness and allocation was offered but not requested.
 6. **Rotate the Massive API key.**
+7. **Persist the five core names' DEPLOYED parameters to a tracked file.** They exist only in
+   the uploaded workbook, which dies with every container, and `book_sim`/G5 cannot run without
+   them (§3.54). `fresh_opt_cands.json` carries AVGO's and nothing else.
 
 ---
 
