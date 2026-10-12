@@ -13,6 +13,10 @@ The two summaries cover theory, methods and worked examples only — the book's 
 deliberately kept out of them, and live in the separate questions sheet instead. Every answer in
 the solutions appendix was checked symbolically with SymPy.
 
+Every algebraic division in the solutions is set out in full long-division form — one column
+per power, a rule under each line that is subtracted, worked down to an explicit remainder of
+zero — rather than by a factorising shortcut.
+
 **Conventions.** All mathematics is set in LaTeX. Anything a reader should know by heart is
 highlighted in light purple (`\key{...}`, via `soul`); formulae sit in light-purple boxes and
 step-by-step methods in boxes with a purple banner. Inside a purple box, where a highlight
