@@ -13,23 +13,44 @@ sweep answers "what would this name have done under a different stop", not
 "what is the best stop and vector together" -- the latter would just be another
 10-parameter fit on 600 bars, which §3.1 says not to trust.
 
-LIMITATION: only five of the nine run. TSM, VRT, VST and MU keep their deployed
-vectors in the workbook alone, which is not attached (§3.54, open item 7), and
-MU is precisely the fastest-recovering name -- the most interesting end of the
-spread is missing. Five names is also too few to establish that optimal stop
-tracks recovery; this is a direction, not a result.
+All nine now run. The four core vectors that previously lived only in the
+workbook are read from deployed_params.json (§3.54 open item 7, closed), AVGO
+and MRVL from fresh_opt_cands.json, GM/VLO/CF from the REF table. Nine names is
+still few for establishing that the optimal stop TRACKS recovery, and the sweep
+moves one parameter on a vector fitted with the stop at 50, so a long stop is
+being judged on a vector chosen under a short one. Read it as "what does this
+name lose or gain from the uniform 50", not as a per-name optimum.
 
 Usage:  python3 dip_stop_sweep.py
 """
 import json
 
 from engine import Params, run_model
-from fresh_opt_cands import REF, daily_from_5min, ref_params
+from fresh_opt_cands import REF, aw_params, daily_from_5min, ref_params
 from minute_index import make_checker
 
 STOPS = (20, 30, 50, 80, 120, 100000)
 # P(recover within 50 calendar days of being 10% down), from dip_recovery.py
-P_REC = {'AVGO': 50, 'GM': 0, 'VLO': 67, 'CF': 33, 'MRVL': 40}
+P_REC = {'MU': 80, 'VLO': 67, 'TSM': 57, 'VST': 57, 'AVGO': 50,
+         'MRVL': 40, 'CF': 33, 'VRT': 29, 'GM': 0}
+
+
+def params_for(nm):
+    """Deployed where one exists, reference otherwise; sources differ by name."""
+    dep = json.load(open('deployed_params.json'))['params']
+    if nm in dep:
+        from cf_swap_test import t0
+        v = dep[nm]
+        return Params(**{**{k: v[k] for k in v}, 'comm': t0().comm,
+                         'capital': t0().capital, 'interest': t0().interest,
+                         'stop_days': 50, 'bayes_pct': 0.5, 'years': t0().years})
+    c = json.load(open('fresh_opt_cands.json'))
+    if nm in c and 'vec' in c[nm].get('reference', {}):
+        from cf_swap_test import t0
+        return aw_params(c[nm]['reference']['vec'], t0())
+    if nm in REF and REF[nm]:
+        return ref_params(nm)
+    return None
 
 
 def score(nm, p, stop, dts, O, H, L, C, chk):
@@ -54,10 +75,10 @@ def main():
           ''.join(f'{(f"{s}d" if s < 10000 else "none"):>9s}' for s in STOPS) +
           f'{"best":>8s}')
     for nm, prec in sorted(P_REC.items(), key=lambda kv: -kv[1]):
-        if nm not in REF or not REF[nm]:
+        p = params_for(nm)
+        if p is None:
             print(f'{nm:6s}  no stored vector'); continue
         dts, O, H, L, C = daily_from_5min(nm)
-        p = ref_params(nm)
         chk = make_checker(nm, dts, O)
         row = []
         for s in STOPS:

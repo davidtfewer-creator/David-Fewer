@@ -1,0 +1,65 @@
+{
+ "_source": "deployed vectors read from the live workbook Model sheets, 14 Oct 2026. Persisted because they previously existed ONLY in an upload that dies with the container, which blocked book_sim and G5 entirely (HANDOVER 3.54 open item 7). Regenerate with BAYES_WORKBOOK=<xlsx> python3 -c \"from live5_load import load; ...\".",
+ "params": {
+  "TSM": {
+   "lam": 0.462001,
+   "phi_L": 0.254287,
+   "psi": 0.065039,
+   "k": 1.004527,
+   "premium": 0.015652,
+   "peak_cap": 0.030484,
+   "ou_buf_k": 0.2,
+   "ou_prem": 0.010022,
+   "ou_cap": 0.020893,
+   "ou_W": 77
+  },
+  "VRT": {
+   "lam": 0.420699,
+   "phi_L": 0.425851,
+   "psi": 0.081656,
+   "k": 1.116397,
+   "premium": 0.021691,
+   "peak_cap": 0.048379,
+   "ou_buf_k": 0.4,
+   "ou_prem": 0.026603,
+   "ou_cap": 0.059499,
+   "ou_W": 80
+  },
+  "VST": {
+   "lam": 0.37352,
+   "phi_L": 0.264322,
+   "psi": 0.096187,
+   "k": 1.38566,
+   "premium": 0.021816,
+   "peak_cap": 0.013663,
+   "ou_buf_k": 0.65,
+   "ou_prem": 0.014498,
+   "ou_cap": 0.052746,
+   "ou_W": 122
+  },
+  "AVGO": {
+   "lam": 1,
+   "phi_L": 0.2816173224692753,
+   "psi": 0.2481521005274053,
+   "k": 0.2181780342757448,
+   "premium": 0.02912374009381593,
+   "peak_cap": 0.05993266745789266,
+   "ou_buf_k": 0.4308981272496185,
+   "ou_prem": 0.01409155293181539,
+   "ou_cap": 0.04861130321846684,
+   "ou_W": 113
+  },
+  "MU": {
+   "lam": 0.6,
+   "phi_L": 0.2636,
+   "psi": 0.01,
+   "k": 1.0548,
+   "premium": 0.0243,
+   "peak_cap": 0.038,
+   "ou_buf_k": 0.75,
+   "ou_prem": 0.025,
+   "ou_cap": 0.0292,
+   "ou_W": 91
+  }
+ }
+}

@@ -2604,6 +2604,82 @@ Results in `dip_recovery.json`, `dip_recovery_check.json`, `dip_stop_sweep.json`
 `dip_conditional.json`.
 
 
+### 3.56 Workbook restored: PARR declined at G5, and dip recovery does not set the stop either (14 Oct)
+
+Workbook re-attached, baseline reproduces exactly — 73.4 / 45.4 / 105.1, maxDD 24.2, stops 47,
+530 fills/yr, identical to the earlier restored state this session. **Open item 7 is closed**: the
+five core deployed vectors are now in `premarket_study/deployed_params.json`, so `book_sim` and G5
+no longer die with the container.
+
+**1. PARR: declined at G5.** The test is the swap, not the addition, because §3.54 measured
+PARR–VLO at 0.72 against the book's own 0.30 average pairwise. PARR runs on the component-wise
+median of the stored reference vectors — the neutral seed, chosen with no reference to PARR's
+history — because §3.54 found its train half anti-predicts its test half at −0.53, so fitting it
+selects a vector to fail.
+
+| | full | train | test | maxDD | fills | Δ vs nine |
+|---|---|---|---|---|---|---|
+| **nine names (with VLO)** | **73.4** | **45.4** | **105.1** | **24.2** | 1234 | — |
+| swap VLO → PARR | 65.9 | 34.7 | 102.2 | 25.2 | 1246 | **−7.6 / −10.7 / −2.9 / +1.0** |
+| add PARR (ten names) | 69.3 | 32.4 | 114.1 | 23.9 | 1330 | −4.1 / −13.1 / +9.0 / −0.3 |
+| drop VLO (eight names) | 69.6 | 51.6 | 88.8 | 26.0 | 1150 | −3.8 / +6.1 / −16.4 / +1.7 |
+
+**The swap loses on all three windows and gives up drawdown** — §3.14a's standard, failed. Through
+the Jan–Apr 2025 AI drawdown it returns **−14.4% against the nine-name book's −6.6%**. Adding PARR
+as a tenth helps the tested half (+9.0) but costs the train half (−13.1), so it fails the
+both-halves requirement too.
+
+**And the attraction evaporates on an honest vector.** PARR's headline was **109.6 fills/yr on a
+zero-day median** — but that was measured on the FITTED vector, the one §3.54 showed cannot be
+used. On the un-fitted vector it does **39/yr**, against VLO's 35. The turnover case and the
+can't-be-fitted finding are in direct conflict, and only one of them can be acted on.
+
+Shape in the pooled book is the final word: **PARR's top third carries 119% of its P&L against
+VLO's 64%.** VLO clears the §3.32 concentration leg and fails only on turnover; PARR fails
+concentration outright — the same pattern that sank speed-constrained CF in §3.51.
+
+**A side-result worth keeping: VLO is load-bearing.** Dropping it costs **16.4pp on the tested
+half** and takes the AI-drawdown loss from −6.6% to **−18.5%**, worse than any other arm. VLO fails
+the turnover bar at 35/yr and earns its slot anyway. That is the clearest statement yet that the
+§3.32 shape bar measures something the book does not actually pay for.
+
+**2. Dip recovery does not set the stop.** §3.55 left exactly one use open — a per-name stop drawn
+from each name's own recovery profile — and it is now testable on all nine.
+
+| name | P(rec ≤ 50 cal) | best stop | ann @50 | best ann | gain |
+|---|---|---|---|---|---|
+| MU | 80% | none | 58.6% | 63.4% | +4.8 |
+| VLO | 67% | 50d | 64.2% | 64.2% | 0.0 |
+| TSM | 57% | none | 48.9% | 62.5% | +13.7 |
+| VST | 57% | 30d | 55.8% | 61.5% | +5.7 |
+| AVGO | 50% | none | 51.2% | 60.7% | +9.5 |
+| MRVL | 40% | 50d | 85.1% | 85.1% | 0.0 |
+| CF | 33% | 20d | 46.9% | 58.3% | +11.4 |
+| VRT | 29% | none | 56.3% | 78.1% | +21.8 |
+| GM | 0% | 50d | 50.3% | 50.3% | 0.0 |
+
+**Rank correlation between recovery probability and best stop length: −0.15.** The metric does not
+predict the stop. GM, which never recovers inside 50 days, wants 50 days; MU, which recovers 80% of
+the time, wants no stop at all. **The one remaining use of dip recovery is closed, and it is
+closed negative.**
+
+**What the sweep does show, with a large caveat.** The uniform 50 days is the best of six choices
+for only **3 of 9** names, 4 prefer **no stop at all**, and the mean in-sample gain from a perfect
+per-name choice is +7.4pp. That number is pure hindsight — it is the maximum over six options
+picked with the answer in hand, and since recovery does not predict it (−0.15) there is no ex-ante
+rule to capture it. It is also a **bull-sample artefact**: a stop costs return in a market that
+always came back, and the stop exists for the bear that is not in this sample (§6). Nothing here
+argues for lengthening or removing the stop.
+
+**Where that leaves dip recovery.** It is real, it is stable, and it is genuinely orthogonal to
+volatility, beta and turnover (§3.55) — but neither of the two ways to trade it survives testing:
+the entry veto is refuted by forward returns improving with depth, and the stop rule is refuted
+here. **It stays a risk and capacity descriptor**, which is what §3.55 concluded and what the
+evidence now confirms twice over.
+
+Results in `parr_g5.json`, `dip_stop_sweep.json`, `deployed_params.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -2797,7 +2873,8 @@ precise, and do not re-fit expecting improvement. Only the OU lookback holds sti
 5. **Website copy** — four revised summary points were delivered as text; a five-point variant
    splitting robustness and allocation was offered but not requested.
 6. **Rotate the Massive API key.**
-7. **Persist the five core names' DEPLOYED parameters to a tracked file.** They exist only in
+7. ~~Persist the five core names' DEPLOYED parameters to a tracked file.~~ **DONE (§3.56)** —
+   `premarket_study/deployed_params.json`. Original note: They exist only in
    the uploaded workbook, which dies with every container, and `book_sim`/G5 cannot run without
    them (§3.54). `fresh_opt_cands.json` carries AVGO's and nothing else.
 
