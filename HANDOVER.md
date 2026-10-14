@@ -2513,6 +2513,97 @@ vector rather than a train-half fit, with the swap judged on both halves and on 
 requires. Results in `premarket_study/parr_check.json`.
 
 
+### 3.55 Dip recovery time across the book: a genuinely new axis — but the veto it suggests is refuted by the data (14 Oct)
+
+**The question.** The model buys at a discount, the name sometimes keeps falling, and with both
+sleeves filled it is frozen (§3.30) until target or the 50-calendar-day stop. So: once we are 10%
+down, how long are we stuck, and does it differ by name?
+
+**It differs enormously.** Episodes built from the underwater curve (non-overlapping by
+construction: open when the close drops below a running peak, close when it regains it), keeping
+those reaching −10%:
+
+| name | eps | /yr | med depth | −10%→recovery (sessions) med/75th/90th | med cal days | **P(rec ≤ 50 cal)** | unrec |
+|---|---|---|---|---|---|---|---|
+| MU | 10 | 4.3 | −18.4% | 14 / 22 / 303 | 21 | **80%** | 1 |
+| VLO | 3 | 1.3 | −12.7% | 21 / 398 / 398 | 31 | **67%** | 0 |
+| TSM | 7 | 3.0 | −18.4% | 34 / 62 / 105 | 49 | **57%** | 1 |
+| VST | 7 | 3.0 | −20.2% | 22 / 76 / 105 | 32 | **57%** | 1 |
+| AVGO | 8 | 3.4 | −19.6% | 21 / 88 / 112 | 29 | **50%** | 1 |
+| MRVL | 5 | 2.1 | −28.3% | 94 / 302 / 302 | 137 | **40%** | 1 |
+| CF | 6 | 2.6 | −22.6% | 88 / 104 / 171 | 127 | **33%** | 1 |
+| VRT | 7 | 3.0 | −24.8% | 60 / 86 / 171 | 90 | **29%** | 1 |
+| GM | 3 | 1.3 | −19.9% | 100 / 202 / 202 | 146 | **0%** | 0 |
+
+The stop is 50 **calendar** days, so the last column is roughly the chance a 10%-underwater
+position leaves at target rather than at the stop. **It ranges from 0% to 80%.**
+
+**Stability.** Re-run at 5%, 7.5%, 10% and 15% thresholds: the name ordering is stable across
+5–10% (rank correlation +0.60 to +0.97, and **7.5% vs 10% is +0.97**) and breaks down at 15%,
+where episode counts fall to 1–5. So the measure is real within the range that has data.
+**GM's 0% is the thin reading** — three episodes — and at shallower thresholds GM is unremarkable
+(70% at 5%, n=10). The honest statement about GM is "dips rarely, but stays down when it does",
+not "GM is a bad name".
+
+**It is the first genuinely NEW axis this session has found.** §3.14 found volatility and AI
+correlation are the same thing; §3.45 found my candidate set was AI-correlated by construction;
+§3.50 found turnover joins them. Three strikes. This one does not:
+
+| P(rec ≤ 50 cal) vs | rank corr |
+|---|---|
+| annualised volatility | **+0.23** |
+| AI beta | **+0.05** |
+| fills per year (§3.49) | **−0.14** |
+
+MU is the most volatile name and the fastest to recover; GM is among the least volatile and the
+slowest. Nothing already measured in this file predicts it.
+
+**Now the strategy question — and the obvious rule does not survive contact with the data.**
+The natural use is a veto: do not let the second sleeve fill when the name is already well below
+its running peak. That only helps if forward returns are worse from down there. Every session of
+all nine names, bucketed by distance below the running peak (4,841 observations, model-free):
+
+| bucket | share | +10d med | +20d med | **+50d med** | +50d mean |
+|---|---|---|---|---|---|
+| at/near peak (0–2%) | 16% | 1.03% | 3.64% | **7.20%** | 9.07% |
+| down 2–5% | 13% | 1.66% | 2.73% | **8.16%** | 9.66% |
+| down 5–10% | 18% | 1.65% | 3.28% | **6.35%** | 9.13% |
+| down 10–20% | 24% | 1.62% | 2.58% | **5.93%** | 9.16% |
+| **down >20%** | 30% | 2.10% | 3.42% | **13.14%** | **20.75%** |
+
+**Forward returns do not deteriorate with depth — they improve.** A drawdown veto would have
+refused the best entries in the sample. Per name the picture is mixed in an interesting way: TSM
+(3.6%→12.0% at +20d), VRT, AVGO and CF all improve with depth, while **MU (15.3%→1.5%) and MRVL
+(16.5%→3.2%) get worse** — the two fastest-recovering names are the two where a deep drawdown is
+genuinely bad news.
+
+**The caveat that governs all of it:** 2024–26 is a bull sample. "Buy the dip" works mechanically
+in a market that always came back, and the >20% bucket's +20.75% mean is largely post-drawdown
+rebounds. §6 already records that the only AI drawdown in the sample sits inside the training
+region. **This finding would be the first casualty of a real bear.**
+
+**The stop idea is unresolved, not refuted.** Sweeping `stop_days` at fixed vectors ran on only
+three names — TSM, VRT, VST and MU keep their deployed vectors in the workbook (§3.54, open item 7)
+— and the one clean-looking result, VLO's 64.2% at 50 days against 44.7% at 80 and 33.3% at 30, is
+a **single-cell spike**, the tell this file has used to reject parameters a dozen times. Three
+names and a spike is not evidence.
+
+**Where the metric does belong.** Not as an entry gate. As a **risk and capacity descriptor**: it
+says how long capital stays committed when a name goes wrong, which is exactly what the
+frozen-sleeve problem costs and what no other column in this file measures. And it has a portfolio
+dimension — the **"10% under water" STATE correlates +0.20 pairwise across the nine**, against the
+book's 0.30 return correlation, so recovery timing is partly diversifiable. But only partly:
+**55% of sessions have five or more of the nine under water, and 11% have all nine.** When the book
+freezes it largely freezes together.
+
+**What I would test next, once the workbook is back:** whether a per-name stop set from each name's
+own recovery distribution beats the uniform 50 days, across all nine rather than three — the one
+use of this metric that the evidence neither supports nor rules out.
+
+Results in `dip_recovery.json`, `dip_recovery_check.json`, `dip_stop_sweep.json`,
+`dip_conditional.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
