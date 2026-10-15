@@ -3416,3 +3416,98 @@ These were wrong and were fixed; a new session should not rediscover them as fin
   week 4 and trade identically forever (§3.48), so RTX's "17.9/yr" is 6.0 distinct positions.
 - GM trades **61** times a year on deployed parameters, not 94 (that was the tested-half figure on
   frozen first-half parameters).
+
+### 3.63 The participation distribution: the liquidity question answered from the book's own record — the nine are fine, CF and VLO are not, and the binding constraint is the stop, not the bid (15 Oct)
+
+User, after challenging §3.37's caps: *"what's the basis for the liquidity cap and is it quantified.
+The key question for me is can we buy and sell efficiently?"* → *"run the participation distribution
+across the nine plus RTX and DE"*. §3.62 conceded the 1%/10% thresholds were reverse-engineered from
+what the incumbents happened to pass. `participation.py` replaces them with the measured record:
+every historical fill sized against the liquidity a **resting limit actually reaches** — bars whose
+low ≤ the bid (buy), whose high ≥ the target (passive sell) — first hour per §3.20. Capital $6.9m,
+pooled, live config. PARR excluded (no volume column, §3.61).
+
+**The nine, live config — 1,218 fills.** Order as a share of first-hour at-bid dollar volume:
+
+| name | fills | median $ | max $ | %ADV | %at-bid | **%1st hr** | p95 1st hr | >5% | >10% |
+|---|---|---|---|---|---|---|---|---|---|
+| AVGO | 138 | 0.65m | 3.74m | 0.02 | 0.05 | **0.11** | 0.8 | 0% | 0% |
+| MU | 127 | 0.86m | 1.78m | 0.01 | 0.04 | **0.05** | 1.3 | 0% | 0% |
+| TSM | 211 | 0.82m | 3.17m | 0.03 | 0.06 | **0.16** | 1.0 | 0% | 0% |
+| MRVL | 126 | 0.73m | 2.17m | 0.06 | 0.15 | **0.45** | 3.5 | 3% | 2% |
+| VRT | 173 | 0.77m | 2.33m | 0.08 | 0.23 | **0.51** | 4.5 | 4% | 2% |
+| VST | 166 | 0.78m | 3.71m | 0.10 | 0.27 | **0.79** | 6.7 | 7% | 2% |
+| GM | 139 | 0.66m | 6.24m | 0.16 | 0.49 | **1.13** | 11.4 | 12% | 7% |
+| **VLO** | 81 | 1.02m | 4.45m | 0.22 | 0.68 | **3.23** | 12.7 | **38%** | 6% |
+| **CF** | 57 | 0.90m | 3.71m | 0.50 | 1.09 | **4.33** | **45.4** | **44%** | **22%** |
+| BOOK | 1218 | 0.78m | 6.24m | 0.06 | 0.17 | **0.38** | 6.7 | 7% | 3% |
+
+**1. ADV flatters the book by roughly 6×, and the first hour unflatters it by another 2×.** The
+median order is **0.06% of ADV**, **0.17%** of whole-session at-bid volume and **0.38%** of
+first-hour at-bid volume. §3.37's choice of denominator was right and the magnitude of the
+correction is now measured: using ADV understates the demand the order actually makes by about
+**six-fold**, and ignoring the first-hour concentration by about **two-fold** on top.
+
+**2. Seven of the nine have no liquidity problem at all.** AVGO, MU, TSM, MRVL, VRT and VST sit at
+**0.05–0.8%** of first-hour at-bid volume at the median with p95 under 7%. GM at 1.13% median is
+comfortable. On these names the answer to *can we buy efficiently* is an unqualified yes, and the
+$0.5–1m order is nowhere near the constraint.
+
+**3. The two diversifiers are the problem, and CF is the acute one.** CF's median order is
+**4.33%** of first-hour at-bid volume, its p95 **45.4%**, and **22% of its orders exceed 10%**.
+VLO's median is 3.23% with 38% of orders above 5%. This independently confirms §3.58 on CF —
+arrived at there from a reverse-engineered threshold, here from the book's own fills — and it is
+now a **measurement, not a guard-rail**. Note what this means for §3.57: the diversifiers are not
+only failing to pay (the user's correction), they are also the only two names whose orders are
+demanding against available liquidity.
+
+**4. Capacity, derived rather than assumed.** Participation is exactly linear in capital, so the
+capital at which the 95th-percentile order reaches a given share of first-hour at-bid volume follows
+directly:
+
+| | CF | VLO | GM | VST | VRT | MRVL | MU | TSM | AVGO | **BOOK** |
+|---|---|---|---|---|---|---|---|---|---|---|
+| @5% | $1m | $3m | $3m | $5m | $8m | $10m | $26m | $34m | $41m | **$5m** |
+| @10% | $2m | $5m | $6m | $10m | $15m | $20m | $51m | $68m | $82m | **$10m** |
+| @20% | $3m | $11m | $12m | $20m | $31m | $39m | $102m | $135m | $165m | **$20m** |
+
+CF and VLO are only 138 of 1,218 fills (11%) but they populate the tail, and removing them moves the
+pooled 95th percentile from **7.2% to 4.1%** — book capacity **$5m / $10m / $19m → $8m / $17m /
+$34m**, a **1.7× gain**. So the diversifiers cost roughly **four-tenths of the book's liquidity
+capacity** on top of the return cost already recorded (§3.57) — material, but less than halving it.
+Within the remaining seven the binding name is VST ($5m @5%, $10m @10%), and MU/TSM/AVGO are
+effectively unconstrained at any capital this book will reach.
+
+**5. The binding constraint is the STOP, not the bid.** ~96% of the loop is passive and cheap: the
+passive sell (target hit) is a **median 0.15%** of at-or-above-target volume, p95 4.0%. But the
+**47 of 1,218 exits (3.9%) that hit the 50-calendar-day stop sell AT THE OPEN**, and against the
+opening 5-minute bar they are a **median 2.1%, p95 39.5%, max 73.8%**. Spread over the first 30
+minutes the same orders are a median 0.6% and p95 7.1%. **This is the one actionable finding on the
+execution side: working the stop over the first 30 minutes rather than dumping it into the opening
+print cuts its p95 participation by a factor of 5.5.** It touches 4% of exits, so it will not show
+up in backtest return — it is a real-money execution instruction, not a model change.
+
+**6. A quarter of fills never reach the bid in the first hour.** 26% of the nine's fills (19% VRT →
+42% VLO) had their bid untouched before 10:30 and rested into the session. Carrying those at the
+whole-session denominator rather than dropping them moves the book p95 from 6.7% to **7.2%** — so
+the first-hour figures are not flattered by survivorship, which was the obvious way this measurement
+could have been wrong.
+
+**7. Adding RTX and DE dilutes, mildly.** Eleven names at the same capital: book median first-hour
+participation **0.38% → 0.34%**, p95 **6.7% → 5.6%**. RTX lands at 0.93% median / 9.1% p95 and DE at
+1.26% / 9.3% — both between GM and VLO, i.e. tolerable but not free. Their own capacity lines are
+**$4m @5% / $8m @10%**, which makes them, with CF and VLO, the names that would bind first as capital
+grows. This also quantifies §3.62's point 3 from the other side: spreading over more names shrinks
+the typical order only **~10%**, because a pooled book concentrates into whichever sleeves are free.
+
+**What this does NOT measure.** Participation is how demanding the order is, not a slippage number
+and not a fill probability. Being 10% of the volume that trades at or below your price does not mean
+you capture 10% of it — queue position, order type and who else is resting there all matter, and none
+of that is visible in 5-minute bars. The honest claim is a **demand distribution**: below ~1% the
+order is invisible, above ~10% it is competing for a material share of the available flow, and the
+severity in between is not resolvable from this data. PARR remains unmeasured.
+
+Artifacts: `participation.py`, `participation.json`, `participation.log`. The JSON carries the raw
+per-fill ratios under `"<arm> :: rows"`, so any later slice (drop a name, move a threshold) comes off
+those rather than another full simulation. `book_sim.py`'s trade records now additionally carry `bid`
+and `target` (purely additive; no behaviour change).

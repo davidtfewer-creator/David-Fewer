@@ -339,7 +339,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
                                        entry=s['entry'], exit=d,
-                                       pnl=proceeds - s['cost'], cost=s['cost'],
+                                       pnl=proceeds - s['cost'], cost=s['cost'], bid=s['bid'], target=s['target'],
                                        stopped=(px < s['target'] - 1e-12)))
                 s.update(holding=False, shares=0.0, target=None, entry=None)
             active = []
@@ -371,7 +371,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
                                        entry=s['entry'], exit=d,
-                                       pnl=proceeds - s['cost'], cost=s['cost'],
+                                       pnl=proceeds - s['cost'], cost=s['cost'], bid=s['bid'], target=s['target'],
                                        stopped=(px < s['target'] - 1e-12)))
                 s.update(holding=False, shares=0.0, target=None, entry=None)
 
@@ -418,7 +418,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if collect_trades:
                     trades.append(dict(name=s['name'], kind=s['kind'],
                                        entry=d, exit=d, pnl=proceeds - cost,
-                                       cost=cost, stopped=False))
+                                       cost=cost, bid=bid, target=target, stopped=False))
             else:
                 s.update(holding=True, shares=shares, target=target, entry=d,
                          cost=cost, bid=bid)
@@ -452,7 +452,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     if collect_trades:
                         trades.append(dict(name=s['name'], kind=s['kind'],
                                            entry=s['entry'], exit=d,
-                                           pnl=proceeds - s['cost'], cost=s['cost'],
+                                           pnl=proceeds - s['cost'], cost=s['cost'], bid=s['bid'], target=s['target'],
                                            stopped=False))
                     s.update(holding=False, shares=0.0, target=None, entry=None)
 
