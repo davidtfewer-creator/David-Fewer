@@ -3511,3 +3511,48 @@ Artifacts: `participation.py`, `participation.json`, `participation.log`. The JS
 per-fill ratios under `"<arm> :: rows"`, so any later slice (drop a name, move a threshold) comes off
 those rather than another full simulation. `book_sim.py`'s trade records now additionally carry `bid`
 and `target` (purely additive; no behaviour change).
+
+### 3.64 The twelve with PARR capped at $400k: the cap is free, and it also shows PARR is not earning its place (15 Oct)
+
+User: *"I think we're going into too much detail here. CF has very few fills over the year anyway.
+I've never had an issue with filling VLO in practice. Can you run the 12 stock model and cap PARR
+at $400k"* — so §3.62's cap_frac sweep (which throttled every name to fix one) is set aside, and
+§3.63's CF/VLO findings are noted but not acted on: CF is 57 fills over the period and the user's
+live experience on VLO outranks a bar-derived ratio. `book_sim.simulate` gains `name_cap`
+({name: max $/order}, remainder re-divided over the other free sleeves). The no-cap arm reproduces
+`book12.json` to **0.000pp**, so the change is non-invasive.
+
+| arm | full | train | test | maxDD | fills/yr | ret/DD |
+|---|---|---|---|---|---|---|
+| NINE, live config (baseline) | 73.2 | 45.4 | 104.6 | 24.2 | 529 | 3.02 |
+| TWELVE, PM on all 12, no cap | 66.8 | 37.2 | 101.1 | 20.7 | 618 | 3.23 |
+| **TWELVE, PM on all 12, PARR ≤ $400k** | **67.7** | **40.9** | **97.9** | **20.5** | 618 | **3.30** |
+| TWELVE + breadth K≥4 on the nine, PARR ≤ $400k | 65.7 | 37.5 | 98.0 | **19.8** | 586 | **3.33** |
+| **ELEVEN (no PARR), PM on all 11** | **70.4** | **47.3** | 95.7 | 21.0 | 577 | **3.36** |
+| TWELVE captive, PARR ≤ $400k | 51.3 | 28.7 | 76.7 | 22.5 | 618 | 2.29 |
+
+**1. The cap costs nothing.** Full **+0.8pp**, test −3.1pp, maxDD −0.2pp, **fill count identical**
+(1,439). Capital denied to PARR re-divides into the other eleven, and those names use it at least as
+well — RTX's median order goes $0.62m → $0.67m, DE's $0.54m → $0.59m. §3.62's conclusion that
+capping PARR costs half the book was an artefact of `cap_frac`, which throttles **every** name; a
+per-name cap costs nothing because only one name is over.
+
+**2. The cap binds on every single PARR order.** Median = p95 = max = **exactly $0.40m** across all
+93 orders (uncapped: median $0.60m, max $2.15m). PARR is therefore no longer participating in the
+pool at all — it is a fixed-size sleeve. Per-**day** across both sleeves the total is median $400k,
+max $800k, with **19 of 74 fill days at $800k** (both sleeves firing), which is the number the
+at-bid volume actually has to absorb.
+
+**3. And that makes PARR redundant.** The **eleven-name book without PARR beats the capped twelve**
+on full (+2.7pp), train (+6.4pp) and ret/DD (3.36 vs 3.30), giving up 2.2pp of test return and
+0.5pp of drawdown. PARR was always the weakest of the three additions — neutral vector, rho −0.49,
+unfittable (§3.61) — and once it is pinned to a fixed $400k it contributes close to nothing.
+**The honest reading: cap PARR and it is free but pointless; drop it and the book is simpler and
+slightly better.** The case for keeping it rests entirely on the 2.2pp of test-half return and the
+marginal drawdown, i.e. on diversification that has not yet proven itself out of sample.
+
+**4. The risk trade the user bought is intact.** Capped twelve vs the nine: **−5.6pp return for
+−3.7pp drawdown**, ret/DD 3.30 vs 3.02; with the breadth gate, 3.33 at an 19.8 maxDD. Eleven is the
+same trade on better terms: −2.8pp return for −3.2pp drawdown, ret/DD 3.36.
+
+Artifacts: `book12_parrcap.py`, `book12_parrcap.json`, `book12_parrcap.log`.

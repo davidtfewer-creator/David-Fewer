@@ -80,13 +80,16 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
+             name_cap=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
              reentry=None, regime_exit=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
-    morning; equal when None). cap_frac: max fraction of the pool one sleeve may
+    morning; equal when None). name_cap: {name: max dollars per order}, a hard
+    per-name ceiling with the remainder re-divided over the other free sleeves.
+    cap_frac: max fraction of the pool one sleeve may
     take in a morning (None = uncapped, the deployed behaviour). date_lo/date_hi
     restrict the simulated window (policy fitting on one half).
     breaker: (trip, reset, frac) book-level circuit breaker, pooled mode only:
@@ -280,11 +283,37 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
         if mode == 'pooled' and active:
             wsum = sum(s['_w'] for s in active)
             bmul = breaker[2] if (breaker is not None and bk_tripped) else 1.0
-            for s in active:
-                a = cash * s['_w'] / wsum * bmul
-                if cap_frac is not None:
-                    a = min(a, cap_frac * cash)
-                s['_alloc'] = a
+            if name_cap:
+                # Water-fill: a sleeve whose name carries a hard dollar cap takes the
+                # cap and leaves the pool; the remainder re-divides over the rest. The
+                # alternative -- leaving the excess idle in cash -- would charge the cap
+                # twice, once to the capped name and once to every other sleeve that
+                # morning, which is not what a person running the book would do.
+                pot, rem = cash * bmul, list(active)
+                while rem:
+                    w = sum(x['_w'] for x in rem)
+                    hit = [x for x in rem
+                           if name_cap.get(x['name']) is not None
+                           and pot * x['_w'] / w > name_cap[x['name']]]
+                    if not hit:
+                        break
+                    for x in hit:
+                        x['_alloc'] = name_cap[x['name']]
+                        pot -= name_cap[x['name']]
+                        rem.remove(x)
+                if rem:
+                    w = sum(x['_w'] for x in rem)
+                    for x in rem:
+                        a = pot * x['_w'] / w
+                        if cap_frac is not None:
+                            a = min(a, cap_frac * cash)
+                        x['_alloc'] = a
+            else:
+                for s in active:
+                    a = cash * s['_w'] / wsum * bmul
+                    if cap_frac is not None:
+                        a = min(a, cap_frac * cash)
+                    s['_alloc'] = a
 
         # -------- intraday fast-crash stand-down: today's trigger time (if any)
         sd_tau = None
