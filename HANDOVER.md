@@ -3038,6 +3038,75 @@ every name. It now merges on write, as `weekly_freeze.py` does for the same reas
 lesson, learned twice).
 
 
+### 3.61 PARR+RTX+DE works far better than the six — and "look for volatile names" is now measured as the wrong instruction (15 Oct)
+
+**1. The three-name book.** Same harness, same per-name vector rule (PARR neutral at rho −0.49,
+RTX and DE fitted at +0.36 and +0.38):
+
+| arm | full | train | test | **maxDD** | fills/yr |
+|---|---|---|---|---|---|
+| captive | 36.6 | 20.8 | 53.2 | 8.6 | 91.8 |
+| **pooled** | **38.4** | **18.5** | **59.8** | **7.9** | **91.8** |
+| pooled + PM rule | 32.6 | 19.5 | 46.1 | 13.1 | 81.2 |
+| pooled + PM + breadth K≥1 | 33.6 | 24.5 | 42.7 | 13.1 | 69.3 |
+
+**38.4% full, 59.8% test, on a 7.9% drawdown.** Both halves positive, unlike the six-name set
+(train −7.8%). Return over drawdown is **4.9** against the nine-name book's 73.4/24.2 = **3.0**.
+Pooling uplift is **+1.7pp full / +6.6pp test** — positive here where it was negative across six.
+
+**Dropping DVN, OXY and AMD did all of that.** They earned 2.5%, −3.4% and −0.3% standalone and
+two of them were the energy names whose shared timing killed the pooling benefit (§3.60).
+
+**The overlays both hurt.** The PM rule costs 5.8pp and nearly doubles drawdown (7.9 → 13.1); the
+breadth gate adds nothing on top. Second time the PM rule has failed to transport off the
+nine-name book (§3.60). With three names, suppressing entries costs more than it saves.
+
+**2. The catch: PARR carries it, and PARR has two problems.**
+- **Unfittable** (rho −0.49), so the honest planning figure is its 25th percentile **44.8%**, not
+  the 114.8% test it posts standalone on the neutral vector.
+- **Liquidity, and it is probably disqualifying at scale.** PARR's Box file has **no volume column
+  at all** — the importer wrote zeros and `liquidity_check.py` divides by zero — so this had to be
+  estimated externally: ADV ≈ **1.0m shares at ~$70–77 = ~$73m**. Applying the at-bid ratio of the
+  comparable names (RTX and DE both run at-bid ≈ 42% of ADV) gives a median at-bid near **$29m**
+  and a §3.37 cap near **$0.29m per order** — about a THIRD of CF's $0.81m, which §3.58 showed
+  already binds the nine-name book at $6.2m. **That caps this book at roughly $0.6–0.9m, not $2m.**
+  *Estimated, not measured: re-pull PARR with volume before relying on it.*
+
+**3. "Should we look for other volatile names?" — No, and it is now measured rather than noticed.**
+Across the 43 names with 5-minute data:
+
+| | |
+|---|---|
+| rank correlation, annualised volatility vs AI beta | **+0.78** |
+| linear correlation | +0.75 |
+
+§3.14, §3.45 and §3.50 each noticed this locally. At 43 names it is simply the structure of this
+market: **screening for volatility IS screening for AI exposure.**
+
+**Only 3 of 43 names are above-median volatility AND uncorrelated** (median vol 57%):
+
+| | vol | beta | and its screened return |
+|---|---|---|---|
+| CELH | 60% | 0.17 | **−8.5%** |
+| TEAM | 59% | 0.17 | **−3.6%** |
+| RKT | 58% | 0.15 | **−18.8%** |
+
+**All three were already screened and all three lose money.** The volatile-uncorrelated corner of
+this universe is three names wide and empty.
+
+**And the inversion that matters: the non-AI names that WORK are the quiet ones.** RTX 25% vol,
+DE 29%, OXY 33%, GM 35%, VLO 36%, DVN 36% — every one below the 57% median. The brief's instinct
+was that volatility supplies fills and therefore return; in the uncorrelated half of the universe
+the relationship runs the other way.
+
+**Where this leaves the parallel book.** PARR+RTX+DE is a genuinely good risk-adjusted result and a
+genuinely small one — capped near $0.6–0.9m by PARR's tape, on three names, with the best name
+unfittable. It is not a home for $2m of NVDA proceeds. §3.58's ~$1.3m of headroom in the existing
+book remains the better destination.
+
+Results in `book3.json`, `vol_vs_beta.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -3252,6 +3321,10 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- **Volatility and AI beta are the SAME AXIS: rank correlation +0.78 across 43 names**
+  (§3.61). Screening for volatility is screening for AI exposure. Only 3 of 43 are
+  above-median volatility and uncorrelated, and all three lose money. The non-AI names
+  that work are the QUIET ones (RTX 25% vol, DE 29%, GM 35%).
 - **Pooling is worth ~+6.8pp on the NINE-NAME book and ~0 on a new set** (§3.60). It pays
   only when names want capital at different times; an energy-heavy set dips together. Do not
   assume the uplift when sizing a new book. The PM rule likewise does not transport.

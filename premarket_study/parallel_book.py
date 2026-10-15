@@ -97,7 +97,7 @@ def pm_rule_for(data, cut='09:00', thr=0.04):
 
 def main():
     rho, vecs = load_rho(), load_vecs()
-    names = SET6
+    names = [a for a in sys.argv[1:] if not a.startswith('-')] or SET6
     po, basis = {}, {}
     for n in names:
         r = rho.get(n)
@@ -129,7 +129,7 @@ def main():
     cap = row('captive (standalone basis)', mode='captive')
     pl = row('pooled', mode='pooled')
     pg = row('pooled + PM rule', mode='pooled', excl_fn=pmf)
-    for K in (2, 3, 4):
+    for K in (1, 2, 3):
         nb, cnt = gate_sets(names, K)
         row(f'pooled + PM + breadth K>={K}', mode='pooled', excl_fn=pmf, no_buy=nb)
     print(f'\n  POOLING UPLIFT  full {(pl["full"]-cap["full"])*100:+.1f}pp   '
@@ -144,7 +144,8 @@ def main():
               f'{r1["fills"]:>6d} fills   {basis[n]}', flush=True)
         out.setdefault('standalone', {})[n] = dict(full=r1['full'], test=r1['test'],
                                                    fills=r1['fills'])
-    json.dump(out, open('parallel_book.json', 'w'), indent=1)
+    import os
+    json.dump(out, open(os.environ.get('OUT', 'parallel_book.json'), 'w'), indent=1)
     print('\nDONE', flush=True)
 
 
