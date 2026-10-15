@@ -2680,6 +2680,83 @@ evidence now confirms twice over.
 Results in `parr_g5.json`, `dip_stop_sweep.json`, `deployed_params.json`.
 
 
+### 3.57 Live episode, 12–15 Oct 2026: the rates shock — measured, not acted on (15 Oct)
+
+US inflation print pushed yields up; book down hard over three sessions with another 2–3%
+indicated in Tuesday's pre-market. User asked how this compares with drops the book has recovered
+from, scope narrowed to **this week only** — the months-old drawdowns (VRT 153 days past its peak,
+VST 387, CF 42) are a separate condition and were excluded.
+
+**The move, 9 Oct close → 14 Oct close, with −2.5% pre-market applied:**
+
+| | TSM | VRT | VST | AVGO | MU | GM | VLO | CF | MRVL |
+|---|---|---|---|---|---|---|---|---|---|
+| week | −5.1% | −8.2% | −6.0% | −4.2% | −11.2% | +0.4% | **+6.0%** | **+7.1%** | −10.9% |
+| +pre-mkt | −7.5% | −10.5% | −8.4% | −6.6% | −13.4% | −2.1% | **+3.4%** | **+4.4%** | −13.1% |
+
+**Book −3.7% over three sessions, −6.1% including pre-market.** That is a 3% tail: 21 of 634
+three-session windows since April 2024 were at least this bad.
+
+**What followed those 21:**
+
+| horizon | median | mean | 25th | % positive | worst | *unconditional median / % pos* |
+|---|---|---|---|---|---|---|
+| +5 sess | **+3.5%** | +1.5% | −2.7% | 67% | −15.7% | *+1.3% / 65%* |
+| +10 sess | **+5.5%** | +3.0% | −0.4% | 71% | −11.9% | *+2.5% / 69%* |
+| +20 sess | +2.0% | +5.4% | −3.1% | 62% | −14.1% | *+4.6% / 76%* |
+| +50 sess | **+15.6%** | +13.8% | −6.7% | 71% | −28.5% | *+12.7% / 82%* |
+
+Medians beat the unconditional at three of four horizons, consistent with §3.55's finding that
+forward returns improve with depth. **But the hit rate is WORSE** at +20 (62% vs 76%) and +50 (71%
+vs 82%), the 25th percentile at +50 is −6.7%, and the worst case is −28.5%. The distribution shifts
+up and widens. Windows overlap, so these are not independent draws, and no attempt was made to
+identify past episodes as rate shocks — 638 sessions is far too few to condition on a cause.
+
+**The diversifiers paid out, in real time.** VLO +6.0% and CF +7.1% on the week while MU −11.2%,
+MRVL −10.9%, VRT −8.2%. VLO closed at an all-time high on 14 Oct. This is the §6 thesis working in
+exactly the episode it was carried for — and note §3.56 had just confirmed VLO as load-bearing
+(dropping it cost 16.4pp on the tested half). A rates/inflation shock is the one macro event where
+the commodity names are a genuine hedge rather than a drag.
+
+**The deployed gate (§3.23, K=4) is OFF: 3 of 9 below their 200dma** — VRT −18.9%, AVGO −8.3%,
+VST −4.3%. **GM is +0.4% above its line**, so one ordinary day turns it on. TSM +6.4%, CF +2.2%,
+MU +25.2%, MRVL +37.1%, VLO +65.3% — several names remain far above trend despite the fall.
+
+**But the gate would protect nothing here, and that is the important finding.** Cash available is
+**$6,034.78** and 13 of 18 sleeves are HOLDING; five names (TSM, VRT, AVGO, MU, GM) are frozen on
+both sleeves. The gate suppresses NEW ENTRIES, and there is no money to enter with. **§3.22 already
+established that an entry veto cannot protect a book whose damage is in held inventory** — this
+episode is that case exactly.
+
+**The selling is already scheduled.** The 50-calendar-day stop will act without anyone deciding:
+
+| | held | targets vs close | stop fires |
+|---|---|---|---|
+| VRT Bayes + OU | 36d | 284.13 / 290.53 vs 222.83 (needs +27%/+30%) | **~28 Oct** |
+| GM Bayes + OU, CF OU | 27d | 85.89 / 88.59 / 137.85 | **~6 Nov** |
+| TSM ×2 | 8d | 480.00 / 477.34 vs 430 | ~26 Nov |
+| VST OU, AVGO Bayes, MRVL OU | 7d | — | ~27 Nov |
+| AVGO OU, MU ×2 | 3d | 1025.89 / 1004.77 vs 914.13 | ~1 Dec |
+
+**Decision: no discretionary action.** The gate is off; it would be inert if on; the analogue
+distribution favours holding; the diversifiers are doing their job; and the two positions least
+likely to recover (VRT, needing +27% in a fortnight) are stopping out on their own in two weeks.
+§3.42 measured decisive stand-down as far worse than the deployed gate.
+
+**The limit of all of this, stated plainly.** Every number above comes from a 2024–26 sample with
+no bear in it. §3.42's finding that stand-down is worse, §3.55's that depth predicts better forward
+returns, and the 21 analogues here all rest on a market that always came back. **This analysis
+cannot distinguish a dip from the first week of a regime change**, and if it is the latter, "hold"
+is the wrong answer and the inventory is where the damage will be. The watch items are GM's 200dma
+(0.4%) as the fourth breach, and whether the diversifiers keep holding up — in 2022 the plateau was
+exactly six names below with the three diversifiers holding (§3.23), so the signal that this has
+become a bear is the diversifiers joining the decline.
+
+Tooling: `drawdown_now.py` (current state vs each name's own dip history), `this_week.py`
+(event window, conditional forward distribution, gate state). Results in `drawdown_now.json`,
+`this_week.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
