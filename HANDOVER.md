@@ -2795,6 +2795,72 @@ Tooling: `drawdown_now.py` (current state vs each name's own dip history), `this
 `this_week.json`.
 
 
+### 3.58 Capacity re-measured on the orders actually placed: headroom is ~$1.3m, not $2m — and CF/VLO are the binding constraint (15 Oct)
+
+User plans to fund the daily book with NVDA proceeds and asked whether another **$2m** fits.
+§3.43 answered with a static calculation — the thinnest name's gate (CF, $0.81m) divided across
+equal weights, giving a ~$7.3m ceiling — and flagged its own assumption: *"it assumes every name
+funded at once, where a typical morning funds about six sleeves."* That makes it conservative in
+one direction and wrong in another, because the **pooled** book does the opposite of equal
+weighting: when few sleeves are free, one name takes a much larger share.
+
+`capacity_recheck.py` measures the real thing — run the pooled book at the proposed capital,
+collect every fill, compare each name's ACTUAL order sizes against its own §3.37 gate.
+
+**At today's mark (~$4.9m) the book already breaches its own gate.**
+
+| | gate cap | binds | orders | median | 95th | max | over cap | worst |
+|---|---|---|---|---|---|---|---|---|
+| **CF** | **0.81m** | thin day | 57 | 0.64m | 2.14m | 2.64m | **16/57** | 3.27× |
+| **VLO** | **1.44m** | thin day | 81 | 0.73m | 1.99m | 3.17m | **9/81** | 2.21× |
+| GM | 2.45m | median | 139 | 0.47m | 1.51m | 4.45m | 2/139 | 1.81× |
+| TSM / AVGO / MU / MRVL / VRT / VST | 3.07–20.65m | — | — | — | — | — | **0** | 0.07–0.86× |
+
+**2.2% of all orders, and 28% of CF's.** The AI names have enormous headroom (MU 0.07×, TSM and
+AVGO 0.13×). **The binding constraint is the diversifier sleeve, which is the part §3.56 showed is
+load-bearing** — dropping VLO cost 16.4pp on the tested half.
+
+**The sweep, and where it breaks:**
+
+| capital | all orders over gate | CF | VLO | GM | **CF median vs its cap** |
+|---|---|---|---|---|---|
+| $4.0m | 1.6% | 21% | 7% | 1% | 0.65× |
+| **$4.9m (today)** | **2.2%** | **28%** | **11%** | 1% | **0.80×** |
+| $5.5m | 2.9% | 39% | 14% | 1% | 0.89× |
+| **$6.0m (+$1.1m)** | 3.5% | 46% | 16% | 1% | **0.97×** |
+| **$6.9m (+$2.0m)** | **4.6%** | **56%** | **23%** | 2% | **1.12×** |
+| $8.0m | 5.8% | 67% | 30% | 5% | 1.30× |
+
+**The median CF order crosses its own gate between $6.0m and $6.9m — call it $6.2m.** Past that it
+is not the tail breaching, it is the typical order. **Headroom from today's mark is about $1.3m,
+not $2m**, and §3.43's $7.3m was too generous because it assumed an allocation the pooled book does
+not use.
+
+**What a breach actually means.** §3.37's gate is an assumption about market impact: an order above
+~1% of at-bid dollar volume may not fill at the posted price. A breach does not fail the trade, it
+means **the backtest's fill was optimistic**. So the consequence of funding to $6.9m is that CF's
+and VLO's modelled returns become progressively unachievable — in the sleeve that exists to protect
+the book.
+
+**Three ways to take the full $2m, all with a price:**
+1. **Cap per-name orders.** The truncated capital flows to the liquid AI names, which is the
+   concentration §3.42 priced at **7.4pp of return and 10.9pp of drawdown**.
+2. **Accept the slippage.** Unquantified here; CF would breach on 56% of orders, up to 4.6×.
+3. **Stage it.** ~$1.1m now, the rest when a more liquid diversifier exists.
+
+**Two caveats that cut opposite ways.** The $4.9m is a **drawdown mark** — if the book recovers to
+$5.5m the same $2m lands at $7.5m, worse than modelled here, so sizing off today's depressed mark
+flatters the answer. Against that, the liquidity figures come from the 5-minute archive ending
+**Aug 2026**; volumes in a selloff usually rise, which would help, but they are unmeasured.
+
+**The structural point.** Capacity is not limited by the book's size but by its two thinnest names,
+and those are diversifiers. Raising capacity therefore requires a **more liquid uncorrelated name**
+— and the screens have produced exactly two candidates, GM (already held, $2.45m cap) and PARR
+(declined at G5, §3.56). That is the same wall §3.43 hit, now located precisely.
+
+Results in `capacity_recheck.json`, `capacity_sweep.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
