@@ -2814,6 +2814,19 @@ recovery, which matters to anyone planning to sell into strength.
 decision — no broad liquidation, VRT the one defensible early exit — but the recovery statistics
 should be held with less confidence than their medians suggest.
 
+**15 Oct, 30 minutes in — the tell did NOT trigger.** Actual prints: VRT −7.0%, TSM −4.5%,
+MU −4.0%, MRVL −4.0%, AVGO −2.5%, VST −2.0%, but **GM +0.25%, CF 0.0%, VLO −1.5%**. Book −2.8%,
+AI six −4.0%, **diversifiers −0.4%**. From the 7 Oct peak: book −8.1%, AI six −14.5%,
+**diversifiers +4.7%**, six of nine below the peak. Three-session move −5.1%, rank 33 of 635.
+Open positions −$642,440 (−11.6%).
+
+**Breadth stayed at 3 of 9 below their 200dma, so the §3.23 gate did not fire** — GM needed −2.9%
+to be the fourth breach and rose instead. (And the gate is a morning rule read off the PRIOR close,
+so an intraday breach would have fed tomorrow's decision, not today's.) Against April 2025's
+diversifiers −12.1% with 9/9 falling, this remains the April-2024 shape. **VRT is the one position
+materially changed**: at ~207 it needs +37%/+40% to reach target, which is out of reach, with
+earnings 20–21 Oct and the stop ~28 Oct.
+
 Tooling: `drawdown_now.py` (current state vs each name's own dip history), `this_week.py`
 (event window, conditional forward distribution, gate state). Results in `drawdown_now.json`,
 `this_week.json`.
