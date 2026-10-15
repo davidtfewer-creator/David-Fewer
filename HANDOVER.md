@@ -2712,9 +2712,17 @@ vs 82%), the 25th percentile at +50 is −6.7%, and the worst case is −28.5%. 
 up and widens. Windows overlap, so these are not independent draws, and no attempt was made to
 identify past episodes as rate shocks — 638 sessions is far too few to condition on a cause.
 
-**The diversifiers paid out, in real time.** VLO +6.0% and CF +7.1% on the week while MU −11.2%,
-MRVL −10.9%, VRT −8.2%. VLO closed at an all-time high on 14 Oct. This is the §6 thesis working in
-exactly the episode it was carried for — and note §3.56 had just confirmed VLO as load-bearing
+**CORRECTED 15 Oct — the diversifiers did NOT pay out, because the book is not in them.**
+The original note read "the diversifiers paid out, in real time", citing VLO +6.0% and CF +7.1% on
+the week against MU −11.2%, MRVL −10.9%, VRT −8.2%. Both price moves are real and **both are
+irrelevant to this book**: VLO holds **zero shares** (both sleeves sat in CASH through the rally,
+bids at 447.28/442.23 against a 459.78 close) and CF's open sleeve was bought at **130.16 on 18
+Sep**, so a 7% bounce leaves it **−10.5%**. Measured on the actual open positions
+(`position_pnl.py`, entries from the trade log): **diversifiers −6.6%, AI six −12.2%, whole held
+book −11.2% = −$617,192 on $5,518,897.** The diversifiers cushioned in relative terms and lost
+money in absolute ones. *A diversifier earns its place by what the book HOLDS of it, not by what
+the ticker does — measuring the price series and calling it a hedge was the error.* The §6 thesis
+is about the former — and note §3.56 had just confirmed VLO as load-bearing
 (dropping it cost 16.4pp on the tested half). A rates/inflation shock is the one macro event where
 the commodity names are a genuine hedge rather than a drag.
 
