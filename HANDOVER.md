@@ -3556,3 +3556,54 @@ marginal drawdown, i.e. on diversification that has not yet proven itself out of
 same trade on better terms: −2.8pp return for −3.2pp drawdown, ret/DD 3.36.
 
 Artifacts: `book12_parrcap.py`, `book12_parrcap.json`, `book12_parrcap.log`.
+
+### 3.65 The ELEVEN-name book (nine + RTX + DE), PARR dropped: the risk trade on better terms, and the whole give-up sits in the test half (15 Oct)
+
+User: *"drop PARR and run the eleven"*, after §3.64 showed the eleven beating the $400k-capped
+twelve. PARR went because capping it pinned all 93 orders to a fixed size, it runs on a NEUTRAL
+vector (unfittable, rho −0.49, §3.61) and its liquidity was never measurable at all (§3.63). RTX and
+DE keep their fitted vectors (+0.36, +0.38). Capital $6.9m.
+
+| arm | full | train | test | maxDD | fills/yr | ret/DD |
+|---|---|---|---|---|---|---|
+| NINE, live config (baseline) | 73.2 | 45.4 | **104.6** | 24.2 | 529 | 3.02 |
+| ELEVEN, no overlays | 60.6 | 37.8 | 85.9 | 21.2 | 592 | 2.86 |
+| ELEVEN, PM on the NINE only | 67.9 | 46.5 | 91.2 | 20.6 | 579 | 3.30 |
+| **ELEVEN, PM on all 11** | **70.4** | **47.3** | 95.7 | 21.0 | 577 | 3.36 |
+| ELEVEN, PM all + breadth K≥4 on the NINE | 68.2 | 43.5 | 95.7 | 20.6 | 546 | 3.31 |
+| **ELEVEN, PM all + breadth K≥5 on ELEVEN** | 69.3 | 45.5 | 95.7 | **19.1** | 547 | **3.64** |
+| ELEVEN captive | 52.9 | 32.7 | 75.0 | 23.1 | 578 | 2.29 |
+
+**1. §3.62's overlay finding transports.** PM on all eleven beats PM on the nine only by **+2.5pp
+full / +4.5pp test**. The mechanism holds at eleven as at twelve: in a pooled book, suppressing a
+poor entry frees that capital for ten other names.
+
+**2. The breadth gate's K must be re-stated for eleven names, and it matters.** Carrying §3.23's
+K≥4-of-nine across unchanged gives ret/DD **3.31**; the proportional **K≥5-of-eleven gives 3.64 at a
+19.1 maxDD** — the best risk-adjusted figure anywhere in this project. Applying a threshold
+calibrated on nine names to eleven would have quietly cost 0.33 of ret/DD, which is why it was run
+rather than assumed.
+
+**3. The risk trade, on better terms than the twelve.** Eleven (PM on all) vs the nine: **−2.8pp
+return for −3.3pp drawdown**, ret/DD 3.36 vs 3.02. With the K≥5 gate: **−3.9pp for −5.1pp**, ret/DD
+**3.64 vs 3.02**. Compare the capped twelve's −5.6pp for −3.7pp (§3.64) — dropping PARR improves
+both legs of the trade.
+
+**4. The caveat, and it is the important one: the entire give-up is in the TEST half.** The eleven
+are **+1.9pp on train** and **−8.9pp on test**. That is an inversion, and it is the opposite of what
+a diversification claim predicts. The nine's 104.6% test-half figure is exceptional and
+concentrated in the AI complex; adding two uncorrelated industrials dilutes exactly the thing that
+drove it. So the honest statement is **not** "the eleven are safer at little cost" but: *the eleven
+trade away a large part of a second-half result that may not repeat, in exchange for a drawdown
+reduction that shows up in both halves.* Whether that is a good trade depends on whether the test
+half is the future or an artefact — which this data cannot settle.
+
+**5. Pooling uplift is +17.5pp full / +20.7pp test**, against the nine's +6.8pp. More names with
+differentiated fill timing is where pooling pays, as §3.60 found.
+
+**6. RTX and DE pull slightly below their weight.** They are 102 of 1,327 fills (7.7%) and **10.4%
+of P&L** — above their per-fill share but below the 9.1% an equal name would contribute, at win
+rates of **91%** against the core's 96–98%. They are adding diversification, not return.
+
+**Deployment candidate: ELEVEN, PM rule on all eleven, breadth gate K≥5 of eleven** — 69.3% full,
+19.1% maxDD, 547 fills/yr, ret/DD 3.64. Artifacts: `book11.py`, `book11.json`, `book11.log`.
