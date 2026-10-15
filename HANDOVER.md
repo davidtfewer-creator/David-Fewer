@@ -2898,6 +2898,80 @@ and those are diversifiers. Raising capacity therefore requires a **more liquid 
 Results in `capacity_recheck.json`, `capacity_sweep.json`.
 
 
+### 3.59 The parallel book, screened on the new brief: six names at 20%+ with ≤2 AI does not exist — and the fittability test is why (15 Oct)
+
+Brief: a second daily book, **≥6 names, ≤2 AI-related, ≥20% standalone, fills as the key metric**,
+Bayes+OU as before. Thirteen names never screened here were restored from Box (AMD, CEG, DVN, FCX,
+FSLR, MRNA, NVDA, OXY, RBLX, RKLB, SHOP, SOFI, UAL; SKHY skipped, only two months of data), taking
+the screened universe to **49 names**.
+
+**G1 on the thirteen: only 2 clear it** — DVN 0.15 and OXY 0.09, both energy. AMD 0.81, RKLB 0.82,
+CEG 0.75, **NVDA 0.73**, SOFI 0.60, FCX 0.50, UAL 0.45, FSLR 0.45, SHOP 0.41, MRNA 0.35, RBLX 0.29
+are all AI-related. *(NVDA at beta 0.73 / correlation 0.73 also settles, by measurement, the claim
+made when advising on the NVDA sale that it is the same trade as the book.)*
+
+**The decisive filter is not return, it is FITTABILITY** (§3.54's test: 300 random vectors scored on
+both halves; rank correlation between train and test performance):
+
+| name | test median | 25th | **rho** | reading | single-fit number |
+|---|---|---|---|---|---|
+| PARR | 63.7% | 44.8% | **−0.49** | fitting HURTS | 46.1% |
+| AMD | 53.5% | 39.2% | **−0.59** | fitting HURTS | 53.2% |
+| NVDA | 33.9% | 21.2% | **+0.41** | fitting works | 49.1% |
+| RTX | 20.2% | 12.2% | **+0.36** | fitting works | 43.1% |
+| DE | 13.1% | 9.9% | **+0.38** | fitting works | 24.6% |
+| DVN | 18.8% | 12.0% | −0.47 | fitting HURTS | 15.6% |
+| OXY | 16.4% | 7.3% | −0.33 | fitting HURTS | 11.3% |
+| SOFI | 23.7% | 16.2% | +0.07 | useless | **70.9%** |
+| DLTR | 7.3% | 1.9% | +0.20 | useless | **22.7%** |
+| EXPE | 11.4% | 5.6% | +0.18 | useless | 23.2% |
+| HUM | 0.8% | −3.7% | −0.39 | fitting HURTS | 14.3% |
+
+**This demolishes four of the candidates that passed on a single fit.** SOFI's 70.9% sits against a
+random-vector median of 23.7% with rho +0.07 — a lucky draw, not a fit. DLTR's 22.7% against a
+median of **7.3%** and a 25th of 1.9% — the same. EXPE and HUM likewise. **A single train-half fit
+reports a number for every name; the number only means something where rho is positive.**
+
+**It also rehabilitates two.** AMD's fitted 53.2% looked like a fitting success; it is not — rho is
+−0.59 — but its random-vector median is **53.5%** and its 25th **39.2%**, so AMD is a strong name
+whose parameters barely matter. Same shape as PARR (median 63.7%, 25th 44.8%). For these the
+planning figure is the 25th percentile, per §3.54.
+
+**Honest standing of every candidate, best basis available:**
+
+| | planning figure | fills/yr | class |
+|---|---|---|---|
+| **PARR** | 44.8% *(25th, unfittable)* | 109.6 fitted / 39 un-fitted | uncorrelated |
+| **AMD** | 39.2% *(25th, unfittable)* | 55.2 | **AI 0.81** |
+| **NVDA** | ~34–49% *(fittable)* | 49.3 | **AI 0.73** |
+| **RTX** | ~20–43% *(fittable, median 20.2%)* | 26.9 | uncorrelated |
+| DVN | 12.0% *(25th)* | 24.2 | uncorrelated |
+| DE | ~13–25% *(fittable, median 13.1%)* | 18.8 | uncorrelated |
+| OXY | 7.3% *(25th)* | 16.7 | uncorrelated |
+
+**The brief cannot be met as written.** Only three names are genuinely strong — **PARR, AMD, NVDA**
+— and **two of the three are AI**, which exhausts the AI budget and leaves one. Below them the
+non-AI field falls to RTX (median 20.2%) and then to DVN/DE/OXY in the low teens. **There is no
+set of four non-AI names at a credible 20%+.**
+
+**What the fills constraint actually costs.** DVN, OXY and HUM have the best FILL profiles measured
+anywhere in this project — median hold 0 days, **90%, 95% and 83%** of trades closed within five
+days — and planning figures of 12.0%, 7.3% and −3.7%. The names that trade fastest in the non-AI
+space are the ones that earn least. That is §3.50's axis finding again, now at 49 names.
+
+**The one premise worth testing before giving up on the brief.** The brief assumes 20% standalone
+becomes 30%+ pooled and gated. That uplift is real and large in the existing book — the nine-name
+pooled result is 73.4% full / 105.1% test against constituents in the 35–50% range. **If pooling
+reliably adds that much, the right move is to LOWER the floor to ~15% and buy fills**, which makes
+PARR, RTX, DVN, OXY + DE a feasible non-AI five, plus one AI. That has not been tested and is the
+obvious next run.
+
+**Not yet done:** the pooled sim on any candidate set, and G5. §3.51's warning stands over all of
+it — optimising for turnover by cutting the premium failed G5 decisively on CF.
+
+Results: `fittability.json`, `fit_ai.json`, `su_dvn.json`, `su_new_g1.log`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -3112,6 +3186,9 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- **A single train-half fit means nothing where the train half does not predict the test
+  half.** Run fittability.py (§3.59) BEFORE reading any fitted number: SOFI 70.9%, DLTR 22.7%
+  and EXPE 23.2% all evaporate, while AMD and PARR are strong names whose fits are noise.
 - **G2 is §3.14's RETURN HURDLE** (30% uncorrelated / 50% AI-related), NOT "beats the
   no-fit baseline" as screen_speed.py implemented it (§3.53). The proxy passes a name
   losing 3.6% and fails one making 46.1%. It changes three §3.50 verdicts.
