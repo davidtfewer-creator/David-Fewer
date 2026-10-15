@@ -2786,6 +2786,30 @@ MRVL +37%, VLO +65%. There is considerably more room to fall before this is a wa
 and the condition that made April 2025 rebound so fast is absent. (April 2024's extension is not
 measurable: fewer than 200 sessions of history existed at that point.)
 
+**CORRECTION (15 Oct) — April 2024 took 36 calendar days to recover, not 7.** The earlier "whole
+again in four sessions / regained the pre-drop level in 7 days" measured from the level THREE
+SESSIONS before the trough, not from the episode's peak. Traced properly (`april2024.py`,
+peak searched 1–15 Apr, trough to 30 Apr, recovery to 31 May):
+
+| | April 2024 | today |
+|---|---|---|
+| peak | 2024-04-03 *(row 2 — the true top may pre-date the data)* | 2026-10-07 |
+| trough / now | 2024-04-19, **−10.7%** | 2026-10-14 +pm, **−11.2%** |
+| **down** | **12 sessions / 16 cal days = −0.90%/session** | **5 sessions / 7 cal days = −2.24%/session** |
+| up | 14 sessions / 20 cal days = +0.86%/session | — |
+| **round trip peak-to-whole** | **26 sessions / 36 calendar days** | — |
+| AI six | −12.8% | −13.1% |
+| diversifiers | **−6.6%** (VLO −9.1, CF −4.5, GM −6.2) | **+2.5%** (VLO +5.7, CF +1.8, GM −0.0) |
+
+**Same damage to the AI complex, at two and a half times the speed.** §3.22's distinction says the
+fast kind is the one an entry veto cannot protect against, because the damage is in inventory —
+today is the fast kind. Against that, April 2024 took the diversifiers down with it and today's
+are up, so the fall is narrower (six of nine, peak-relative).
+
+**And the recovery was not a straight line**: 89.3 at the trough (19 Apr) → 98.7 by 29 Apr → back
+to **94.0 on 1 May** → whole on 9 May. An eight-session bounce retraced nearly half before the real
+recovery, which matters to anyone planning to sell into strength.
+
 **Net: "April recovered" is true and is weaker evidence than it sounds.** It does not change the
 decision — no broad liquidation, VRT the one defensible early exit — but the recovery statistics
 should be held with less confidence than their medians suggest.
