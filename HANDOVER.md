@@ -2972,6 +2972,72 @@ it — optimising for turnover by cutting the premium failed G5 decisively on CF
 Results: `fittability.json`, `fit_ai.json`, `su_dvn.json`, `su_new_g1.log`.
 
 
+### 3.60 The 15%-floor parallel book, pooled and gated: the pooling premise is refuted, the gate works, and the book lands at a third of the nine-name result (15 Oct)
+
+Six names at a 15% floor — **PARR, RTX, DVN, OXY, DE, AMD** (one AI) — run pooled on the live
+config. Vectors chosen **per name by §3.59's fittability test**, which is the whole point: a fitted
+vector is meaningful only where the train half predicts the test half, so RTX (+0.36) and DE (+0.38)
+use their fitted vectors and PARR (−0.49), AMD (−0.59), DVN (−0.47) and OXY (−0.33) use the neutral
+seed, never fitted to them at all.
+
+| arm | full | train | test | maxDD | fills/yr |
+|---|---|---|---|---|---|
+| captive (standalone basis) | 19.8 | −2.2 | 45.3 | 18.0 | 174.3 |
+| pooled | 17.0 | −7.8 | 46.9 | 24.3 | 174.3 |
+| pooled + PM rule | 13.5 | −11.0 | 43.2 | 28.0 | 165.3 |
+| **pooled + PM + breadth K≥2** | **22.3** | **+3.6** | 43.4 | **22.4** | 140.8 |
+| pooled + PM + breadth K≥3 | 22.1 | +3.6 | 42.9 | 22.4 | 144.7 |
+| pooled + PM + breadth K≥4 | 21.6 | +0.7 | 45.7 | 22.4 | 148.5 |
+
+**1. The pooling premise is refuted for this set — but it is real for the nine-name book.** Measured
+both ways on the same harness:
+
+| | pooling uplift (captive → pooled) |
+|---|---|
+| **nine-name book** | **+6.8pp full, +6.7pp test, maxDD −1.5pp** |
+| **the six candidates** | **−2.8pp full, +1.6pp test, maxDD +6.3pp** |
+
+So the brief's assumption that a modest standalone number becomes much better pooled is **true of
+the existing book and false of this set**. And even the book's +6.8pp on a 20% base gives 27%, not
+30%+.
+
+**The likely reason is composition, and it was self-inflicted: PARR, DVN and OXY are all
+energy/commodity — three of six.** Pooling pays when the names want capital at different times; an
+energy-heavy set dips together, so three sleeves compete for the pot on the same mornings and sit
+idle together on the others. Consistent with §3.9's finding that the uplift is counter-cyclical.
+*(Hypothesis, inferred from composition — the fill-day correlation was not measured.)*
+
+**2. The GATE works, and that is the real find here.** Pooled+PM 13.5% → **22.3%** at K≥2, the
+train half **−11.0% → +3.6%**, drawdown **28.0% → 22.4%**. Roughly **+9pp of return and −5.6pp of
+drawdown** from breadth-gating alone. The brief's instinct that gating adds a lot is correct, even
+though the pooling half of it is not.
+
+**3. The pre-market rule does not transport.** It helps the nine-name book (64.8 → 73.4) and
+**hurts this one** (17.0 → 13.5). §3.16 was calibrated on the book's names and should not be
+assumed for new ones.
+
+**4. Three of the six earn essentially nothing.** Standalone full-sample: PARR **40.4%**,
+RTX **36.9%**, DE **34.0%**, then DVN 2.5%, OXY −3.4%, AMD −0.3%. The book is carried by three
+names and diluted by three. Note also the violent half-asymmetry — the set makes almost nothing in
+the train half (+3.6% at best) and 43% in the test half.
+
+**Verdict: the parallel book as briefed does not work.** At its best configuration it returns
+**22.3% full / 43.4% test with a 22.4% drawdown**, against the nine-name book's **73.4 / 105.1 at
+24.2** — about **a third of the return for the same risk**. Nothing here justifies deploying
+capital that could go to the existing book, which §3.58 says has ~$1.3m of headroom anyway.
+
+**What survives.** PARR (25th percentile 44.8%, the strongest honest figure found in 49 names) and
+RTX. Both already known; PARR failed G5 as a VLO swap (§3.56). The three-name set PARR+RTX+DE is
+the only part of this worth any further work, and it is not six names and not a book.
+
+Results in `parallel_book.json`, `nine_pooling_uplift.json`, `fittability.json`.
+
+**Bug found and fixed:** `fittability.py` wrote to a fixed filename, so three successive runs
+silently overwrote each other and the first parallel-book run fell back to neutral vectors for
+every name. It now merges on write, as `weekly_freeze.py` does for the same reason (§3.28d's
+lesson, learned twice).
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -3186,6 +3252,9 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- **Pooling is worth ~+6.8pp on the NINE-NAME book and ~0 on a new set** (§3.60). It pays
+  only when names want capital at different times; an energy-heavy set dips together. Do not
+  assume the uplift when sizing a new book. The PM rule likewise does not transport.
 - **A single train-half fit means nothing where the train half does not predict the test
   half.** Run fittability.py (§3.59) BEFORE reading any fitted number: SOFI 70.9%, DLTR 22.7%
   and EXPE 23.2% all evaporate, while AMD and PARR are strong names whose fits are noise.

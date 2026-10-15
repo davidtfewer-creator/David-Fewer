@@ -66,7 +66,14 @@ def main():
                         q25=s[len(s)//4], q75=s[3*len(s)//4], rho=rho, reading=read))
         print(f'{nm:6s}{len(tr):>8d}{statistics.median(te):>12.1f}%{s[len(s)//4]:>8.1f}%'
               f'{s[3*len(s)//4]:>8.1f}%{rho:>+17.2f}   {read}', flush=True)
-        json.dump(out, open('fittability.json', 'w'), indent=1)
+        # merge rather than overwrite: three separate runs silently clobbered each
+        # other and the parallel book then fell back to neutral vectors for every name
+        try:
+            prev = {r['name']: r for r in json.load(open('fittability.json'))}
+        except (FileNotFoundError, ValueError):
+            prev = {}
+        prev.update({r['name']: r for r in out})
+        json.dump(list(prev.values()), open('fittability.json', 'w'), indent=1)
     print('\nDONE', flush=True)
 
 
