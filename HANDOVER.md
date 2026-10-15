@@ -3107,6 +3107,74 @@ book remains the better destination.
 Results in `book3.json`, `vol_vs_beta.json`.
 
 
+### 3.62 The twelve-name book: the risk trade works, the gates-off-the-three premise does not, and the liquidity threshold needs qualifying (15 Oct)
+
+User's design: add PARR, RTX and DE to the nine, pool all twelve, withhold the overlays from the
+three (since §3.61 found the PM rule costs them 5.8pp), accepting lower return for shock
+protection. Capital $6.9m. Vectors: the nine as deployed; PARR neutral (rho −0.49), RTX and DE
+fitted (+0.36, +0.38).
+
+| arm | full | train | test | **maxDD** | fills/yr |
+|---|---|---|---|---|---|
+| NINE, live config (baseline) | 73.2 | 45.4 | 104.6 | 24.2 | 529 |
+| TWELVE, no overlays | 58.2 | 31.3 | 88.8 | 20.2 | 638 |
+| **TWELVE, PM on all 12** | **66.8** | **37.2** | **101.1** | **20.7** | 618 |
+| TWELVE, PM on the NINE only | 64.1 | 37.0 | 94.9 | 19.9 | 624 |
+| TWELVE, PM + breadth K≥4 on NINE | 63.6 | 36.1 | 94.9 | **18.0** | 592 |
+| TWELVE captive | 51.9 | 28.9 | 77.6 | 22.6 | 624 |
+
+**1. The risk trade is real and slightly favourable.** Twelve with PM on the nine gives up
+**9.1pp of return** for **4.4pp less drawdown**. Risk-adjusted that is 64.1/19.9 = **3.22** against
+the nine's 73.2/24.2 = **3.03**; adding the breadth gate takes it to 63.6/18.0 = **3.53**. Pooling
+uplift inside the twelve is **+12.2pp full / +17.2pp test**, much larger than the nine's +6.8 —
+more names with different fill timing is exactly where pooling pays (§3.60).
+
+**2. The gates-off-the-three premise is WRONG in this context.** PM on ALL twelve beats PM on the
+nine only by **+2.7pp full and +6.2pp test** at near-identical risk-adjusted return. §3.61's finding
+that the PM rule hurts the three stands *for a three-name book* and does not transport: in a pooled
+twelve, suppressing a poor PARR/RTX/DE entry frees capital for nine other names, where in a
+three-name book there was nowhere else for it to go. **Apply the PM rule to all twelve.**
+
+**3. Spreading over twelve does NOT fix PARR's order size.** Median PARR order **$0.59m**, 95th
+$1.34m, max $1.65m — **104 of 105 orders above the $0.29m estimate**. The reason is §3.58's
+mechanism: a pooled book CONCENTRATES, it does not spread. A free sleeve takes a full share of the
+pot when the others are holding, regardless of how many names exist.
+
+**4. A per-order cap fixes it and costs about half the book.**
+
+| cap_frac | max order | full | test | maxDD | PARR median | over cap |
+|---|---|---|---|---|---|---|
+| none | — | 66.8 | 101.1 | 20.7 | $0.60m | 90/93 |
+| 0.0417 (=1/24) | $0.29m | **35.5** | 50.0 | 11.7 | $0.28m | 43/93 |
+| 0.0300 | $0.21m | **28.0** | 38.8 | 9.5 | $0.21m | **0/93** |
+| 0.0200 | $0.14m | 20.8 | 28.1 | 7.0 | $0.14m | 0/93 |
+
+Full compliance costs **39pp of return**. The cap binds on *every* name, not just PARR, which is
+why it is so expensive.
+
+**5. A QUALIFICATION THE RECORD NEEDS: §3.37's 1%/10% thresholds are not quantified.** Challenged
+by the user on exactly this. What §3.37 established is solid — ADV is the wrong denominator, the
+binding quantity is dollar volume at or below the bid, and the failure mode of a resting limit is a
+**partial fill, not a worse price**. The *thresholds* were reverse-engineered from the incumbents:
+in §3.37's own words, admit a name under those bounds *"which is where every current book name sits"*.
+That is a don't-be-worse-than-today guard-rail, **not an impact model**, and the conclusions drawn
+from it — PARR "undeployable", CF "binding the book" (§3.58) — are softer than they were stated.
+
+**Two things that follow.** Only **3.8% of orders are marketable** (47 stops of 1,234 fills): the
+50-day stop sells at the open. The other ~96% are resting limits that never cross the spread, so
+the question is fill COMPLETION, not price impact. And the honest denominator is probably not the
+daily figure but the **first hour**, where §3.20 found 56–80% of fills occur — on which RTX at a
+$0.6m order is **9.2%** of at-bid volume rather than 0.3%. **That tightens the picture for names
+already in the book, not just for PARR.**
+
+**Open, and the right next measurement:** the realised participation distribution — every
+historical fill as a share of that day's first-hour at-bid dollar volume — which replaces the
+borrowed rule of thumb with measured data. PARR cannot be included until a volume source is found;
+its Box file has no volume column (§3.61).
+
+Results in `book12.json`, `book12_cap.json`.
+
+
 ---
 
 ## 4. Live workbook state and known issues
@@ -3321,6 +3389,10 @@ These were wrong and were fixed; a new session should not rediscover them as fin
 - The first risk-adjusted split test was biased — `ou_buf_k` had been fitted at `bayes=0` on the full
   sample.
 - The first diversifier marginal test used daily rebalancing and was wrong (see §3.4).
+- **§3.37's 1%/10% liquidity thresholds are a guard-rail, NOT an impact model** (§3.62).
+  They were reverse-engineered from the incumbents. The denominator finding (at-bid, not ADV)
+  and the failure mode (partial fill, not worse price) ARE solid. ~96% of orders are resting
+  limits that never cross the spread; only the 50-day stop is marketable, at 3.8% of fills.
 - **Volatility and AI beta are the SAME AXIS: rank correlation +0.78 across 43 names**
   (§3.61). Screening for volatility is screening for AI exposure. Only 3 of 43 are
   above-median volatility and uncorrelated, and all three lose money. The non-AI names
