@@ -2760,6 +2760,36 @@ is the wrong answer and the inventory is where the damage will be. The watch ite
 exactly six names below with the three diversifiers holding (§3.23), so the signal that this has
 become a bear is the diversifiers joining the decline.
 
+**WHY THE TWO APRILS CAME BACK — and why that is weaker comfort than it looks (15 Oct).**
+The recoveries had completely different shapes, and only one of them is a precedent for today.
+
+*April 2025 — the cause was withdrawn.* Day-by-day the book went 83.6, 85.9, 84.3, then **95.8**:
+a **+13.7% single session on 9 Apr 2025**, with 53% of the whole 20-day recovery arriving in three
+sessions and essentially all of it in that one day. On 8 Apr it was still falling. That is a policy
+shock reversed by policy (the tariff pause). Delete that day and there is no April 2025 recovery.
+
+*April 2024 — it ground back.* No single day above **+2.4%**, only 32% of the recovery in the first
+three sessions, whole again in four sessions by a steady climb: 94.1, 95.3, 97.6, 98.9, 101.3. That
+is a market absorbing a rate repricing (the hot CPI print of 10 Apr 2024 pushing back cut
+expectations) and then being carried by a strong Q1 earnings season. *Macro attributions here are
+recollection of 2024–25 market history, not derived from this dataset.*
+
+**Today is the April 2024 type** — an inflation print moving the rate path, with no single
+reversible trigger. So there is no +13.7% day to wait for, and the thing that resolved April 2024
+was earnings delivering, which Q3 reporting is about to test on the same schedule.
+
+**The asymmetry that cuts against the comfort.** April 2025 crashed into an ALREADY-CORRECTED
+market: the book sat **−10% below its 200dma with 8 of 9 names below** on 1 Apr 2025. There was no
+air underneath, which is exactly why the snapback was so violent. **Today the book is +12% ABOVE
+its 200dma even after this fall** (it was +20% on 9 Oct), with only 3 of 9 below — MU +25%,
+MRVL +37%, VLO +65%. There is considerably more room to fall before this is a washed-out market,
+and the condition that made April 2025 rebound so fast is absent. (April 2024's extension is not
+measurable: fewer than 200 sessions of history existed at that point.)
+
+**Net: "April recovered" is true and is weaker evidence than it sounds.** It does not change the
+decision — no broad liquidation, VRT the one defensible early exit — but the recovery statistics
+should be held with less confidence than their medians suggest.
+
 Tooling: `drawdown_now.py` (current state vs each name's own dip history), `this_week.py`
 (event window, conditional forward distribution, gate state). Results in `drawdown_now.json`,
 `this_week.json`.
