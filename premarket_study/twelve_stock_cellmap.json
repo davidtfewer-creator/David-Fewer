@@ -1,0 +1,72 @@
+{
+ "src": "/root/.claude/uploads/3d41d7f9-ef99-5f28-8175-d0fe4e3b909a/071a87e9-TradingExcel_9stock_avgo.xlsx",
+ "out": "/home/user/David-Fewer/TradingExcel_12stock_live.xlsx",
+ "roster": [
+  "TSM",
+  "VRT",
+  "VST",
+  "AVGO",
+  "MU",
+  "GM",
+  "VLO",
+  "CF",
+  "MRVL",
+  "RTX",
+  "DE",
+  "NVDA"
+ ],
+ "moves": {
+  "Dashboard": "rows 13-15 appended; no existing row moved",
+  "Allocation": "names 11-19->11-22, TOTAL 21->24, machine 25-42->28-51, summary 43-46->52-55, notes +9",
+  "Active Trading": "funds 7-15->7-18, orders 19-36->22-45, log region 40-1041->49-1050 (+9), 103 populated log rows carried",
+  "Performance": "10 formulas repointed +9"
+ },
+ "query": {
+  "RTX": {
+   "cols": [
+    "AL",
+    "AO"
+   ],
+   "rows": 596,
+   "last": "2026-08-14"
+  },
+  "DE": {
+   "cols": [
+    "AP",
+    "AS"
+   ],
+   "rows": 596,
+   "last": "2026-08-14"
+  },
+  "NVDA": {
+   "cols": [
+    "AT",
+    "AW"
+   ],
+   "rows": 587,
+   "last": "2026-08-03"
+  }
+ },
+ "defined_names": {
+  "IBKR_Orders": [
+   "'Active Trading'!$A$18:$J$36",
+   "'Active Trading'!$A$21:$J$45"
+  ],
+  "IBKR_LogAnchor": [
+   "'Active Trading'!$A$41",
+   "'Active Trading'!$A$50"
+  ],
+  "IBKR_AvailFunds": [
+   "unchanged",
+   "Allocation!$B$5"
+  ],
+  "IBKR_BuyFee": [
+   "unchanged",
+   "'Active Trading'!$B$3"
+  ],
+  "IBKR_SellFee": [
+   "unchanged",
+   "'Active Trading'!$E$3"
+  ]
+ }
+}

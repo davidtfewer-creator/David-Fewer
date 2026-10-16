@@ -3900,3 +3900,47 @@ per-name ten-parameter vectors as simulated, and the overlay spec — PM rule on
 09:00 cut and 4% threshold, **no breadth gate**, 50-calendar-day stop, pooled across 24 sleeves.
 The nine carry their live workbook vectors; RTX, DE and NVDA carry train-half fits
 (rho +0.36 / +0.38 / +0.41). Artifacts: `book12_nvda.py`, `book12_nvda.json`, `book12_nvda.log`.
+
+### 3.71 The live workbook rebuilt for twelve names (16 Oct)
+
+User: *"update the live workbook to create a 12 stock workbook, Important that the changes don't
+impact layout so as to affect script 1 and script 2."* Built by `build_twelve_stock_book.py`,
+which extends the uploaded live file in place in the manner of `build_nine_stock_book.py`, so the
+trade log, fees, overrides and every user-entered cell survive. Output
+`TradingExcel_12stock_live.xlsx`; the before/after cell map is `twelve_stock_cellmap.json`.
+
+**Layout.** Nine→twelve needs 3 more funds rows and 6 more order rows, and the nine-stock build
+spent the last of the slack (4 spare rows against 9 needed). So blocks had to move. User chose to
+shift rather than relocate the log to its own sheet.
+
+| sheet | change | moves anything? |
+|---|---|---|
+| Query | RTX `AL:AO`, DE `AP:AS`, NVDA `AT:AW` | **no** — pure append, no existing column moves |
+| Feed/Model | three new sheet pairs from the TSM pair | no |
+| Dashboard | rows 13–15 | **no** — nothing existed below row 12 |
+| Allocation | names 11–22, TOTAL 21→24, machine 25–42→**28–51**, summary 43–46→52–55, notes +9 | yes, but no script anchors below `B5` |
+| Active Trading | funds 7–18, orders 19–36→**22–45**, **log region 40–1041 → 49–1050 (+9)** | yes |
+| Performance | 10 formulas repointed to the moved log | no |
+
+`IBKR_Orders` → `$A$21:$J$45`, `IBKR_LogAnchor` → `$A$50`. `IBKR_AvailFunds`, `IBKR_BuyFee` and
+`IBKR_SellFee` are unchanged. **Script 2 needs no change if it addresses the blotter through those
+two defined names; if it hardcodes row 41 or 42 it must be updated or it will write into the
+orders block.**
+
+**A bug caught by the build's own verification, worth recording because the obvious implementation
+has it.** Rebuilding the order rows from a single template silently flattened the **200dma column
+(N)**, which is per-name: TSM reads `Query!$E:$E`, GM `$Y:$Y`, MRVL `$AK:$AK`. Copying row 19 gave
+every name TSM's close. A column-by-column diff of order row 19 against row 29 established that
+column N is the **only** per-name variation beyond the row number, the Model sheet name and the
+Dashboard row; the fix maps each name to `5 + 4i`. The verification now asserts it per row.
+
+**Verification built into the builder, all passing:** new sheets exist; Query headers correct and
+`AK` (MRVL_C) untouched; Allocation roster and 24-sleeve machine block; AT funds and order rosters;
+log header at row 50; **103 live trade records compared cell-by-cell against the source and intact**
+(floats to 1e-9 relative — openpyxl re-serialises them); defined names; per-name 200dma; and no
+surviving nine-name ranges.
+
+**Two things the user must do before trading on it.** (1) openpyxl strips cached formula values,
+so the book must be opened in Excel and allowed to recalculate. (2) **NVDA's Query data stops at
+2026-08-03** against 2026-08-14 for RTX and DE, because the 5-minute archive is shorter for NVDA —
+Script 1 or `ops/backfill_query.py` has to fill the gap before the Model sheet is meaningful.
