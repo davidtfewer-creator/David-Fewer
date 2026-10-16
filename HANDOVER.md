@@ -3798,3 +3798,54 @@ flat NVDA price, deploying the sale proceeds three months earlier beats the 2pp 
 eleven-month deferral at **every** book return from 10% to 68%. But it also puts BC at ~$9.2m
 against §3.63's measured ~$10m ceiling, so the case for selling early rests on capacity the
 participation study calls borderline. Dropping CF and VLO would lift that ceiling to ~$17m.
+
+### 3.69 NVDA as a twelfth name: accretive on the full period, neutral out of sample, and it lifts the book's liquidity ceiling (16 Oct)
+
+User: *"I've done well out of holding NVDA and some of the early iterations of the trading idea
+were underpinned by NVDA. If I did decide to sell it now, I would like to consider adding it as a
+12th name to the book. How profit dilutive would this be?"* — the motivation is acknowledged as
+partly sentimental by the user; the numbers are indifferent to it. Eleven-name book (nine + RTX +
+DE) plus NVDA, PM rule on all twelve, no breadth gate (§3.66), $6.9m.
+
+Two facts framed it before any simulation. NVDA's train→test rank correlation is **rho = +0.41,
+the highest of any name screened** — fitting NVDA earns more than fitting anything else in the
+universe (RTX +0.36, DE +0.38, PARR −0.49). Against that, G1 puts it at **AI beta 0.727,
+correlation 0.733** to the book's own AI factor, the most correlated candidate yet considered.
+
+| arm | full | train | test | maxDD | ret/DD | fills/yr |
+|---|---|---|---|---|---|---|
+| ELEVEN (nine + RTX + DE) | 70.4 | 47.3 | **95.7** | 21.0 | 3.36 | 577 |
+| **TWELVE (+ NVDA)** | **72.0** | **51.8** | 93.8 | **20.9** | **3.45** | **637** |
+| TWELVE (+ NVDA) captive | 53.5 | 35.7 | 72.7 | 22.8 | 2.35 | 637 |
+
+**1. Not dilutive — but the headline is flattered and must be read carefully.** Full +1.6pp, maxDD
+−0.1pp, ret/DD 3.45 vs 3.36, fills +60/yr. **But NVDA's vector is fitted on the train half**, so
+the +4.5pp train gain is in-sample. The out-of-sample read is the test half, and that is
+**−1.9pp**. The honest summary is *neutral on return, mildly positive on risk-adjusted return and
+clearly positive on fill count* — not the +1.6pp the full column advertises.
+
+**2. The concentration fear does not materialise.** AI-related share of book P&L rises only
+**59.5% → 62.3% (+2.9pp)**, because NVDA takes just 6.8% of P&L. And the stress windows get
+*better*, not worse: Jan–Apr 2025 AI drawdown **3.9% → 4.3%**, Feb–Jun 2025 8.3% → 9.8%, Jun–Jul
+2026 8.6% → 8.4%. The correlation is high but the position is small and fast, so it does not
+behave like added beta.
+
+**3. NVDA's win rate is 99%**, the highest in the book, on 138 fills — consistent with rho +0.41.
+
+**4. It raises the book's liquidity ceiling rather than consuming it.** Measured: NVDA ADV
+**$26.8bn**, at-bid dollar volume **$15.3bn** on a median fill day, first hour **$3.6bn**. The
+book's €0.55m median NVDA order is **0.015% of first-hour at-bid volume** — against CF's 4.33% and
+VLO's 3.23% (§3.63). §3.63 put the twelve-name book's capacity at ~$10m held down by CF and VLO;
+NVDA is at the opposite extreme and gives the pool somewhere to put size without constraint. This
+matters directly, because deploying the NVDA proceeds takes BC to ~$8.9m against that ceiling.
+
+**5. Worth saying to the user, since the motivation was partly about staying connected to NVDA:**
+the book's NVDA sleeve is **not an NVDA investment**. 138 fills at a €0.55m median order on the
+book's one-day median hold is a trading exposure that is flat most of the time, not a position
+that participates in NVDA's trend. If the attachment is to NVDA's upside, adding it to the book
+does not deliver that; if it is to the name's role in the strategy's history, it does.
+
+**Verdict: no reason not to, and two reasons to.** It is roughly return-neutral out of sample,
+improves risk-adjusted return and fill count, and relieves the capacity constraint that the
+NVDA proceeds would otherwise aggravate. Artifacts: `nvda_add.py`, `nvda_add.json`;
+`liquidity_check.json` now carries NVDA.
