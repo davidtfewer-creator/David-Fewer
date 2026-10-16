@@ -3679,3 +3679,78 @@ improvement that *is* visible in both halves, and does not rest on a gate with n
 evidence. If the gate is wanted anyway, **K≥6, never K≥4**.
 
 Artifacts: `book12_gate.py`, `book12_gate.json`, `book12_gate.log`.
+
+### 3.67 Speed-constrained CF at G5 on the TWELVE: declined again, but the penalty halves, the stress argument collapses, and fills turn out to cost the same however you buy them (16 Oct)
+
+User: *"run the speed-constrained CF through G5 on the twelve"*. §3.51 declined this vector on the
+nine. The twelve is a different pooling problem and the direction was not obvious ex ante: twelve
+sleeves split the pot twenty-four ways so capital is scarcer, but §3.65 measured the twelve's
+pooling uplift at +17.5pp against the nine's +6.8pp, and that uplift exists *because* free sleeves
+absorb capital holders are not using — which a one-day-hold CF supplies far more often. Config is
+§3.66's pick: PM on all twelve, PARR ≤ $400k, no breadth gate. Deltas against **return-optimal**
+(the deployed vector is a full-sample fit).
+
+| CF vector | full | train | test | maxDD | fills/yr | Δ vs return-optimal |
+|---|---|---|---|---|---|---|
+| deployed *[lookahead]* | 67.7 | 40.9 | 97.9 | 20.5 | 618 | +0.7 / −0.5 / +2.3 / +0.0 |
+| **return-optimal** | **66.9** | **41.4** | **95.6** | **20.5** | 634 | — |
+| **speed-constrained** | 64.5 | 38.5 | 93.9 | 20.8 | **669** | **−2.4 / −2.9 / −1.7 / +0.3** |
+| twelve minus CF (eleven names) | **68.6** | 40.6 | **100.5** | 22.2 | 592 | +1.7 / −0.8 / +4.9 / +1.7 |
+
+**1. Declined, on the same standard and for one reason only.** §3.14a requires a candidate to beat
+on BOTH halves without giving up drawdown. The fast vector loses on all three windows and adds
+0.3pp of drawdown. **But the penalty halves: −2.4pp on the twelve against −3.8pp on the nine.**
+The dilution hypothesis was right — spreading the crowding over eleven other names rather than
+eight genuinely softens it. It is not enough to change the verdict.
+
+**2. §3.51's decisive argument does NOT survive the move to twelve, and I should say so plainly.**
+On the nine, the fast CF was *worse through the Jan–Apr 2025 AI drawdown than having no CF at all*
+(−10.1% vs −3.0%), and that — not the return — was what settled it. On the twelve:
+
+| CF vector | Jan–Apr 2025 | Feb–Jun 2025 | Jun–Jul 2026 |
+|---|---|---|---|
+| deployed | +3.8% | +8.9% | +9.0% |
+| return-optimal | **+4.9%** | +10.1% | +8.5% |
+| speed-constrained | +3.3% | +8.5% | +7.8% |
+| twelve minus CF | +4.4% | +9.2% | +7.3% |
+
+Every arm is **positive** through the window that the nine-name book lost 6.6–10.1% in, and the fast
+vector is 1.6pp behind the best rather than 9pp. The twelve with the PM rule on all twelve is simply
+far more robust there. So the insurance-destruction objection is gone; **the decline now rests
+purely on return**, which is a weaker basis than §3.51 had.
+
+**3. The crowding mechanism, now measured name by name.** Going return-optimal → speed-constrained
+costs the book $854k of P&L. **CF itself loses only $321k of that — the other eleven lose $533k,
+62% of the total.** Ten of eleven names are down; only AVGO (+$16k) and RTX (+$2k) are flat or
+better. That is §3.51's claim — "a name that trades more takes capital from better names" — shown
+directly rather than inferred from the aggregate.
+
+**4. The finding worth more than the verdict: fills cost about the same however you buy them.**
+
+| way of buying fills | Δ fills/yr | Δ full | **pp per fill/yr** |
+|---|---|---|---|
+| nine → eleven (add RTX, DE) | +48 | −2.8pp | **0.058** |
+| eleven → twelve (add PARR, capped) | +41 | −2.7pp | **0.066** |
+| **fast CF on the twelve** | **+35** | **−2.4pp** | **0.069** |
+| fast CF on the nine (§3.51) | +33 | −3.8pp | 0.115 |
+
+Three structurally different levers — two roster additions and one premium cut — land within 0.058
+to 0.069pp of annual return per extra fill per year. The fourth, the same premium cut on the
+narrower book, is the outlier at 0.115, which is the crowding penalty the twelve dilutes away. So
+**on a twelve-name book, buying turnover by cutting a premium is no longer meaningfully worse than
+buying it by adding a name** — §3.51's generalised conclusion that G4 is "a good screening
+descriptor and a bad objective constraint" needs narrowing to the narrow-book case.
+This also puts a price on the user's objective: **~0.065pp of annual return per extra fill/yr**,
+roughly 6.5pp for a hundred more fills a year, whichever lever is pulled.
+
+**5. CF's own trade shape still fails the §3.32 bar, and still fails it on the concentration leg.**
+Fast CF does 77 trades/yr (clears ≥50 easily) at +0.72% average on a one-day median hold, but the
+top third carries **118%** of its P&L against the <80% requirement, and CF's contribution falls
+from $1.39m to $1.07m. Many tiny wins and a few large stops — the original complaint, worse.
+
+**6. Noted, not acted on: twelve-minus-CF beats every CF vector on return** (68.6 full, 100.5 test
+against the best CF arm's 67.7/97.9) **and gives up 1.7pp of drawdown to do it.** Same shape as the
+nine-name result. CF continues to earn its slot through drawdown rather than return.
+
+**Status: CF stays as it is — but the reason is now narrower than §3.51's.** Artifacts:
+`cf_speed_g5_12.py`, `cf_speed_g5_12.json`, `cf_speed_g5_12.log`.
