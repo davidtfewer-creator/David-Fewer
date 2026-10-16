@@ -3416,6 +3416,11 @@ These were wrong and were fixed; a new session should not rediscover them as fin
   week 4 and trade identically forever (§3.48), so RTX's "17.9/yr" is 6.0 distinct positions.
 - GM trades **61** times a year on deployed parameters, not 94 (that was the tested-half figure on
   frozen first-half parameters).
+- **The breadth gate's every reported benefit is in-sample.** It fires 55-69 times in the train half
+  and **0-1 times in the test half** across all of nine, eleven and twelve names, last firing
+  2025-05-12 (§3.66). This qualifies §3.23, §3.62's gated arms and, most directly, §3.65's
+  recommended ELEVEN + K≥5 config, which was put forward on a ret/DD of 3.64 that the test half does
+  not support. The ungated comparison is the honest one.
 
 ### 3.63 The participation distribution: the liquidity question answered from the book's own record — the nine are fine, CF and VLO are not, and the binding constraint is the stop, not the bid (15 Oct)
 
@@ -3607,3 +3612,70 @@ rates of **91%** against the core's 96–98%. They are adding diversification, n
 
 **Deployment candidate: ELEVEN, PM rule on all eleven, breadth gate K≥5 of eleven** — 69.3% full,
 19.1% maxDD, 547 fills/yr, ret/DD 3.64. Artifacts: `book11.py`, `book11.json`, `book11.log`.
+
+### 3.66 The twelve with K≥5/K≥6, and a correction: the breadth gate has never fired out of sample (16 Oct)
+
+User: *"can you try with the 12 +PM+breadth K>=5 or 6. I like the increase in fill numbers with the
+12"*. PARR back in, run both uncapped and at the $400k per-order cap. Capital $6.9m.
+
+| arm | **fills/yr** | full | train | test | maxDD | ret/DD |
+|---|---|---|---|---|---|---|
+| NINE, live config (baseline) | 529 | 73.2 | 45.4 | 104.6 | 24.2 | 3.02 |
+| ELEVEN, PM all + K≥5 of 11 (§3.65 pick) | 547 | 69.3 | 45.5 | 95.7 | 19.1 | 3.64 |
+| TWELVE, PM all, no gate | **618** | 66.8 | 37.2 | 101.1 | 20.7 | 3.23 |
+| TWELVE, PM all + K≥4 of 12 | 577 | 60.1 | 26.0 | 101.1 | 24.5 | 2.46 |
+| TWELVE, PM all + K≥5 of 12 | 580 | 63.7 | 32.0 | 101.1 | 21.0 | 3.03 |
+| TWELVE, PM all + K≥6 of 12 | 582 | 64.7 | 33.6 | 101.1 | 19.7 | 3.29 |
+| **TWELVE, PM all, no gate, PARR ≤ $400k** | **618** | **67.7** | 40.9 | 97.9 | **20.5** | **3.30** |
+| TWELVE, PM all + K≥5 of 12, PARR ≤ $400k | 580 | 64.9 | 36.1 | 98.0 | 20.9 | 3.11 |
+| TWELVE, PM all + K≥6 of 12, PARR ≤ $400k | 582 | 65.9 | 37.8 | 98.0 | **19.4** | 3.39 |
+
+**1. THE CORRECTION, and it invalidates the §3.65 recommendation's headline. The breadth gate has
+never fired in the test half.** The identical test column across K≥4/5/6 gave it away, and counting
+the suppressed dates confirms it:
+
+| set | K | suppressed dates | train | **test** | last firing |
+|---|---|---|---|---|---|
+| twelve | 4 | 69 | 68 | **1** | 2025-05-27 |
+| twelve | 5 | 58 | 58 | **0** | 2025-05-12 |
+| twelve | 6 | 55 | 55 | **0** | 2025-05-12 |
+| eleven | 5 | 55 | 55 | **0** | 2025-05-12 |
+| nine | 4 | 59 | 58 | **1** | 2025-05-27 |
+
+The archive runs 2024-04-01 → 2026-08-03 and the split is 2025-05-23, so the gate is silent for the
+whole **14½-month test half**. **Every breadth-gate ret/DD figure in this project is therefore an
+in-sample number** — §3.23's original K=4, §3.62's gated twelve, and §3.65's recommended
+"ELEVEN + K≥5, ret/DD 3.64". I recommended that config yesterday without checking, and its
+advantage over the ungated eleven (3.64 vs 3.36) rests entirely on the train half. **Withdraw the
+gate from the recommendation.** It is not refuted — it is untested, which is different and worse
+than it looked.
+
+What the gate *is*: insurance against a broad 200dma breakdown, a regime that has not occurred since
+May 2025. The October 2026 event the user is currently living through is **not in this data at all**
+(archive ends 2026-08-03), so whether the gate would fire now is unknown from here and worth
+checking against live prices before the gate is either deployed or discarded.
+
+**2. On the train half, where the gate does fire, K matters enormously and K≥4 is harmful.**
+Carrying §3.23's nine-name K=4 onto twelve names gives ret/DD **2.46** — far worse than no gate at
+all (3.23) — because at twelve names a 4-of-12 threshold trips on ordinary dispersion. K≥6 is the
+right proportional threshold (4/9 ≈ 6/12 as a fraction of the set) and recovers 3.29/3.39. This
+confirms §3.65's point that K must be re-stated with the set size, and sharpens it: getting K wrong
+is worse than omitting the gate.
+
+**3. The PARR cap is free again, third time of asking.** At K≥5: full **+1.1pp**, maxDD −0.2pp. At
+K≥6: full **+1.2pp**, maxDD −0.2pp. Cost: −3.0pp test. PARR's own contribution is **2.1% of P&L on
+80 fills** with every order pinned at exactly $0.40m.
+
+**4. What the extra fills actually cost.** Against the eleven's ungated 577/yr, the capped ungated
+twelve buys **+41 fills/yr (+7%)** for **−2.7pp full** and **−0.5pp maxDD** — ret/DD 3.30 vs 3.36.
+Against the nine's 529/yr it is **+89 fills/yr (+17%)** for −5.5pp return and −3.7pp drawdown.
+Fill count rises monotonically with names (529 → 577 → 618) and return falls; there is no
+configuration here where adding names raises both.
+
+**Revised recommendation, on test-half-valid evidence only: TWELVE, PM rule on all twelve, PARR
+capped at $400k, NO breadth gate** — **618 fills/yr** (the highest measured anywhere), 67.7% full,
+20.5% maxDD, ret/DD 3.30. It gives the user the fill count they asked for, keeps the drawdown
+improvement that *is* visible in both halves, and does not rest on a gate with no out-of-sample
+evidence. If the gate is wanted anyway, **K≥6, never K≥4**.
+
+Artifacts: `book12_gate.py`, `book12_gate.json`, `book12_gate.log`.
