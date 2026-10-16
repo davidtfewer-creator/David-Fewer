@@ -3754,3 +3754,47 @@ nine-name result. CF continues to earn its slot through drawdown rather than ret
 
 **Status: CF stays as it is — but the reason is now narrower than §3.51's.** Artifacts:
 `cf_speed_g5_12.py`, `cf_speed_g5_12.json`, `cf_speed_g5_12.log`.
+
+### 3.68 Bridge capacity: the book is not fully invested, and a dated call is reliable with a week's notice (16 Oct)
+
+Asked while mapping the user's December 2026 tax-bill decision: *"If BC is fully invested, I may
+not have the option to do a temporary partial loan repayment"*. The right challenge — the whole
+funding plan pivoted on that bridge — and it is measurable rather than assumable, because exits are
+driven by price, not by whether new bids are placed. Standing down releases exactly the proceeds of
+positions already open. Twelve-name book, PM on all twelve, PARR ≤ $400k, $6.9m.
+
+**1. The book carries far more cash than expected.** Median cash on hand **34.4% of equity**
+($3.99m), 10th percentile 13.6% ($1.22m). $1m is already available on **94% of days** with no
+action at all. That follows directly from §3.49's one-day median hold: a book of fast round trips
+is in cash most of the time. The premise of the question was wrong, and worth recording as such.
+
+**2. Drawdowns thin it, but not enough to matter.** The honest stress case is a drawdown, which is
+where the user currently is:
+
+| book state | sessions | median cash | €1m same day | +1 session | +3 sessions |
+|---|---|---|---|---|---|
+| at/near a high (0–5% off) | 529 | $4.24m | 93% | 100% | 100% |
+| mild (5–10% off) | 32 | $2.55m | 81% | 100% | 100% |
+| moderate (10–15% off) | 17 | $2.06m | 82% | 100% | 100% |
+| **deep (>15% off)** | 9 | $1.66m | **67%** | **100%** | **100%** |
+
+**3. The only real failure mode is a same-day call with no notice.** The worst session in the
+archive (2024-07-05) had the book **fully invested, $0 cash** — the user's scenario exactly. Even
+there, standing down produced $0.61m within one session, $1.71m within five and $3.00m within ten.
+A dated obligation like 15 December is therefore safe with about a week's notice; an unscheduled
+one is not.
+
+**4. Cost of the bridge.** Standing the whole book down runs at ~$93k per five sessions at the
+backtest rate, but that overstates it: the operation is ring-fencing cash as positions close, not
+halting the book. Holding $1.15m aside for a fortnight costs **$13k–30k** depending on the return
+assumed.
+
+**Mechanism change:** `book_sim.simulate` now also returns `cash` (the daily cash balance) and
+`cal`, both purely additive. Artifacts: `bridge_capacity.py`, `bridge_stress.py` and their JSON.
+
+**Used for, outside the repo:** the December-2026 decision map
+(https://claude.ai/artifact/GrwFGLMUQz8Ltdmqs2SRDF). Its one finding that bears on the book: at a
+flat NVDA price, deploying the sale proceeds three months earlier beats the 2pp CGT saving and the
+eleven-month deferral at **every** book return from 10% to 68%. But it also puts BC at ~$9.2m
+against §3.63's measured ~$10m ceiling, so the case for selling early rests on capacity the
+participation study calls borderline. Dropping CF and VLO would lift that ceiling to ~$17m.

@@ -189,6 +189,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                  w=(weights or {}).get(s['name'], 1.0))
     cash = capital
     equity_curve = []
+    cash_curve = []
     trades = []
     fills = 0
     free_days = 0
@@ -494,6 +495,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             elif mode == 'captive':
                 mv += s['own']
         equity_curve.append((cash if mode == 'pooled' else 0.0) + mv)
+        cash_curve.append(cash if mode == 'pooled' else 0.0)
         prev_mv = mv
         if intraday_sd is not None:
             sd_closes.append(equity_curve[-1])
@@ -517,7 +519,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 test=annualise(eq[-1] / eq[cut] - 1, cal, cut, N - 1),
                 maxdd=dd, fills=fills, fills_per_day=fills / N,
                 cash_frac=free_days / sleeve_days if sleeve_days else 0.0,
-                stops=stops, equity=eq, trades=trades,
+                stops=stops, equity=eq, cash=cash_curve, cal=cal, trades=trades,
                 bk_trips=bk_trips, bk_days=bk_days,
                 hh_days=hh_days, frac_series=frac_series,
                 sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars,
