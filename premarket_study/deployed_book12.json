@@ -1,0 +1,200 @@
+{
+ "_note": "The twelve-name book as specified 16 Oct 2026: the nine plus RTX, DE and NVDA. PARR removed (\u00a73.64/\u00a73.69). Overlay: the \u00a73.16 pre-market rule on ALL twelve, 09:00 cut, 4% threshold. NO breadth gate \u2014 \u00a73.66 found it fires 0 times in the test half. Stop: 50 calendar days. Pooled allocation across 24 sleeves.",
+ "roster": [
+  "TSM",
+  "VRT",
+  "VST",
+  "AVGO",
+  "MU",
+  "GM",
+  "VLO",
+  "CF",
+  "MRVL",
+  "RTX",
+  "DE",
+  "NVDA"
+ ],
+ "capital": 6900000,
+ "overlays": {
+  "pm_rule": {
+   "names": [
+    "TSM",
+    "VRT",
+    "VST",
+    "AVGO",
+    "MU",
+    "GM",
+    "VLO",
+    "CF",
+    "MRVL",
+    "RTX",
+    "DE",
+    "NVDA"
+   ],
+   "cut": "09:00",
+   "thr": 0.04
+  },
+  "breadth_gate": null,
+  "stop_days": 50
+ },
+ "vector_basis": {
+  "TSM": "live workbook / reference",
+  "VRT": "live workbook / reference",
+  "VST": "live workbook / reference",
+  "AVGO": "live workbook / reference",
+  "MU": "live workbook / reference",
+  "GM": "live workbook / reference",
+  "VLO": "live workbook / reference",
+  "CF": "live workbook / reference",
+  "MRVL": "live workbook / reference",
+  "RTX": "fitted (rho +0.36)",
+  "DE": "fitted (rho +0.38)",
+  "NVDA": "fitted (rho +0.41)"
+ },
+ "params": {
+  "TSM": {
+   "lam": 0.462001,
+   "phi_L": 0.254287,
+   "psi": 0.065039,
+   "k": 1.004527,
+   "premium": 0.015652,
+   "peak_cap": 0.030484,
+   "ou_buf_k": 0.2,
+   "ou_prem": 0.010022,
+   "ou_cap": 0.020893,
+   "ou_W": 77
+  },
+  "VRT": {
+   "lam": 0.420699,
+   "phi_L": 0.425851,
+   "psi": 0.081656,
+   "k": 1.116397,
+   "premium": 0.021691,
+   "peak_cap": 0.048379,
+   "ou_buf_k": 0.4,
+   "ou_prem": 0.026603,
+   "ou_cap": 0.059499,
+   "ou_W": 80
+  },
+  "VST": {
+   "lam": 0.37352,
+   "phi_L": 0.264322,
+   "psi": 0.096187,
+   "k": 1.38566,
+   "premium": 0.021816,
+   "peak_cap": 0.013663,
+   "ou_buf_k": 0.65,
+   "ou_prem": 0.014498,
+   "ou_cap": 0.052746,
+   "ou_W": 122
+  },
+  "AVGO": {
+   "lam": 1,
+   "phi_L": 0.2816173224692753,
+   "psi": 0.2481521005274053,
+   "k": 0.2181780342757448,
+   "premium": 0.02912374009381593,
+   "peak_cap": 0.05993266745789266,
+   "ou_buf_k": 0.4308981272496185,
+   "ou_prem": 0.01409155293181539,
+   "ou_cap": 0.04861130321846684,
+   "ou_W": 113
+  },
+  "MU": {
+   "lam": 0.6,
+   "phi_L": 0.2636,
+   "psi": 0.01,
+   "k": 1.0548,
+   "premium": 0.0243,
+   "peak_cap": 0.038,
+   "ou_buf_k": 0.75,
+   "ou_prem": 0.025,
+   "ou_cap": 0.0292,
+   "ou_W": 91
+  },
+  "GM": {
+   "lam": 0.704472,
+   "phi_L": 0.750723,
+   "psi": 0.0805582,
+   "k": 0.461711,
+   "premium": 0.00969721,
+   "peak_cap": 0.0423717,
+   "ou_buf_k": 1.06024,
+   "ou_prem": 0.0451112,
+   "ou_cap": 0.0417662,
+   "ou_W": 45
+  },
+  "VLO": {
+   "lam": 0.723393,
+   "phi_L": 0.625222,
+   "psi": 0.0200999,
+   "k": 0.543763,
+   "premium": 0.0303035,
+   "peak_cap": 0.0308569,
+   "ou_buf_k": 1.17841,
+   "ou_prem": 0.0419514,
+   "ou_cap": 0.0370821,
+   "ou_W": 125
+  },
+  "CF": {
+   "lam": 0.736218,
+   "phi_L": 0.10612,
+   "psi": 0.0694359,
+   "k": 2.03552,
+   "premium": 0.0465592,
+   "peak_cap": 0.0286416,
+   "ou_buf_k": 0.841237,
+   "ou_prem": 0.0590932,
+   "ou_cap": 0.0831024,
+   "ou_W": 66
+  },
+  "MRVL": {
+   "lam": 1.0,
+   "phi_L": 1.940613293301791,
+   "psi": 0.2666961043260138,
+   "k": 0.3797158406757842,
+   "premium": 0.03429888194107799,
+   "peak_cap": 0.03555276837362029,
+   "ou_buf_k": 0.140044649913305,
+   "ou_prem": 0.03512857631233481,
+   "ou_cap": 0.08959445194442937,
+   "ou_W": 80
+  },
+  "RTX": {
+   "lam": 1.5969341808569149,
+   "phi_L": 0.4946823876508484,
+   "psi": 0.0731509755949682,
+   "k": 0.3642355540929183,
+   "premium": 0.03564399393599424,
+   "peak_cap": 0.027202570693217167,
+   "ou_buf_k": 1.458126373223722,
+   "ou_prem": 0.03430330493210752,
+   "ou_cap": 0.04752567184044988,
+   "ou_W": 111
+  },
+  "DE": {
+   "lam": 0.4906126564193854,
+   "phi_L": 0.41037787617237936,
+   "psi": 0.012561476318510352,
+   "k": 1.3020010458299052,
+   "premium": 0.03238314091134764,
+   "peak_cap": 0.056580000588800895,
+   "ou_buf_k": 2.0614642615046934,
+   "ou_prem": 0.04715192679407823,
+   "ou_cap": 0.005111592940905844,
+   "ou_W": 36
+  },
+  "NVDA": {
+   "lam": 0.7274846459738155,
+   "phi_L": 0.31929714788235153,
+   "psi": 0.004558465971773798,
+   "k": 0.9474915105359794,
+   "premium": 0.011001248681323881,
+   "peak_cap": 0.03610078663428944,
+   "ou_buf_k": 0.2608180111830065,
+   "ou_prem": 0.03662901807576418,
+   "ou_cap": 0.11923982382805587,
+   "ou_W": 58
+  }
+ }
+}

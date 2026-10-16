@@ -3849,3 +3849,54 @@ does not deliver that; if it is to the name's role in the strategy's history, it
 improves risk-adjusted return and fill count, and relieves the capacity constraint that the
 NVDA proceeds would otherwise aggravate. Artifacts: `nvda_add.py`, `nvda_add.json`;
 `liquidity_check.json` now carries NVDA.
+
+### 3.70 The twelve-name book as specified: nine + RTX + DE + NVDA. PARR out. (16 Oct)
+
+User: *"add NVDA to the book and re-run the 12 stock sim"*. This supersedes §3.62/§3.64/§3.66 on
+composition — PARR is replaced by NVDA. Capital $6.9m.
+
+| arm | full | train | test | maxDD | ret/DD | fills/yr |
+|---|---|---|---|---|---|---|
+| NINE, live config | 73.2 | 45.4 | **104.6** | 24.2 | 3.02 | 529 |
+| ELEVEN (nine + RTX + DE) | 70.4 | 47.3 | 95.7 | 21.0 | 3.36 | 577 |
+| TWELVE with PARR, capped $400k | 67.7 | 40.9 | 97.9 | 20.5 | 3.30 | 618 |
+| TWELVE + NVDA, no overlays | 61.0 | 41.2 | 82.5 | 21.0 | 2.91 | 653 |
+| **TWELVE + NVDA, PM on all 12** | **72.0** | **51.8** | 93.8 | **20.9** | **3.45** | **637** |
+| TWELVE + NVDA, PM + breadth K≥6 *| 71.0 | 49.9 | 93.8 | **18.8** | **3.78** | 601 |
+| TWELVE + NVDA, captive | 53.5 | 35.7 | 72.7 | 22.8 | 2.35 | 637 |
+
+\* the breadth gate fires **0 times in the test half** (§3.66), so its 3.78 is in-sample only.
+
+**1. NVDA beats PARR as the twelfth name on every axis.** +4.3pp full, +2.9pp train, −4.1pp test,
++0.4pp maxDD, +19 fills/yr, ret/DD 3.45 vs 3.30. PARR was a neutral vector capped to a fixed
+$400k contributing 2.1%; NVDA is the best-fitting name in the universe contributing 6.8% at a
+**99% win rate**, the highest in the book.
+
+**2. The pre-market rule is carrying an enormous amount.** No overlays 61.0 → PM on all twelve
+**72.0**, a **+11.0pp** swing, much larger than the +2.5pp it was worth at eleven (§3.65). The
+more names, the more a suppressed bad entry has somewhere better to go.
+
+**3. Against the nine it is the same trade as before, on better terms.** full −1.2pp,
+maxDD −3.4pp, **fills +108/yr (529 → 637)**, ret/DD 3.02 → 3.45. The give-up remains concentrated
+in the test half (−10.8pp), which is the standing caveat from §3.65: the nine's 104.6% test figure
+is AI-concentrated and diluting it is the price of the drawdown reduction.
+
+**4. Stress behaviour improves monotonically with breadth**, which is the point of the exercise:
+
+| arm | Jan–Apr 2025 | Feb–Jun 2025 | Jun–Jul 2026 |
+|---|---|---|---|
+| NINE | 1.6% | 5.4% | 5.6% |
+| ELEVEN | 3.9% | 8.3% | 8.6% |
+| **TWELVE + NVDA** | **4.3%** | **9.8%** | 8.4% |
+
+**5. Pooling uplift is +18.5pp full / +21.2pp test** against captive — the largest measured
+anywhere, consistent with §3.60's finding that pooling pays most when fill timing is varied.
+
+**6. AI-related share of P&L is 62.3%.** Up 2.9pp from the eleven. High, and worth watching, but
+the stress rows say it is not behaving like concentrated beta.
+
+**Deployable config written to `premarket_study/deployed_book12.json`** (tracked): roster, the
+per-name ten-parameter vectors as simulated, and the overlay spec — PM rule on all twelve at the
+09:00 cut and 4% threshold, **no breadth gate**, 50-calendar-day stop, pooled across 24 sleeves.
+The nine carry their live workbook vectors; RTX, DE and NVDA carry train-half fits
+(rho +0.36 / +0.38 / +0.41). Artifacts: `book12_nvda.py`, `book12_nvda.json`, `book12_nvda.log`.
