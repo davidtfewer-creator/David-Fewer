@@ -4028,3 +4028,49 @@ book is not down $0.8m in cash; it is holding positions marked lower. The only m
 forces a realisation is the 50-calendar-day stop (§3.63 measured it at 3.9% of exits). This is the
 same conclusion as the 13 Oct episode work (§3.57): the drawdown is carried, not crystallised.
 Artifacts: `current_dip.py`, `current_dip.json`, and `dd_anatomy.py` for the distribution behind it.
+
+### 3.74 Stop watch: $1.8m reaches its 50-day stop within three weeks, and VRT is 27% of the book (20 Oct)
+
+User: *"yes, check which positions are near their 50-day stop"* — the follow-up to §3.73, since the
+stop is the only mechanism that converts the unrealised drawdown into a realised loss. Read from
+the blotter in the 14/15 Oct workbook (so anything opened or closed since is not reflected).
+`stop_watch.py`, as of 20 Oct.
+
+**13 open sleeves, $5.52m of cost — about 80% of a $6.9m book deployed**, which is itself the
+drawdown signature: positions that have not reached their targets stay on.
+
+| stop date | in | capital | sleeves |
+|---|---|---|---|
+| **2026-10-29** | **9 days** | **$785k** | VRT OU, VRT Bayes |
+| **2026-11-07** | **18 days** | **$1,012k** | GM Bayes, GM OU, CF OU |
+| 2026-11-26 | 37 days | $377k | TSM ×2 |
+| 2026-11-27 | 38 days | $2,294k | AVGO Bayes, MRVL OU, VST OU |
+| 2026-12-01 | 42 days | $1,051k | MU ×2, AVGO OU |
+
+**$1.80m — 26% of the book — reaches its stop inside three weeks** unless the take-profit fills
+first. Nothing then falls due for a further nineteen days.
+
+**VRT is the pressing one and the concentration is larger than it looks.** Two main sleeves
+(9 Sep, $785k at 283.00 / 278.10) plus two discretionary tickets (28 Sep at 251.64, 9 Oct at
+243.73, $1,083k) = **$1.87m, 27% of the book in one name**, built on a descending ladder of
+entries. The main sleeves stop on **29 October**, selling at the open:
+
+| VRT price | main P&L | vs cost |
+|---|---|---|
+| 230.00 | −$141k | −18.0% |
+| 243.73 *(the 9 Oct disc entry)* | −$103k | −13.1% |
+| 260.00 | −$57k | −7.3% |
+| 278.10 | −$7k | −0.9% |
+
+**Release prices** — the take-profit that closes a sleeve profitably before its stop — are modest
+for most of the book: GM Bayes needs only **+0.97%** from its entry, TSM OU +1.00%, AVGO OU +1.41%,
+VST OU +1.45%. The hard ones are **CF OU +5.91%** and **GM OU +4.51%**. VRT needs +2.66% / +2.17%
+from entries it is currently well below.
+
+**Execution note that now has a date on it.** §3.63 measured stop exits at a median **2.1%** of the
+opening 5-minute bar and a 95th percentile of **39.5%**, falling to 0.6% / 7.1% worked over the
+first 30 minutes. The 29 Oct and 7 Nov clusters are $785k and $1,012k going to market at the open
+on a single morning; working them over the first half hour rather than dumping them into the
+opening print is worth more here than anywhere else in the loop.
+
+Artifacts: `stop_watch.py`, `stop_watch.json`.
