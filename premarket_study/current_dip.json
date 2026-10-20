@@ -1,0 +1,50 @@
+{
+ "_note": "Live book is the NINE; the TWELVE is shown for comparison. drop = 6.1/6.9-1.",
+ "drop": -0.1159,
+ "sessions": 10,
+ "NINE (live book)": {
+  "windows": 577,
+  "worse_or_equal": 5,
+  "pctile": 0.009,
+  "worst_10sess_window": -0.167,
+  "p1_window": -0.103,
+  "p5_window": -0.043,
+  "sessions_at_or_beyond_depth": 32,
+  "n_sessions": 587,
+  "share_at_depth": 0.055,
+  "deepest_in_archive": 0.242,
+  "episodes_reaching_depth": [
+   [
+    "2025-03-04",
+    0.242,
+    69
+   ]
+  ]
+ },
+ "TWELVE (new roster)": {
+  "windows": 577,
+  "worse_or_equal": 3,
+  "pctile": 0.005,
+  "worst_10sess_window": -0.162,
+  "p1_window": -0.088,
+  "p5_window": -0.03,
+  "sessions_at_or_beyond_depth": 15,
+  "n_sessions": 587,
+  "share_at_depth": 0.026,
+  "deepest_in_archive": 0.209,
+  "episodes_reaching_depth": [
+   [
+    "2025-03-10",
+    0.209,
+    56
+   ]
+  ]
+ },
+ "caveats": [
+  "n=1 for what follows a drop this deep, so no probability is quoted",
+  "the one precedent is in the TRAIN half",
+  "that episode was an AI drawdown; this is a rates shock",
+  "the October 2026 event is not in the archive at all",
+  "all figures are daily-close mark-to-market, not realised"
+ ]
+}

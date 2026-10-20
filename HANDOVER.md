@@ -3991,3 +3991,40 @@ Two limits on all of it: the figures are **daily closes**, so intraday the book 
 way to each trough; and it is **mark-to-market**, not realised — the book was never down 20% in
 cash, it held positions that later recovered. The October 2026 event the user is living through is
 not in this archive at all. Artifacts: `dd_anatomy.py`, `dd_anatomy.json`.
+
+### 3.73 The live October 2026 dip against the book's own record: normal depth, extreme speed (20 Oct)
+
+User: *"in the current dip the book was valued at c. 6.9m million. It's now c. 6.1m, after about 2
+weeks. is this extreme?"* — a **−11.6%** drawdown in roughly 10 sessions. Measured against the
+**nine-name** book, which is what is live (the twelve-name workbook was built 16 Oct but is not
+deployed); the twelve is shown alongside because it is the more robust of the two.
+
+| | NINE (live) | TWELVE (new) |
+|---|---|---|
+| 10-session windows as bad or worse | **5 of 577** | 3 of 577 |
+| percentile of the current move | **0.9th** | 0.5th |
+| worst 10-session window in the archive | −16.7% | −16.2% |
+| 1st / 5th percentile window | −10.3% / −4.3% | −8.8% / −3.0% |
+| sessions at or beyond 11.6% off the high | **32 of 587 (5.5%)** | 15 of 587 (2.6%) |
+| deepest drawdown in the archive | 24.2% | 20.9% |
+
+**The depth is ordinary; the speed is not.** Being 11.6% off the high has happened on **5.5% of
+sessions** — about one session in eighteen — and the book's worst was more than twice as deep. But
+**−11.6% over ten sessions sits at the 0.9th percentile** of all ten-session windows: only five of
+577 were as bad. So this is a routine depth arrived at unusually quickly.
+
+**The one precedent, and it is only one.** The nine-name book crossed 11.6% off its high once, on
+**4 March 2025**. It went on to **24.2%** and took **69 sessions — about 3.3 months — from the
+crossing** to regain the high. With n=1 no probability can be quoted from that and none is; what
+the record supports is that a fall this fast is rare, not what typically follows one.
+
+**Why the precedent may not transfer.** That episode was an AI-complex drawdown; this is a
+bond-yield/rates shock, a different driver against a book whose AI names are 60%+ of P&L. It also
+sits in the **train** half, so the parameters were fitted over a window containing it. And the
+October 2026 event is not in the archive at all.
+
+**Framing that matters for any action.** These are daily-close **mark-to-market** figures. The
+book is not down $0.8m in cash; it is holding positions marked lower. The only mechanism that
+forces a realisation is the 50-calendar-day stop (§3.63 measured it at 3.9% of exits). This is the
+same conclusion as the 13 Oct episode work (§3.57): the drawdown is carried, not crystallised.
+Artifacts: `current_dip.py`, `current_dip.json`, and `dd_anatomy.py` for the distribution behind it.
