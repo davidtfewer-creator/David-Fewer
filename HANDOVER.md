@@ -4121,3 +4121,55 @@ ran long; it is now the larger of the two exposures and nothing in the workbook 
 automatically.
 
 Artifacts: `stop_watch.py` (now reads Dashboard marks), `stop_watch.json`.
+
+### 3.76 The book's LIVE record, and what it says about funding it with the NVDA proceeds (20 Oct)
+
+User: *"I have 15,000 NVDA shares in another account. I'm considering liquidating that and using
+it to increase the funding for the book above. I think the book will probably perform better than
+NVDA from here. What do you think?"* The session had never looked at what the book has actually
+realised, as opposed to backtested. It should have.
+
+**Since inception, 4 August → 20 October (77 days, 11 weeks), on $4.879m starting capital:**
+
+| | |
+|---|---|
+| realised, main book | **+$673.7k** |
+| realised, discretionary | **+$269.8k** |
+| realised total | **+$943.5k (+19.3%)** |
+| unrealised on open positions | **−$929.0k** |
+| **NET** | **+$14.5k — +0.30%** |
+
+**The realised figure cannot be read as performance, and the 98% win rate is why.** A
+take-profit/time-stop book in a drawdown banks its winners and carries its losers: every position
+that reached target closed and is in the realised column, every position that did not is still
+open and in the unrealised column. Annualising the realised number gives **131%/yr**; the net
+number annualises to **1.4%/yr**. The second is the honest one. This asymmetry is structural, not
+a flaw, but it means the blotter's win rate conveys nothing about whether the book is making money.
+
+**Fair context, because flat is not failure here.** Equal-weight buy-and-hold of the nine over the
+same window returned **+0.5%**, so the book has roughly matched simply owning the names. Excluding
+VLO — which returned **+44%** and which the book never bought, the ATH guard having kept it out —
+buy-and-hold was **−5.0%** and the book is about **5pp ahead**. A long-only high-beta book flat
+through a rates shock that took VRT down 23.5% and AVGO 21.4% is a reasonable showing. It is not
+73%/yr.
+
+**What this does to the funding question.** §3.67's crossover stands: selling NVDA and deploying
+wins at any book return above roughly **12%/yr**. The difficulty is that **eleven weeks of live
+record cannot distinguish 12% from 73% from zero.** The backtest's 73.2% remains the only evidence
+for the high end, and §3.72 established that every drawdown over 10% in that backtest is in-sample
+while the test half's worst was 7.4% — less than the book is carrying right now.
+
+**The stronger argument is not about return at all.** Funding the book with the proceeds moves the
+position from (book $6.2m + NVDA $2.9m) to (**book ~$9.1m**), which is: everything in one strategy
+with eleven weeks of live history; at **~$9.1m against the ~$10m capacity ceiling** measured in
+§3.63; during its first real drawdown; with **$1.8m due to stop out inside three weeks** (§3.75);
+into a book that has just put **27% into one name on a descending ladder** and is carrying −$382k
+on it.
+
+**Recommendation: stage it, and let January be the decision point.** §3.70's tax work found that
+waiting from October to January costs €12k–71k at plausible book returns and actively *wins* below
+~12% — and the same doubt that lowers the book-return assumption also argues for waiting, so the
+two uncertainties point the same way. By mid-January the stop cluster will have resolved, the
+drawdown will have recovered or not, and the live record will be roughly 23 weeks instead of 11.
+That is a materially better-informed decision for a cost measured in tens of thousands against a
+$2.9m commitment.
