@@ -4173,3 +4173,55 @@ two uncertainties point the same way. By mid-January the stop cluster will have 
 drawdown will have recovered or not, and the live record will be roughly 23 weeks instead of 11.
 That is a materially better-informed decision for a cost measured in tens of thousands against a
 $2.9m commitment.
+
+### 3.77 Where the negative position comes from: the discretionary book is proportionate, and the include-toggle costs less than feared (20 Oct)
+
+Two user questions: *"to what extent the book's negative position is driven by discretionary
+trades"*, and the observation that toggling CF/VLO off *"was keeping the capital away from the AI
+stocks"*.
+
+**1. The discretionary book is not the driver.** Both books are separately near flat:
+
+| | closed P&L | open cost | unrealised | unrealised % | NET |
+|---|---|---|---|---|---|
+| main | +$673.7k | $5,519k | −$666k | **−12.1%** | **+$7.7k** |
+| discretionary | +$269.8k | $1,627k | −$263k | **−16.2%** | **+$6.8k** |
+
+Discretionary is **28% of the unrealised loss on 23% of the open capital** — slightly worse per
+dollar, but proportionate, and net it has contributed about as much as the main book (nothing).
+The negative position is not a discretionary problem; it is both books holding the same falling
+names. Its real governance issue is the one in §3.75: all three open tickets are past their
+10-session time stop with nothing to close them.
+
+**2. The include-toggle. I overstated the mechanism before measuring it, and the correction
+matters.** I argued that because the model only fills where prices fall, toggling off the rising
+names must systematically push capital into the decliners — a procyclical amplifier. The mechanism
+is real (a paused sleeve leaves the allocation, so everyone else's slice grows) but the magnitude
+depends entirely on **how long a name stays off**, and for short toggles it is nil:
+
+| arm | full | test | **maxDD** | ret/DD | med order | AI $ share | CF+VLO fills |
+|---|---|---|---|---|---|---|---|
+| all nine ON | 73.2 | 104.6 | **24.2** | 3.02 | 782k | 74.2% | 138 |
+| off on no-fill mornings only | 72.1 | 102.5 | **24.3** | 2.97 | 814k | 75.1% | 138 |
+| off while above the 50dma (~58% of the time) | 71.9 | 95.2 | **25.5** | 2.82 | 910k | 83.4% | **51** |
+| permanently off | 72.5 | 97.4 | **29.0** | 2.50 | 1041k | 87.1% | 0 |
+
+Switching them off on individual no-fill days is **free** — drawdown 24.3% against 24.2% — because
+the reserved cash simply returns to the pool next morning. The damage comes from **duration**:
+held off through an uptrend the drawdown rises to 25.5% and the AI share of deployed capital goes
+74.2% → **83.4%**; permanently off it is 29.0% and 87.1%.
+
+**The larger cost of the trend-length toggle is not concentration at all — it is lost trades.**
+"Above the 50dma" is not the same as "will not fill": CF+VLO fills drop from **138 to 51**, so 63%
+of their trades are thrown away on pullbacks that would have filled inside the uptrend. That is
+where the −9.4pp of test-half return goes.
+
+**Proportionality.** On these brackets the toggle is worth roughly **1–1.5pp of extra drawdown**
+against a live drawdown of 12.1% on open positions. It contributed; it is not the explanation. The
+dominant driver is simply that the book was long AI names into a rates shock — VRT −23.5% and
+AVGO −21.4% from the 4 August marks.
+
+**Practical rule this supports:** toggling a name off for a morning is harmless, so there is no
+need to agonise over it. Leaving it off for the length of a trend is the expensive version, and it
+costs more through the fills it forgoes than through the concentration it creates. Artifacts:
+`toggle_cost.py`, `toggle_trend.py`, `toggle_cost.json`.
