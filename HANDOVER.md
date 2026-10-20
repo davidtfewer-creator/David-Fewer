@@ -3944,3 +3944,50 @@ surviving nine-name ranges.
 so the book must be opened in Excel and allowed to recalculate. (2) **NVDA's Query data stops at
 2026-08-03** against 2026-08-14 for RTX and DE, because the 5-minute archive is shorter for NVDA —
 Script 1 or `ops/backfill_query.py` has to fill the gap before the Model sheet is meaningful.
+
+### 3.72 What "20.9% max drawdown" actually describes — and the fact that every drawdown over 10% is in-sample (20 Oct)
+
+User: *"When you say 20% drawdown what does it mean? Does it mean the book can drop 20% from its
+high at a time during the trading period?"* Yes. `book_sim` computes
+`max over days of (running peak − equity)/running peak` on the **daily close** equity curve, where
+equity is cash plus the mark-to-market of open positions. So it is the deepest single
+peak-to-trough fall anywhere in the backtest. `dd_anatomy.py` measures the rest of the shape.
+
+**The worst episode, which is the whole of the headline number.** Peak **19 Feb 2025** → trough
+**4 Apr 2025**, a **20.9%** fall (**$1.44m** on a $6.9m book) over 32 sessions / 44 calendar days;
+back to the peak **29 May 2025**, 37 sessions later. **69 sessions underwater end to end, 3.3
+months.** The recovery is the part the single number omits and it is the part that is actually
+lived through.
+
+**It is one episode, not a per-year figure.** Six drawdowns past 5% in 2.3 years, but only
+**one** past 10%. The median 5%+ episode is 6.5% deep and recovers in **5 sessions**.
+
+**Most of the time the book is near its high:** 64.7% of sessions within 1% of it, 25.0% between
+1% and 5% off, and only **1.5% of sessions more than 15% off**. Median drawdown on a random day is
+**0.3%**; the 95th percentile is 8.9%.
+
+**What a single day can do:** worst session **−6.98%** ($482k), worst five sessions **−12.61%**,
+best session +9.75%.
+
+**The finding that matters most, and it cuts against the headline.** Splitting the episodes at the
+2025-05-23 train/test boundary:
+
+| peak | trough | depth | recovery | half |
+|---|---|---|---|---|
+| 2024-07-31 | 2024-08-07 | 6.9% | 4 sessions | TRAIN |
+| 2024-08-30 | 2024-09-06 | 6.1% | 5 sessions | TRAIN |
+| **2025-02-19** | **2025-04-04** | **20.9%** | **37 sessions** | **TRAIN** |
+| 2025-12-11 | 2025-12-17 | 6.0% | 11 sessions | test |
+| 2026-03-25 | 2026-03-30 | 5.8% | 2 sessions | test |
+| 2026-07-23 | 2026-07-29 | 7.4% | not recovered by archive end | test |
+
+**Every drawdown deeper than 10% sits in the train half. Out of sample the worst was 7.4%.** Two
+readings and both are honest: the book has been far calmer out of sample, *and* the test half
+simply never contained a February-2025-style event — which is also why the breadth gate never
+fired there (§3.66). The absence of a deep out-of-sample drawdown is a statement about the period,
+not evidence of robustness. **20.9% should be read as one observation of a tail, not a ceiling.**
+
+Two limits on all of it: the figures are **daily closes**, so intraday the book went lower on the
+way to each trough; and it is **mark-to-market**, not realised — the book was never down 20% in
+cash, it held positions that later recovered. The October 2026 event the user is living through is
+not in this archive at all. Artifacts: `dd_anatomy.py`, `dd_anatomy.json`.
