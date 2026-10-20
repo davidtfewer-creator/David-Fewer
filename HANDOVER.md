@@ -4074,3 +4074,50 @@ on a single morning; working them over the first half hour rather than dumping t
 opening print is worth more here than anywhere else in the loop.
 
 Artifacts: `stop_watch.py`, `stop_watch.json`.
+
+### 3.75 Stop watch on live marks: a correction, and VRT is 41% of the drawdown (20 Oct)
+
+User re-uploaded the workbook: *"I don't think you have the latest book"*. The **blotter is
+identical** (103 rows, the same 13 open sleeves), so §3.74's stop dates stand. What the new file
+carries is **live Dashboard marks**, which §3.74 lacked.
+
+**Correction to §3.74.** I priced the 29 October VRT stop at about **−$103k**, using the 9 October
+discretionary entry of 243.73 as a stand-in for the market. VRT is at **206.42**. The real figure
+is **−$207k** — twice what I indicated. The sensitivity table was right; the row I pointed at was
+not low enough.
+
+**Open main book at live marks: $5,519k at cost, $4,853k marked, unrealised −$666k (−12.1%).**
+
+| stop date | in | at cost | realises today | sleeves |
+|---|---|---|---|---|
+| **2026-10-29** | 9d | $785k | **−$207k (−26.4%)** | VRT ×2 |
+| 2026-11-07 | 18d | $1,012k | **−$32k (−3.1%)** | GM ×2, CF OU |
+| 2026-11-26 | 37d | $377k | −$48k | TSM ×2 |
+| 2026-11-27 | 38d | $2,294k | −$270k | AVGO B, MRVL OU, VST OU |
+| 2026-12-01 | 42d | $1,051k | −$108k | MU ×2, AVGO OU |
+
+**The release gaps now decide which stops actually fire.** VRT needs **+40.7% / +37.6%** in nine
+days — that one is going to stop. MRVL OU needs +25.8%, also effectively certain. But **GM Bayes
+needs only +2.3%** and GM OU +5.5%, so the 7 November cluster is genuinely live and would realise
+only −$32k as things stand.
+
+**Reconciling the user's ~$6.1m** (§3.73 compared against a cost-based figure):
+
+| | |
+|---|---|
+| cash | $6.0k |
+| main book, marked | $4,853k (cost $5,519k) |
+| discretionary, marked | $1,364k (cost $1,627k) |
+| **combined, marked** | **$6,223k** — **−9.8%** from the $6.9m high |
+
+**VRT alone is 41% of the loss.** Main $785k + discretionary $1,083k = $1,868k at cost, marked
+$1,195k: **−$382k of the −$929k total unrealised**, from one name on a descending ladder of four
+entries (283.00, 278.10, 251.64, 243.73) against a 206.42 mark.
+
+**The discretionary tickets are past their time stop and still open** — VRT OU from 28 Sep is 22
+days old, VRT Bayes and MRVL Bayes 11 days, against a 10-session rule. $1,627k at cost carrying
+−$263k with no stop enforcing an exit. This is the same pattern as the August AVGO tickets that
+ran long; it is now the larger of the two exposures and nothing in the workbook will close it
+automatically.
+
+Artifacts: `stop_watch.py` (now reads Dashboard marks), `stop_watch.json`.

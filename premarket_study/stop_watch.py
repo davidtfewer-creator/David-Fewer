@@ -33,6 +33,9 @@ def main():
     cfg = json.load(open('deployed_book12.json'))['params']
     wb = openpyxl.load_workbook(path, data_only=True)
     at = wb['Active Trading']
+    db = wb['Dashboard']
+    last = {db.cell(r, 1).value: db.cell(r, 2).value for r in range(4, 16)
+            if db.cell(r, 1).value}
 
     rows = []
     for r in range(42, 1032):
@@ -47,21 +50,31 @@ def main():
         rows.append(dict(row=r, name=nm, tr=tr, buy=d, px=px, sh=sh, cost=cost,
                          held=(asof - d).days, stop=d + dt.timedelta(days=STOP_DAYS),
                          left=STOP_DAYS - (asof - d).days,
-                         rel=(px * (1 + prem) if prem else None), prem=prem))
+                         rel=(px * (1 + prem) if prem else None), prem=prem,
+                         mkt=last.get(nm)))
     rows.sort(key=lambda x: x['left'])
 
     print(f'as of {asof} — blotter from the workbook (last saved ~14-15 Oct, so any '
           f'position\nopened or closed since then is not reflected)\n')
-    print(f'  {"name":6s}{"sleeve":7s}{"bought":12s}{"held":>6s}{"stop date":>13s}'
-          f'{"days left":>11s}{"cost":>11s}{"buy px":>10s}{"release px":>12s}{"needs":>8s}')
-    tot = 0.0
+    print(f'  {"name":6s}{"sleeve":7s}{"stop":>12s}{"left":>6s}{"cost":>9s}'
+          f'{"buy":>9s}{"last":>9s}{"P&L":>9s}{"vs cost":>9s}'
+          f'{"release":>9s}{"gap":>8s}')
+    tot = mv = 0.0
     for x in rows:
         tot += x['cost']
-        need = (x['rel'] / x['px'] - 1) * 100 if x['rel'] else float('nan')
-        print(f"  {x['name']:6s}{x['tr']:7s}{str(x['buy']):12s}{x['held']:>5d}d"
-              f"{str(x['stop']):>13s}{x['left']:>10d}d{x['cost']/1e3:>10.0f}k"
-              f"{x['px']:>10.2f}{x['rel']:>12.2f}{need:>7.2f}%")
-    print(f'  {"TOTAL":6s}{"":7s}{"":12s}{"":6s}{"":13s}{"":11s}{tot/1e3:>10.0f}k')
+        m = x['mkt']
+        pnl = (m - x['px']) * x['sh'] if m else None
+        mv += (m * x['sh']) if m else x['cost']
+        gap = (x['rel'] / m - 1) * 100 if (m and x['rel']) else float('nan')
+        print(f"  {x['name']:6s}{x['tr']:7s}{str(x['stop']):>12s}{x['left']:>5d}d"
+              f"{x['cost']/1e3:>8.0f}k{x['px']:>9.2f}{(m or 0):>9.2f}"
+              f"{(pnl or 0)/1e3:>8.0f}k{(pnl or 0)/x['cost']*100:>8.1f}%"
+              f"{x['rel']:>9.2f}{gap:>7.1f}%")
+    print(f'  {"TOTAL":6s}{"":7s}{"":12s}{"":6s}{tot/1e3:>8.0f}k{"":9s}{"":9s}'
+          f'{(mv-tot)/1e3:>8.0f}k{(mv-tot)/tot*100:>8.1f}%')
+    print(f'\n  open positions at cost ${tot/1e3:,.0f}k, marked ${mv/1e3:,.0f}k'
+          f'  -> unrealised ${(mv-tot)/1e3:,.0f}k')
+    print('  "gap" = how far the LAST price must rise to reach the release price.')
 
     print(f'\n  --- grouped by stop date ---\n')
     by = {}
@@ -70,8 +83,10 @@ def main():
     for sd in sorted(by):
         g = by[sd]
         c = sum(x['cost'] for x in g)
-        print(f"  {sd}  in {g[0]['left']:>2d} days   ${c/1e3:>6.0f}k across "
-              f"{len(g)} sleeve(s): " + ', '.join(f"{x['name']} {x['tr']}" for x in g))
+        rp = sum((x['mkt'] - x['px']) * x['sh'] for x in g if x['mkt'])
+        print(f"  {sd}  in {g[0]['left']:>2d} days   ${c/1e3:>6.0f}k at cost, "
+              f"would realise ${rp/1e3:>7.0f}k ({rp/c*100:>6.1f}%)   "
+              + ', '.join(f"{x['name']} {x['tr']}" for x in g))
 
     print(f'\n  --- discretionary log ({DISC_STOP_SESSIONS}-session time stop) ---\n')
     for r in range(42, 1032):
