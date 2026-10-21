@@ -4426,3 +4426,52 @@ drawdown recovered fast. A stop exists for a bear that keeps falling, which is n
 The 2021–23 bear-market data in Box (`2021 to 2023 bear market/`, used by `bear_replay.py`) is the
 test that could overturn this, since it is the only regime where a shorter stop should earn its keep.
 Artifacts: `stop_study.py`, `stop_study.json`, `stop_study.log`.
+
+### 3.82 The stop sweep through the 2022 bear: the stop earns its keep, its length doesn't matter, and the gate is the real bear lever (21 Oct)
+
+User: *"run the stop sweep on the 2021-23 bear data"* — the test §3.81 named as the one that could
+overturn "keep 50 days", since a stop exists for a bear that keeps falling. Eleven of the twelve
+2021–23 five-minute files restored from Box to `data_bear/` (span-checked Aug 2021 – Jun 2023;
+**no NVDA data exists for the period**, and NVDA fell ~⅔ in 2022, so its absence flatters the
+book). Construction follows `bear_replay.py`; every vector fitted on 2024–26, so all of it is out of
+sample. No pre-market rule (no cache for the period) — absent from every arm equally.
+`bear_stop.py`, `bear_breadth.py`, `gate_normal_cost.py`.
+
+**1. Having a stop matters a great deal in a bear.** Calendar 2022, no gate: **no stop −17.9%,
+26.7% drawdown**; 50 days **−8.7%, 19.6%**. Equal-weight buy-and-hold of the eleven: −11.6%. Do not
+lengthen or remove the stop.
+
+**2. Its length within 10–50 days carries no reliable signal.** 2022, no gate: 10d −5.9%, 20d
+−9.3%, **30d −16.0%**, 40d −10.5%, 50d −8.7%. With the per-name gate: 20d +9.4% but **30d −2.9%**
+next door — a 12pp swing for ten days, the single-cell-spike tell. Drawdown sits in a 13.6–15.4%
+band for 10–50 days with the gate and worsens only beyond 60 days. Against §3.81's −15.3pp/yr cost
+of 20 days in 2024–26, there is no case for shortening.
+
+**3. The §3.81 per-name stop set is not robust here either:** 2022 without gate −10.2% / 22.2% DD,
+**worse than 50 days uniform** (−8.7% / 19.6%); with the per-name gate +12.7% / 14.5%. Mixed across
+regimes and failed the 2024–26 test half — fitting noise, confirmed twice.
+
+**4. What actually moves the bear drawdown is the gate, and it is not free:**
+
+| rule, 50-day stop | 2024–26 full | 2024–26 maxDD | 2022 return | 2022 maxDD |
+|---|---|---|---|---|
+| no gate (current) | 72.0 | 20.9 | −8.7% | 19.6% |
+| breadth gate K≥6 | 71.0 | 18.8 | −6.2% | 18.7% |
+| **per-name 200dma gate** | **64.7** | **23.6** | **+1.1%** | **14.2%** |
+
+(2024–26 breadth figure from §3.70, K≥6 of 12; bear K≥6 of 11.)
+
+The **per-name gate** — stop buying a name while it is below its own 200dma — turns 2022 from
+−8.7% to **+1.1%** and cuts its drawdown 19.6 → **14.2%**. But in 2024–26 it costs **−7.3pp/yr**
+and *worsens* drawdown 20.9 → 23.6%, because it refuses dips that then recovered (it is on 295 of
+the test half's days). It is genuine bear insurance with a genuine bull-market premium — not a
+drawdown reducer in general.
+
+The **breadth gate** is close to free in normal markets (−1.0pp, and it never fires in the 2024–26
+test half, §3.66) but buys only a little protection in 2022 (−8.7 → −6.2%, DD 19.6 → 18.7%). It
+needs most of the book below trend before it switches on, by which point most of the damage is done.
+
+**Verdict.** Keep **50 days, uniform**. If the user wants bear protection, the choice is between
+the breadth gate (cheap, weak) and the per-name gate (strong, costly in good years) — a judgement
+on how likely a 2022 is, not something the backtest can make. Artifacts: `bear_stop.py`,
+`bear_breadth.py`, `gate_normal_cost.py` and their JSON; `data_bear/` holds the restored files.

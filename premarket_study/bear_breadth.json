@@ -1,0 +1,98 @@
+{
+ "CALENDAR 2022 | no gate | 50d": {
+  "ann": -0.08667434676331254,
+  "maxdd": 0.1957084889391968,
+  "fills": 448,
+  "days_on": 0
+ },
+ "CALENDAR 2022 | no gate | 20d": {
+  "ann": -0.09335293499151098,
+  "maxdd": 0.1895204732027453,
+  "fills": 657,
+  "days_on": 0
+ },
+ "CALENDAR 2022 | per-name (K>=1) | 50d": {
+  "ann": 0.01062754470496774,
+  "maxdd": 0.1416078592197922,
+  "fills": 222,
+  "days_on": 248
+ },
+ "CALENDAR 2022 | per-name (K>=1) | 20d": {
+  "ann": 0.09435699463713743,
+  "maxdd": 0.13632692058859255,
+  "fills": 289,
+  "days_on": 248
+ },
+ "CALENDAR 2022 | breadth K>=5 of 11 | 50d": {
+  "ann": -0.05539535971285969,
+  "maxdd": 0.183775073423519,
+  "fills": 275,
+  "days_on": 188
+ },
+ "CALENDAR 2022 | breadth K>=5 of 11 | 20d": {
+  "ann": 0.0018464564159654806,
+  "maxdd": 0.17593882172094238,
+  "fills": 355,
+  "days_on": 188
+ },
+ "CALENDAR 2022 | breadth K>=6 of 11 | 50d": {
+  "ann": -0.06231579820331279,
+  "maxdd": 0.1867497664679686,
+  "fills": 302,
+  "days_on": 139
+ },
+ "CALENDAR 2022 | breadth K>=6 of 11 | 20d": {
+  "ann": -0.009273001012673587,
+  "maxdd": 0.17822465858515493,
+  "fills": 414,
+  "days_on": 139
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | no gate | 50d": {
+  "ann": 0.033174572486244,
+  "maxdd": 0.1957084889391968,
+  "fills": 687,
+  "days_on": 0
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | no gate | 20d": {
+  "ann": 0.027805032143322084,
+  "maxdd": 0.1895204732027453,
+  "fills": 989,
+  "days_on": 0
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | per-name (K>=1) | 50d": {
+  "ann": 0.07950797911404028,
+  "maxdd": 0.1416078592197922,
+  "fills": 414,
+  "days_on": 372
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | per-name (K>=1) | 20d": {
+  "ann": 0.15118985743167945,
+  "maxdd": 0.13632692058859255,
+  "fills": 530,
+  "days_on": 372
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | breadth K>=5 of 11 | 50d": {
+  "ann": 0.057317584437213576,
+  "maxdd": 0.183775073423519,
+  "fills": 502,
+  "days_on": 233
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | breadth K>=5 of 11 | 20d": {
+  "ann": 0.08548345090629694,
+  "maxdd": 0.17593882172094238,
+  "fills": 649,
+  "days_on": 233
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | breadth K>=6 of 11 | 50d": {
+  "ann": 0.05318650342849951,
+  "maxdd": 0.1867497664679686,
+  "fills": 536,
+  "days_on": 157
+ },
+ "FULL SPAN Jan 2022 - Jun 2023 | breadth K>=6 of 11 | 20d": {
+  "ann": 0.09964563497263579,
+  "maxdd": 0.17822465858515493,
+  "fills": 733,
+  "days_on": 157
+ }
+}
