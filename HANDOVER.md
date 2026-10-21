@@ -4225,3 +4225,40 @@ AVGO −21.4% from the 4 August marks.
 need to agonise over it. Leaving it off for the length of a trend is the expensive version, and it
 costs more through the fills it forgoes than through the concentration it creates. Artifacts:
 `toggle_cost.py`, `toggle_trend.py`, `toggle_cost.json`.
+
+### 3.78 SpaceX (SPCX) as a thirteenth name: not screenable yet, and the reasons are measurable (21 Oct)
+
+User: *"I realise spaceX hasnt been trading for too long but do you think it might fit into the 12
+stock book as no. 13"*. SPCX listed on Nasdaq **12 June 2026** at $135 (largest IPO on record,
+~$85.7bn raised). No SPCX data exists in the 5-minute archive.
+
+**1. History: about 90 sessions against 587 for every other name.** The fittability test (§3.59)
+splits history into train and test halves and asks whether a vector's ranking survives the split.
+Using NVDA's own volatility (3.03%/day) as the scale, the 1-σ standard error of an annualised return
+estimated from one half is:
+
+| history | per half | 1-σ SE |
+|---|---|---|
+| SPCX now, ~90 sessions | 45 | **±114pp** |
+| one year, ~250 | 125 | ±68pp |
+| book standard, 587 | 293 | ±45pp |
+
+At 45 sessions a half the noise is several times wider than any plausible signal, so rho would be
+meaningless and any fitted vector would be fitted to noise. The ATH anchor (`peak_cap`) is also
+degenerate on a recent IPO: its all-time high is simply its post-listing high.
+
+**2. Scheduled supply events, the opposite of what this model is built for.** Lock-ups are staggered
+(sources disagree on exact dates and should be checked against the prospectus): a first tranche
+around 6 Aug, further unlocks through September, a **large tranche (~1.3bn shares reported) after the
+autumn results**, and Musk plus majority holders locked for **366 days, to ~mid-June 2027**. These
+are large, non-mean-reverting flows; a dip-buying model fitted through them would be fitting an
+event calendar, not a price process.
+
+**3. Price-discovery regime.** Parameters fitted on an IPO's first months describe a regime the stock
+then leaves, so even a fit that looked good would not transfer.
+
+**Earliest defensible screen: mid-2027,** when the main lock-up has passed and roughly a year of
+history exists — still the thinnest history of any name screened, so the bar should be higher, not
+the same. Practical step meanwhile: add SPCX to the 5-minute data pull now so the history is there
+when it qualifies. Also relevant: the twelve-name book (§3.70/§3.71) has not yet traded live, so a
+thirteenth name is premature on sequencing alone.
