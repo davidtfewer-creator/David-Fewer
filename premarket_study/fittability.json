@@ -97,5 +97,32 @@
   "q75": 16.4,
   "rho": 0.18,
   "reading": "fitting is ~useless; plan on the distribution"
+ },
+ {
+  "name": "PLTR",
+  "n": 300,
+  "median": 12.306955726378899,
+  "q25": 3.057417907358295,
+  "q75": 21.583938794901236,
+  "rho": -0.5874656385070944,
+  "reading": "FITTING HURTS \u2014 vector is a guess"
+ },
+ {
+  "name": "TSLA",
+  "n": 292,
+  "median": 17.22321330793055,
+  "q25": 9.143819458887826,
+  "q75": 29.040806369298757,
+  "rho": -0.296117138928238,
+  "reading": "FITTING HURTS \u2014 vector is a guess"
+ },
+ {
+  "name": "RKLB",
+  "n": 300,
+  "median": 9.13557747384165,
+  "q25": -5.926090032637776,
+  "q75": 26.999239894550154,
+  "rho": -0.05624373604151157,
+  "reading": "fitting is ~useless; plan on the distribution"
  }
 ]

@@ -4262,3 +4262,55 @@ history exists — still the thinnest history of any name screened, so the bar s
 the same. Practical step meanwhile: add SPCX to the 5-minute data pull now so the history is there
 when it qualifies. Also relevant: the twelve-name book (§3.70/§3.71) has not yet traded live, so a
 thirteenth name is premature on sequencing alone.
+
+### 3.79 PLTR, TSLA and RKLB added to the twelve: lower correlation is real, but every addition makes the book worse (21 Oct)
+
+User: *"can you look at the impact of adding PLTR, TSLA and Rocketlabs to the 12 stock book. I know
+there's an AI element to these stocks but I don't think they're fully correlated in the same way as
+others"*. PLTR and TSLA 5-minute data restored from Box (587 sessions each, ticker taken from each
+file's own first line). **RKLB was removed from the book on 2 Sep as a user risk decision (§3.28)**;
+this re-tests it on request and does not reverse that call on its own.
+
+**1. The correlation claim is half right.** Against the G1 AI factor (`diversify_check.py`):
+
+| | beta | corr | down-day corr | on the factor's 20 worst days |
+|---|---|---|---|---|
+| core AI (TSM…MRVL, NVDA) | 0.71–1.18 | 0.73–0.85 | 0.67–0.82 | −5.8% to −10.4% |
+| **PLTR / TSLA / RKLB** | **0.50 / 0.60 / 0.82** | **0.40 / 0.47 / 0.44** | **0.32 / 0.39 / 0.30** | **−3.9% / −4.9% / −5.4%** |
+| diversifiers (GM, VLO, CF, RTX, DE) | −0.02–0.18 | −0.02–0.24 | 0.08–0.21 | −0.6% to −1.5% |
+
+They are a genuine third category — falling roughly half to 0.7× the factor on its worst days — but
+all three are AI-related under G1 (beta ≥ 0.27), and much of the low correlation is idiosyncratic
+noise rather than safety: annual vol 62% / 62% / **90%** (RKLB the most volatile name ever screened).
+
+**2. None of the three is fittable.** Train→test rank correlation over 300 vectors: **PLTR −0.59**
+(fitting actively hurts; joint-worst in the universe with AMD), **TSLA −0.30** (hurts), **RKLB −0.06**
+(useless). All three therefore run on the neutral seed — PARR's position.
+
+**3. Every addition worsens the book on every measure except fills:**
+
+| arm | full | train | test | maxDD | ret/DD | fills/yr | AI $ |
+|---|---|---|---|---|---|---|---|
+| **TWELVE (current)** | **72.0** | 51.8 | **93.8** | **20.9** | **3.45** | 637 | 71% |
+| + PLTR | 68.6 | 54.2 | 83.6 | 22.1 | 3.11 | 678 | 73% |
+| + TSLA | 64.8 | 45.3 | 85.7 | 21.7 | 2.98 | 671 | 73% |
+| + RKLB | 71.1 | 57.6 | 85.1 | 21.2 | 3.36 | 673 | 73% |
+| FIFTEEN | 61.9 | 53.3 | **70.5** | **22.9** | 2.71 | 748 | 76% |
+
+**The diversification argument fails in the book even though the correlation measurement supports
+it:** drawdown goes *up* with each name (+0.3 to +2.0pp), not down, and the stress windows mostly
+worsen — the fifteen turns Jun–Jul 2026 from **+8.4% to −0.8%**. The mechanism is §3.51's: an
+unfittable, very volatile name places poorly-timed orders that claim pool capital from the names
+that earn it. Lower correlation does not help a name that loses money on its own terms.
+
+**RKLB's full-period −0.9pp is flattered by the in-sample train half** (+5.8pp there); out of sample
+it is **−8.8pp**. In the fifteen it makes $41k on 84 fills — **0.3% of book P&L**. PLTR contributes
+2.7% and TSLA 1.7%, all well under the 6.7% an equal name would.
+
+**On fills, the one thing they deliver:** +111/yr for all three, but at 0.091pp of return per extra
+fill against the ~0.065 found for the earlier additions (§3.67), and TSLA alone at 0.218. They buy
+turnover expensively and raise drawdown while doing it.
+
+**Verdict: declined, all three, singly and together.** The 2 Sep RKLB decision is independently
+corroborated out of sample. Artifacts: `diversify_check.py`, `book15.py`, `book15.json`,
+`fittability.json` (PLTR/TSLA/RKLB merged).
