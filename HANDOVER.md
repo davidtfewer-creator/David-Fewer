@@ -4374,3 +4374,55 @@ on every measure; the verdict stands.
 
 Artifacts: `lowdd_book.py`, `lowdd_halves.py`, `lowdd_book.json`, `lowdd_halves.json`,
 `universe_beta.json`, `fittability.json`.
+
+### 3.81 Per-stock stops: they overfit, and stop length barely moves the drawdown (21 Oct)
+
+User: *"look into the stop period for the 12 stock book and see what impact this has on drawdown
+levels… I think we can do better on the drawdown/return/trade frequency through varying this by
+stock."* `book_sim.simulate` gains `stop_days` (int or {name: days}, default 50; exits only, since
+the engine's bid series are price-only — verified identical to the default at 50). `stop_study.py`,
+twelve-name book, protocol fixed in advance: choose on TRAIN, judge on TEST.
+
+**1. Uniform stop — the drawdown hardly responds:**
+
+| stop | full | test | maxDD | test DD | test R/DD | fills/yr | stops/yr |
+|---|---|---|---|---|---|---|---|
+| 10d | 48.2 | 72.7 | 20.1 | 7.1 | 10.23 | 863 | 183 |
+| 20d | 56.7 | 77.6 | 20.4 | 8.3 | 9.35 | 747 | 96 |
+| 30d | 61.4 | 82.6 | 21.9 | 8.7 | 9.50 | 668 | 57 |
+| 40d | 67.1 | 83.2 | 20.0 | 8.0 | 10.41 | 649 | 38 |
+| **50d** | **72.0** | **93.8** | **20.9** | **7.4** | **12.60** | 637 | 25 |
+| 75d | 67.6 | 89.5 | 22.4 | 8.6 | 10.39 | 593 | 18 |
+| none | 63.0 | 75.6 | 23.3 | 7.2 | 10.51 | 487 | 0 |
+
+Max drawdown sits in a **20.0–23.3% band whatever the stop**. The reason is the episode itself: the
+Feb–Apr 2025 fall was V-shaped, so a shorter stop crystallises the loss at the trough rather than
+avoiding it — consistent with §3.5x's finding that 68% of stopped positions recover to entry within
+50 sessions. **50 days is the best uniform choice on full return, test return and test R/DD.** The
+train-half selector actually picked 40d and it did worse out of sample.
+
+**2. Per-name, chosen on train (others at 50):** picks TSM 40, VRT 20, VST 40, AVGO 30, MU 50, GM 50,
+VLO 20, CF 40, MRVL 20, RTX none, DE 75, NVDA 50. The per-name train R/DD differences are tiny
+(mostly within ±0.2 of the 2.48 baseline) and the picks have no structure — the tell of fitting noise.
+
+**3. Out of sample, the per-name set fails on every test measure:**
+
+| | full | train | test | maxDD | **test DD** | **test R/DD** | fills |
+|---|---|---|---|---|---|---|---|
+| 50d (current) | 72.0 | 51.8 | **93.8** | 20.9 | **7.4** | **12.60** | 637 |
+| best uniform (40d, train-chosen) | 67.1 | 51.7 | 83.2 | 20.0 | 8.0 | 10.41 | 649 |
+| per-name set | 72.2 | **62.6** | 81.9 | **17.2** | **8.8** | 9.36 | 675 |
+
+The per-name set's headline — max drawdown 20.9 → 17.2%, train return +10.8pp — is **entirely
+in-sample**. On the unseen half its drawdown is **worse** (7.4 → 8.8%) and its return lower
+(93.8 → 81.9%). Twelve stop parameters fitted twelve noise patterns.
+
+**4. Shorter stops are an expensive way to buy fills.** 20 days adds 110 fills/yr for −15.3pp
+(0.14pp per fill), 30 days 31 fills for −10.6pp (0.34pp) — against ~0.065pp per fill for adding
+names (§3.67).
+
+**Verdict: keep 50 days, uniform.** The standing caveat (§6, §3.72): this archive's one deep
+drawdown recovered fast. A stop exists for a bear that keeps falling, which is not in the sample.
+The 2021–23 bear-market data in Box (`2021 to 2023 bear market/`, used by `bear_replay.py`) is the
+test that could overturn this, since it is the only regime where a shorter stop should earn its keep.
+Artifacts: `stop_study.py`, `stop_study.json`, `stop_study.log`.
