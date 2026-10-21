@@ -80,14 +80,17 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
-             name_cap=None,
+             name_cap=None, stop_days=None,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
              reentry=None, regime_exit=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
-    morning; equal when None). name_cap: {name: max dollars per order}, a hard
+    morning; equal when None). stop_days: calendar-day time stop -- an int for
+    every name, or {name: days} (missing names keep STOP_DAYS). Exits only; the
+    engine's bid series do not depend on it, so data can be loaded once.
+    name_cap: {name: max dollars per order}, a hard
     per-name ceiling with the remainder re-divided over the other free sleeves.
     cap_frac: max fraction of the pool one sleeve may
     take in a morning (None = uncapped, the deployed behaviour). date_lo/date_hi
@@ -383,7 +386,9 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             nd = data[s['name']]
             i = s['_i']
             H, O = nd['H'][i], nd['O'][i]
-            stop = (d - s['entry']).days >= STOP_DAYS
+            sd = (stop_days.get(s['name'], STOP_DAYS) if isinstance(stop_days, dict)
+                  else (stop_days if stop_days is not None else STOP_DAYS))
+            stop = (d - s['entry']).days >= sd
             px = None
             ps_level = (s['bid'] * (1 - price_stop)) if price_stop is not None else None
             if ps_level is not None and nd['L'][i] <= ps_level + 1e-12:
