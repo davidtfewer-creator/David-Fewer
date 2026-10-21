@@ -124,5 +124,104 @@
   "q75": 26.999239894550154,
   "rho": -0.05624373604151157,
   "reading": "fitting is ~useless; plan on the distribution"
+ },
+ {
+  "name": "CHTR",
+  "n": 297,
+  "median": -41.29435058571713,
+  "q25": -49.78989910901349,
+  "q75": -31.320036920716642,
+  "rho": -0.47528248199389145,
+  "reading": "FITTING HURTS \u2014 vector is a guess"
+ },
+ {
+  "name": "ALNY",
+  "n": 297,
+  "median": -8.985717751388457,
+  "q25": -13.785807700153619,
+  "q75": -3.506542872213847,
+  "rho": 0.05913799705746016,
+  "reading": "fitting is ~useless; plan on the distribution"
+ },
+ {
+  "name": "RKT",
+  "n": 299,
+  "median": -2.498274229191333,
+  "q25": -7.4644035496174155,
+  "q75": 6.36218484941895,
+  "rho": -0.18859688895872145,
+  "reading": "fitting is ~useless; plan on the distribution"
+ },
+ {
+  "name": "LULU",
+  "n": 291,
+  "median": -30.631689894964566,
+  "q25": -39.22557361073948,
+  "q75": -21.840585999342377,
+  "rho": -0.10254590964650426,
+  "reading": "fitting is ~useless; plan on the distribution"
+ },
+ {
+  "name": "TEAM",
+  "n": 288,
+  "median": -29.234221754249432,
+  "q25": -36.175774362576284,
+  "q75": -17.69082550810902,
+  "rho": 0.3378946987690342,
+  "reading": "fitting earns something"
+ },
+ {
+  "name": "CELH",
+  "n": 288,
+  "median": -1.5607268353400316,
+  "q25": -9.101317395983632,
+  "q75": 6.5909557161391685,
+  "rho": 0.17827252852360456,
+  "reading": "fitting is ~useless; plan on the distribution"
+ },
+ {
+  "name": "NOC",
+  "n": 297,
+  "median": 1.7032273681248489,
+  "q25": -2.528417647207515,
+  "q75": 7.2796136927362864,
+  "rho": -0.26293407501461197,
+  "reading": "FITTING HURTS \u2014 vector is a guess"
+ },
+ {
+  "name": "STNG",
+  "n": 296,
+  "median": 25.00243550675244,
+  "q25": 15.060210430672205,
+  "q75": 39.76422808099515,
+  "rho": -0.45648607004539205,
+  "reading": "FITTING HURTS \u2014 vector is a guess"
+ },
+ {
+  "name": "LEN",
+  "n": 294,
+  "median": -1.510610083778452,
+  "q25": -5.328225532573083,
+  "q75": 3.6112667723340097,
+  "rho": 0.3741140859652706,
+  "reading": "fitting earns something"
+ },
+ {
+  "name": "SPOT",
+  "n": 296,
+  "median": 3.9111310642166552,
+  "q25": -6.491704726985493,
+  "q75": 10.739498874182729,
+  "rho": -0.28753915703068245,
+  "reading": "FITTING HURTS \u2014 vector is a guess"
+ },
+ {
+  "name": "NEM",
+  "n": 300,
+  "median": 20.171858294546197,
+  "q25": 14.018610911754891,
+  "q75": 28.736763882667084,
+  "rho": 0.5010802342248247,
+  "reading": "fitting earns something"
  }
 ]
