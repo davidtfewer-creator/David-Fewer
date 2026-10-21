@@ -4314,3 +4314,63 @@ turnover expensively and raise drawdown while doing it.
 **Verdict: declined, all three, singly and together.** The 2 Sep RKLB decision is independently
 corroborated out of sample. Artifacts: `diversify_check.py`, `book15.py`, `book15.json`,
 `fittability.json` (PLTR/TSLA/RKLB merged).
+
+### 3.80 A lower-drawdown book: drop VRT and MRVL, add NEM and LEN — 64% return at a 12.3% drawdown (21 Oct)
+
+User: *"I'd be happy enough with an overall 60% return if we could bring the max drawdown down
+significantly. Can you look at candidates in box that might achieve this?"* A different point on the
+frontier, not more return.
+
+**Screen.** All 45 local names ranked by AI beta (`universe_beta.json`); NOC, STNG and LEN restored
+from Box (596 sessions); pre-market cache rebuilt to cover them (all 43 existing names verified
+unchanged). Fittability on the eleven untested low-beta names: **NEM +0.50** (highest in the
+universe, random-vector median +20.2%), **LEN +0.37**, TEAM +0.34 (dropped: median −29.2%); CHTR,
+ALNY, RKT, LULU, CELH, NOC, STNG and SPOT fail. NOC is the purest hedge in the universe — it *rose*
++0.3% on the AI factor's 20 worst days, vol 26% — but cannot be fitted.
+
+**Two levers, tested side by side** (`lowdd_book.py`, PM on every name, no breadth gate):
+
+| arm | n | full | test | maxDD | ret/DD | fills/yr | AI $ |
+|---|---|---|---|---|---|---|---|
+| TWELVE (current) | 12 | 72.0 | 93.8 | 20.9 | 3.45 | 637 | 71% |
+| + NEM | 13 | 70.4 | 87.3 | 19.1 | 3.68 | 667 | 69% |
+| + LEN | 13 | 71.0 | 90.6 | 19.3 | 3.68 | 645 | 71% |
+| + NOC (neutral) | 13 | 65.1 | 85.3 | 18.3 | 3.56 | 662 | 69% |
+| + NEM + LEN | 14 | 70.1 | 85.3 | 17.9 | 3.93 | 675 | 68% |
+| − VRT − MRVL | 10 | 65.9 | 77.3 | 15.5 | 4.27 | 507 | 65% |
+| **− VRT − MRVL + NEM + LEN** | **12** | **64.1** | **69.5** | **12.3** | **5.19** | **545** | **61%** |
+| − VRT − MRVL + NEM + LEN + NOC | 13 | 58.8 | 64.7 | 11.0 | 5.34 | 570 | 58% |
+
+**The removal does the work, the additions refine it.** Adding diversifiers alone moves drawdown
+20.9 → 17.9%. Removing the two highest-beta AI names — VRT and MRVL, which fall hardest on the
+factor's worst days (−10.3%, −10.4%) — gets to 15.5% on its own, and combined with NEM and LEN to
+**12.3%, a 41% cut, at 64.1% full return**. Return/drawdown goes 3.45 → **5.19**, the best measured
+in the project. Stress windows all improve sharply (Jan–Apr 2025 +4.3% → **+14.6%**).
+
+**Out of sample the improvement is real but smaller, and only from the removal** (`lowdd_halves.py`):
+
+| arm | maxDD | train DD | **test DD** | test return |
+|---|---|---|---|---|
+| TWELVE | 20.9 | 20.9 | **7.4** | 93.8 |
+| + NEM + LEN | 17.9 | 17.9 | **7.5** | 85.3 |
+| − VRT − MRVL + NEM + LEN | 12.3 | 12.3 | **5.5** | 69.5 |
+
+All of the large reduction lands in the in-sample Feb–Apr 2025 episode (§3.72) — and NEM/LEN are
+fitted on that half, which flatters them there. **Adding NEM + LEN alone does nothing out of sample
+(7.4 → 7.5%).** The removal of VRT and MRVL is what carries through: test-half drawdown 7.4 →
+**5.5%**. That is consistent with it being structural rather than fitted — VRT and MRVL were chosen
+on AI beta, not on their returns.
+
+**Costs, stated plainly.** Test-half return 93.8 → 69.5%. **MRVL was the twelve's largest single
+contributor (12.3% of P&L)** and VRT the fourth, so this gives up the book's best earners. Fills
+fall 637 → **545/yr (−14%)**, which matters given the user's earlier emphasis on trading volume.
+
+**Implementation note.** Dropping VRT and MRVL means not *re-entering* them, not liquidating: their
+open sleeves close on target or stop as normal (VRT's main sleeves stop on 29 Oct regardless, §3.75).
+
+**Correction to §3.79.** PLTR and TSLA were run there without the PM rule (no pre-market cache).
+Re-run with it: fifteen 63.9 / 71.0 / 22.2% DD (was 61.9 / 70.5 / 22.9). Still worse than the twelve
+on every measure; the verdict stands.
+
+Artifacts: `lowdd_book.py`, `lowdd_halves.py`, `lowdd_book.json`, `lowdd_halves.json`,
+`universe_beta.json`, `fittability.json`.
