@@ -4830,3 +4830,32 @@ NVTS, AXTI, FCX, EXPE, HUM, AAOI, and CEG on DD. Pairs: **+RKT+LUNR 74.6 / 94.0 
 +RKT+TEAM 74.5 / 94.0 / 12.7%, +TEAM+LUNR 74.1 / 94.1 / 13.0%. RKT (beta 0.15) and TEAM (0.17) are
 diversifiers; LUNR (0.84) is another small-cap AI-adjacent multi-bagger like the two removed.
 All differences are one episode wide.
+
+### 3.93 The 20-name managed book, as chosen (22 Oct)
+
+User: *"go with RKT and TEAM for the 20"*. `book20.py` → `book20.json` (results) and
+**`deployed_book20.json`** (roster, tiers, rules, vectors; deployed_book12 format). The script
+asserts the core's twelve vectors equal `deployed_book12.json` to 1e-9.
+
+- **Core (tier 1):** TSM VRT VST AVGO MU GM VLO CF MRVL RTX DE NVDA — unchanged.
+- **Bench (tier 2):** PLTR TSLA RKLB (eligible 60 sessions after a close ≥40% below the trailing
+  252-session high) + NEM LEN DLTR RKT TEAM (always eligible). Vectors: NEM, LEN, DLTR, TEAM fitted;
+  PLTR, TSLA, RKLB, RKT neutral (rho < 0.20).
+- **Breadth gate K≥6** on the core, held cash; **E** lends the held cash to eligible bench orders
+  (≤ one ordinary sleeve share each). Bench has no other funding. Orders never exceed cash.
+- PM rule + ATH gate on all twenty; 50-day stop.
+
+| 2024–26 | full | train | test | maxDD | test DD | fills/yr |
+|---|---|---|---|---|---|---|
+| live twelve | 71.3 | 50.1 | 94.3 | 20.5 | 7.5 | 633 |
+| **book20** | **74.5** | 56.2 | **94.0** | **12.7** | 7.5 | 638 |
+
+Bench P&L +$1.47m (NEM +530k, RKLB +190k, RKT +168k, TSLA +163k, DLTR +121k, PLTR +110k, LEN +100k,
+TEAM +60k) on ~41 fills/yr in total. **The gate was on for 51 sessions, 28 Feb – 12 May 2025, and
+that is the only time the bench was funded** — in practice the book runs as the twelve and the
+bench is a crisis rotation. Worst drawdowns: 12.7% (Feb–Apr 2025), then 7.5, 6.8, 6.6, 6.2%,
+identical to the twelve outside the gate episode.
+
+**Open:** (1) the out-of-sample check is a long bear (2022) — bench bear files still needed for
+PLTR, TSLA, DLTR, RKT, TEAM (RKLB, NEM, LEN in Box) plus NVDA at 5-minute; (2) workbook: 20 slots,
+breadth gate with held cash, lend-to-bench logic and the rebound admission flag in Script 1.
