@@ -223,5 +223,14 @@
   "q75": 28.736763882667084,
   "rho": 0.5010802342248247,
   "reading": "fitting earns something"
+ },
+ {
+  "name": "BRKB",
+  "n": 282,
+  "median": 6.567660715988177,
+  "q25": 4.007287381791036,
+  "q75": 8.973312824636913,
+  "rho": 0.05616065578244324,
+  "reading": "fitting is ~useless; plan on the distribution"
  }
 ]

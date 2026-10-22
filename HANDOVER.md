@@ -4560,3 +4560,40 @@ concentration paying in an AI rally. (2) The nine's K≥4 bear result (+1.7%) ne
 is a one-step 10pp swing — the single-cell-spike tell; do not read K≥4 as a winner. (3) Across
 both books and both regimes, holding the gated cash is what cuts drawdown; redistributing mostly
 moves return. Twelve + K≥6 cash is the best drawdown profile that keeps the test half intact.
+
+### 3.85 BRK.B as name 13: a real hedge on correlation, but it dilutes the book (22 Oct)
+
+User: *"I'm considering including BRK.B in the book. Probably not very volatile but reported to be
+a good hedge against AI chip stocks"*. User uploaded `BRK.B_5min.xlsx` to Box
+(`00 Live Trading/data/minute data`, file 2542914868253; Apr 2024 – 21 Oct 2026, 643 sessions).
+Imported as **BRKB** (`ops/box_5min_autoimport.sh` rejects the dot, so `box_5min_import.py` was
+called directly). PM cache rebuilt for 49 names; existing names verified unchanged.
+**No 2021–23 BRK.B file yet**, so 2024–26 only. `brkb_add.py` / `brkb_add.json`.
+
+**1. The hedge claim holds on correlation** (vs the G1 AI factor): beta **0.01**, corr 0.02,
+down-day beta −0.05, **0.0%** on the factor's 20 worst days (factor −8.2%; RTX −0.6%, CF −0.6%,
+DE −1.2%, NVDA −6.2%). Annual vol **17%**, against 25% for RTX, the quietest book name.
+
+**2. Fittability rho +0.06** → neutral `x0_vector(1)` (random-vector test median +6.6%, IQR 4.0 to
+9.0%: positive but small).
+
+**3. Book result (2024–26, $6.9m, 50-day stop, PM rule):**
+
+| | full | train | test | maxDD | test DD | fills/yr | stress Jan–Apr25 / Feb–Jun25 / Jun–Jul26 |
+|---|---|---|---|---|---|---|---|
+| twelve, no gate | 72.0 | 51.8 | 93.8 | 20.9 | 7.4 | 637 | +4.3 / +9.8 / +8.4 |
+| twelve, K≥6 cash | 66.5 | 42.0 | 93.8 | 15.5 | 7.4 | 601 | +2.1 / +1.7 / +8.4 |
+| +BRKB, no gate | 66.6 | 50.0 | 84.1 | 18.9 | 6.7 | 657 | +6.1 / +10.4 / +8.5 |
+| +BRKB, K≥6 cash | 61.6 | 41.0 | 84.1 | 13.9 | 6.7 | 621 | +4.0 / +2.8 / +8.5 |
+| +BRKB, K≥7 cash | 61.7 | 41.1 | 84.1 | 13.8 | 6.7 | 622 | |
+
+**4. Why it costs return: dilution, not idle cash.** Average cash is unchanged (36.8% → 35.7%).
+BRKB takes a 1/13 slice of every morning's pot, every other name's orders shrink accordingly, and
+every other name's P&L falls ~12% (total −$2.4m). BRKB itself earns **+$343k on 20 fills/yr** —
+profitable, but at 17% vol its premium per dollar is a fraction of the others' ($0.8–2.4m each).
+Net −5.4pp full, **−9.7pp test**.
+
+**Reading.** BRKB buys ~2pp of drawdown (20.9 → 18.9) for ~5pp of return. The K≥6 cash gate
+(§3.83) buys more drawdown (→15.5) for the same return cost, with the test half untouched; on top
+of the gate, BRKB adds 1.6pp of drawdown cut for another ~5pp. Not recommended on 2024–26 evidence.
+The case BRKB was proposed for is a 2022-style bear; that test needs its 2021–23 file.
