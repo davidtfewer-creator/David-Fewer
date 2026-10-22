@@ -4640,3 +4640,33 @@ before writing anything. `bear_brkb.py`, ATH gate on:
 slowly, later, and on different days, which is the path a dip-buyer with a 50-day stop loses on.
 The sleeve lost money in 2022 in every arm. **Verdict: no BRK.B** — dilutive in 2024–26 (§3.85),
 no help in 2022.
+
+### 3.87 Toward a 20-name managed book: does the model trade better after a big drop? (22 Oct)
+
+User: a 20-name **managed book** — the twelve live, eight on the bench, include flags switched in
+the workbook — and *"some stocks perform well and are volatile after a significant drop (e.g.
+PLTR, RKLB)"*, asking for roster and admission-gate options. `post_drop.py` / `post_drop.json`:
+every name run **alone** ($1m, its two sleeves, 50-day stop, ATH gate on, PM rule on 2024–26),
+each trade tagged with the name's drawdown from its trailing 252-session high at entry.
+
+| dd at entry | 24–26 share of days | fwd 60d return | fwd vol | trades | ret/100d held | stop% | 2021–23 ret/100d | stop% |
+|---|---|---|---|---|---|---|---|---|
+| <10% | 36% | 12.6% | 49% | 1764 | 17.3% | 9% | 4.5% | 16% |
+| 10–25% | 28% | 15.4% | 54% | 821 | 18.0% | 10% | 2.7% | 17% |
+| 25–40% | 18% | 15.1% | 59% | 496 | 19.5% | 9% | **−6.0%** | 18% |
+| **>40%** | 18% | **28.1%** | **72%** | 454 | 19.5% | 7% | **20.9%** | 7% |
+
+**The premise holds at the extreme only.** Names >40% off their high had the strongest forward
+returns and ~1.5× the vol (2024–26), and the >40% bucket was the best for the model in *both*
+periods. The 25–40% bucket is the trap in a bear (−6.0%/100d in 2021–23).
+
+**"Wait for stabilisation" is wrong for this model.** Deep (≥25%) trades split by trend at entry:
+below 20dma 23.7%/100d (2024–26) and **31.7%** (2021–23); above 20dma 17.2% and **−1.0%**. Buying
+the wreck while it is still under its short average beats buying the bounce — bear-market rallies
+are where deep names lose.
+
+**Caveats.** The universe was assembled in 2026 by someone who knew which names ran (APLD, AXTI,
+AAOI, LUNR, NVTS lead standalone efficiency); per-name deep samples are small (PLTR 6 trades);
+the 2024–26 high is truncated (files start Apr 2024); 2021–23 covers only the 12 bear files.
+
+Roster and gate options were put to the user (see chat); nothing is modelled yet.
