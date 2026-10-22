@@ -80,14 +80,18 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
 
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
-             name_cap=None, stop_days=None,
+             name_cap=None, stop_days=None, gate_cash=False,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
              reentry=None, regime_exit=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     weights: dict name -> relative weight (renormalised over the sleeves free each
-    morning; equal when None). stop_days: calendar-day time stop -- an int for
+    morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
+    no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
+    having it re-divided over the sleeves still bidding -- so gating most of the
+    book does not concentrate the remaining capital into the few names left.
+    Default False is the original behaviour. stop_days: calendar-day time stop -- an int for
     every name, or {name: days} (missing names keep STOP_DAYS). Exits only; the
     engine's bid series do not depend on it, so data can be loaded once.
     name_cap: {name: max dollars per order}, a hard
@@ -243,6 +247,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
 
         # -------- morning: who is free and has a live bid?
         active = []
+        gated_free = []
         re_open = sum(1 for s in sleeves if s['kind'] == 'R' and s['holding'])
         for s in sleeves:
             nd = data[s['name']]
@@ -267,12 +272,14 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     continue
             else:
                 bid = nd[s['bids']][i]
-            paused = (no_buy and d in no_buy.get(s['name'], ())) or halted
+            gate_pause = bool(no_buy and d in no_buy.get(s['name'], ()))
+            paused = gate_pause or halted
+            other_pause = bool(halted)
             if (deep_excl is not None and bid is not None and i > 0
                     and bid < nd['C'][i - 1] * (1 - deep_excl)):
-                paused = True
+                paused = other_pause = True
             if excl_fn is not None and bid is not None and i > 0 and excl_fn(s['name'], i, bid):
-                paused = True
+                paused = other_pause = True
             if bid_fn is not None and bid is not None and i > 0:
                 bid = bid_fn(s['name'], i, bid)
             s['_i'] = i
@@ -283,9 +290,13 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 sleeve_days += 1
                 if s['_bid'] is not None:
                     active.append(s)
+                elif (gate_cash and gate_pause and not other_pause
+                      and bid is not None and i > 0):
+                    gated_free.append(s)
         free_days += len(active)
         if mode == 'pooled' and active:
-            wsum = sum(s['_w'] for s in active)
+            wsum = sum(s['_w'] for s in active) + sum(x['w'] for x in gated_free)
+            assert not (gate_cash and name_cap), 'gate_cash is not wired for name_cap'
             bmul = breaker[2] if (breaker is not None and bk_tripped) else 1.0
             if name_cap:
                 # Water-fill: a sleeve whose name carries a hard dollar cap takes the

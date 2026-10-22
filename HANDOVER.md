@@ -4475,3 +4475,56 @@ needs most of the book below trend before it switches on, by which point most of
 the breadth gate (cheap, weak) and the per-name gate (strong, costly in good years) — a judgement
 on how likely a 2022 is, not something the backtest can make. Artifacts: `bear_stop.py`,
 `bear_breadth.py`, `gate_normal_cost.py` and their JSON; `data_bear/` holds the restored files.
+
+### 3.83 The twelve through 2022 with the breadth gate — and holding the gated cash, which makes the gate a real drawdown reducer (22 Oct)
+
+User: *"run the 12 stock book with the breadth gate in 2022"*. Eleven of the twelve (no NVDA data
+for 2021–23, §3.82), 50-day stop, vectors fitted on 2024–26, no pre-market rule. `bear12_breadth.py`.
+
+**Breadth in 2022.** Names below their own 200dma averaged 1.6 of 11 in January and 8.2 in October.
+The gate was armed 6 Apr – 7 Nov 2022 at K≥5 (149 sessions) and 19 May – 7 Nov at K≥6 (119).
+
+| arm | 2022 | Aug21–Jun23 | maxDD | worst month | fills | stops |
+|---|---|---|---|---|---|---|
+| no gate | −8.6% | +5.0% | 19.6% | −12.7% (Jun) | 687 | 100 |
+| K≥5 | −5.5% | +8.6% | 18.4% | −11.5% | 502 | 77 |
+| K≥6 | −6.2% | +8.0% | 18.7% | −11.3% | 536 | 79 |
+
+Same drawdown peak (30 Mar 2022) in every arm; the gated arms bottom earlier (14 Jul vs 30 Sep) and
+recover ~3 weeks sooner (24 Jan / 1 Feb 2023 vs 14 Feb). The return gain is real, the drawdown cut
+is not (≈1pp).
+
+**Why it is weak: crowding.** The pooled book hands a gated name's share of the morning pot to the
+names still bidding. With 6–8 names gated, the pot lands on the 3–5 names still above trend —
+which in 2022 were the next ones to break. GM went −$221k → −$293k (K≥5) / −$362k (K≥6), VRT
+−$105k → −$227k, AVGO −$3k → −$121k. The gate stops buying the losers and doubles up on the next.
+
+**Fix tested: hold the gated share in cash.** New `book_sim` option `gate_cash=True`: a sleeve
+paused only by the gate keeps its slice of the pot out of the market instead of handing it on
+(halts and exclusions still redistribute; not wired for `name_cap`). Default unchanged — regression
+reproduces 72.0% / 20.9%. `gate_cash_test.py`.
+
+| arm | 2024–26 full | test | maxDD | test DD | 2022 | Aug21–Jun23 | 2022 maxDD |
+|---|---|---|---|---|---|---|---|
+| no gate (current) | 72.0 | 93.8 | 20.9 | 7.4 | −8.6% | +5.0% | 19.6% |
+| K≥6, redistribute | 71.0 | 93.8 | 18.8 | 7.4 | −6.2% | +8.0% | 18.7% |
+| **K≥6, hold cash** | **66.5** | **93.8** | **15.5** | **7.4** | **−7.2%** | **+5.8%** | **13.1%** |
+| K≥5, hold cash | — | — | — | — | −8.5% | +4.2% | 13.0% |
+| per-name, redistribute | 64.7 | 90.5 | 23.6 | 7.8 | +1.1% | +12.0% | 14.2% |
+| per-name, hold cash | 59.6 | 80.4 | 16.3 | 7.5 | −3.7% | +3.6% | 10.2% |
+
+(2024–26 is the twelve with NVDA; 2022 the eleven.)
+
+**Reading.** Holding the cash turns the breadth gate from "cheap and weak" into a drawdown reducer
+in both regimes: **2022 maxDD 19.6 → 13.1%, 2024–26 maxDD 20.9 → 15.5%**, test half untouched
+(93.8%, 7.4% DD — the gate never fires there). The price is return in the episodes where it
+does fire: −5.5pp on the 2024–26 full period, and in 2022 it gives back the redistribute arm's
+return gain (−7.2% vs −6.2%). It is close to the user's stated "~60%+ with a significantly lower
+drawdown" (§3.80) without changing the roster.
+
+**Caveats.** (1) Every 2024–26 drawdown >10% is in the train half (Feb–Apr 2025), so the 2024–26
+DD cut is in-sample; the 2022 cut is the out-of-sample evidence, on one bear. (2) K was chosen on
+2024–26 (§3.65). (3) NVDA is missing from 2022 and fell ~⅔ that year — the no-gate arm would be
+worse with it, and the gate would likely have caught it (it was below its 200dma from spring).
+(4) No pre-market rule in the bear arms. (5) Not yet wired into the workbook or the scripts —
+live, it means leaving the gated names' funds row idle rather than letting Script 1 reallocate.
