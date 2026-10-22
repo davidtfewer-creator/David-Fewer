@@ -4484,7 +4484,7 @@ for 2021–23, §3.82), 50-day stop, vectors fitted on 2024–26, no pre-market 
 **Breadth in 2022.** Names below their own 200dma averaged 1.6 of 11 in January and 8.2 in October.
 The gate was armed 6 Apr – 7 Nov 2022 at K≥5 (149 sessions) and 19 May – 7 Nov at K≥6 (119).
 
-| arm | 2022 | Aug21–Jun23 | maxDD | worst month | fills | stops |
+| arm | 2022 | Jan22–Jun23 | maxDD | worst month | fills | stops |
 |---|---|---|---|---|---|---|
 | no gate | −8.6% | +5.0% | 19.6% | −12.7% (Jun) | 687 | 100 |
 | K≥5 | −5.5% | +8.6% | 18.4% | −11.5% | 502 | 77 |
@@ -4504,7 +4504,7 @@ paused only by the gate keeps its slice of the pot out of the market instead of 
 (halts and exclusions still redistribute; not wired for `name_cap`). Default unchanged — regression
 reproduces 72.0% / 20.9%. `gate_cash_test.py`.
 
-| arm | 2024–26 full | test | maxDD | test DD | 2022 | Aug21–Jun23 | 2022 maxDD |
+| arm | 2024–26 full | test | maxDD | test DD | 2022 | Jan22–Jun23 | 2022 maxDD |
 |---|---|---|---|---|---|---|---|
 | no gate (current) | 72.0 | 93.8 | 20.9 | 7.4 | −8.6% | +5.0% | 19.6% |
 | K≥6, redistribute | 71.0 | 93.8 | 18.8 | 7.4 | −6.2% | +8.0% | 18.7% |
@@ -4528,3 +4528,35 @@ DD cut is in-sample; the 2022 cut is the out-of-sample evidence, on one bear. (2
 worse with it, and the gate would likely have caught it (it was below its 200dma from spring).
 (4) No pre-market rule in the bear arms. (5) Not yet wired into the workbook or the scripts —
 live, it means leaving the gated names' funds row idle rather than letting Script 1 reallocate.
+
+### 3.84 Recap: nine vs twelve, every gate, both regimes (22 Oct)
+
+User asked for one comparison. `recap_9v12.py` / `recap_9v12.json`. Capital $6.9m, 50-day stop.
+Breadth K scaled to book size (nine: K≥4/5; twelve: K≥5/6). "Cash" = `gate_cash=True` (§3.83).
+2024–26 includes the PM rule; the bear window is **Jan 2022 – Jun 2023** (sim starts 1 Jan 2022 —
+§3.83's column was mislabelled Aug21 and is corrected), no PM rule, no NVDA (so twelve = eleven).
+
+| book / gate | 24–26 full | test | maxDD | test DD | fills/yr | 2022 | Jan22–Jun23 | 2022 maxDD | bear fills/yr |
+|---|---|---|---|---|---|---|---|---|---|
+| nine, no gate (live) | 73.2 | 104.6 | 24.2 | 9.6 | 529 | −13.8 | +0.8 | 23.7 | 413 |
+| nine, K≥5 | 71.5 | 104.6 | 19.5 | 9.6 | 500 | −8.7 | +7.5 | 22.1 | 302 |
+| nine, K≥5 cash | 66.6 | 104.6 | 18.5 | 9.6 | 500 | −12.5 | +2.7 | 16.6 | 302 |
+| nine, K≥4 | 68.9 | 105.1 | 23.0 | 9.6 | 499 | +1.7 | +17.8 | 15.7 | 261 |
+| nine, K≥4 cash | 66.6 | 104.6 | 18.5 | 9.6 | 500 | −8.1 | +4.2 | 14.2 | 261 |
+| nine, per-name | 62.7 | 103.9 | 29.2 | 9.8 | 460 | −1.5 | +12.3 | 16.8 | 238 |
+| nine, per-name cash | 60.9 | 94.4 | 20.0 | 9.6 | 461 | −7.3 | +1.3 | 14.2 | 238 |
+| twelve, no gate | 72.0 | 93.8 | 20.9 | 7.4 | 637 | −8.6 | +5.0 | 19.6 | 462 |
+| twelve, K≥5 or K≥6 | 71.0 | 93.8 | 18.8 | 7.4 | 601 | −5.5 / −6.2 | +8.6 / +8.0 | 18.4 / 18.7 | 337 / 360 |
+| **twelve, K≥6 cash** | **66.5** | **93.8** | **15.5** | **7.4** | **601** | **−7.2** | **+5.8** | **13.1** | **360** |
+| twelve, per-name | 64.7 | 90.5 | 23.6 | 7.8 | 555 | +1.1 | +12.0 | 14.2 | 278 |
+| twelve, per-name cash | 59.6 | 80.4 | 16.3 | 7.5 | 555 | −3.7 | +3.6 | 10.2 | 278 |
+
+In 2024–26 the twelve's K≥5 and K≥6 gates fire on the same days, so they are identical there.
+
+**Reading.** (1) Twelve vs nine, ungated: −1.2pp full return, −3.3pp drawdown, +108 fills/yr; in
+2022 the twelve loses 5pp less (−8.6 vs −13.8%) with a 4pp smaller drawdown — RTX and DE earn
+their place mostly in the bear. The nine's higher test-half return (104.6 vs 93.8) is the AI
+concentration paying in an AI rally. (2) The nine's K≥4 bear result (+1.7%) next to K≥5 (−8.7%)
+is a one-step 10pp swing — the single-cell-spike tell; do not read K≥4 as a winner. (3) Across
+both books and both regimes, holding the gated cash is what cuts drawdown; redistributing mostly
+moves return. Twelve + K≥6 cash is the best drawdown profile that keeps the test half intact.
