@@ -4804,3 +4804,29 @@ every rebound name was already ≥30–35% off its high, so any X up to ~35% adm
 same as no rule. Higher X only shuts names out. In E, **the breadth gate is the real admission
 test**; the deep-drop rule adds nothing in 2024–26. All of this is one episode; in a long bear
 (2022) X could matter, since names fall at different speeds.
+
+### 3.92 Decision: breadth + E without APLD/AAOI; were their runs isolated, and what fills the last two slots (22 Oct)
+
+**User decision:** breadth K≥6 + E, **APLD and AAOI removed** (*"if [their] runs were isolated
+events I would tend to remove them as they are skewing the numbers"*). Bench = PLTR, TSLA, RKLB
+(drop-admitted X40 — §3.91: barely matters) + NEM, LEN, DLTR (always eligible). 18 names.
+`e_final_check.py` / `e_final_check.json`.
+
+**1. "Isolated" checked — only half true.** Standalone ($1m alone), share of each name's trade P&L
+from its best three months: **APLD 43%** (+$5.7m total — among the *least* concentrated: it earned
+steadily through a 4 → 26 run), **AAOI 79%**; PLTR 93%, RKLB 176%, NEM 56%, DLTR 33%, LEN 70%.
+The real issue is selection, not timing: APLD +538%, AAOI +628% — but RKLB +1622%, PLTR +451% and
+AXTI +1181% were picked with the same hindsight. Removing the two lowers the bias; it does not
+remove it. **And under E they barely move the result anyway** (APLD +$160k, AAOI −$74k as single
+additions): the skew was in the overbooked D+A version (§3.88), where APLD alone was +$1.1–1.3m.
+
+**2. The eighteen:** 73.4 full / 54.2 train / **94.1 test** / **13.1% maxDD** / 7.5 test DD / 624
+fills — against the live twelve 71.3 / 50.1 / 94.3 / 20.5 / 7.5 / 633.
+
+**3. Slots 19–20.** Single additions to the eighteen range 71.9–74.5 full, 12.5–14.7% DD — under
+E the bench only trades in the one gate episode, so a slot changes little. Help on both return
+and DD: **RKT** (+0.9pp, 12.5%), APLD, **LUNR** (+0.5, 12.7%), **TEAM** (+0.3, 13.3%); hurt: UAL,
+NVTS, AXTI, FCX, EXPE, HUM, AAOI, and CEG on DD. Pairs: **+RKT+LUNR 74.6 / 94.0 / 12.3%**,
++RKT+TEAM 74.5 / 94.0 / 12.7%, +TEAM+LUNR 74.1 / 94.1 / 13.0%. RKT (beta 0.15) and TEAM (0.17) are
+diversifiers; LUNR (0.84) is another small-cap AI-adjacent multi-bagger like the two removed.
+All differences are one episode wide.
