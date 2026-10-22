@@ -4782,3 +4782,25 @@ live book and leans more on APLD/AAOI.
 and its drawdown cut comes from what the bench did then (NEM rode the 2025 gold rally). The test
 half cannot confirm it because the gate never fires there. The 2022 run (eleven core + bench bear
 files: RKLB, NEM, LEN in Box; PLTR, TSLA, DLTR, AAOI needed) is the out-of-sample check.
+
+### 3.91 The deep-drop threshold under breadth + E barely matters (22 Oct)
+
+User: was 40% checked against 30% or others under E? (§3.88's grid was the overbook version.)
+`managed20_e_sweep.py` / `.json`: X 20–50% × N 40/60/120 for the rebound names, diversifiers
+always eligible, plus "always eligible", with and without APLD/AAOI.
+
+| X | full | test | maxDD | rebound P&L |
+|---|---|---|---|---|
+| 20–30% (= always eligible) | 74.1 | 94.1 | 13.9 | +$634k |
+| 35% | 74.2 | 94.1 | 13.8 | +$646k |
+| 40% (§3.90) | 73.9 | 94.1 | 13.5 | +$581k |
+| 45% | 72.7 | 94.1 | 14.0 | +$401k (PLTR never admitted) |
+| 50% | 72.7 | 94.1 | 13.6 | +$357k (PLTR, RKLB never admitted) |
+
+Without APLD/AAOI: 71.8–73.8 full, 13.0–13.6% DD, same shape. **N makes no difference at all.**
+
+**Why:** under E the bench is funded only while the breadth gate is on (Feb–Apr 2025). By then
+every rebound name was already ≥30–35% off its high, so any X up to ~35% admits all of them — the
+same as no rule. Higher X only shuts names out. In E, **the breadth gate is the real admission
+test**; the deep-drop rule adds nothing in 2024–26. All of this is one episode; in a long bear
+(2022) X could matter, since names fall at different speeds.
