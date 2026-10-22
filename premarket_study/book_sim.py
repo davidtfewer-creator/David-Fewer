@@ -78,14 +78,30 @@ def load_all(engine_kwargs_per_name=None, names=None, params_override=None):
     return data, sleeves, cal
 
 
+TIER2_MIN = 10_000      # a tier-2 order squeezed below this by the day's cash is not placed
+
+
 def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              no_buy=None, collect_trades=False, weights=None, cap_frac=None,
              name_cap=None, stop_days=None, gate_cash=False,
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
-             reentry=None, regime_exit=None):
+             reentry=None, regime_exit=None, tier2=None, tier2_first=False):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
+    tier2: a set of names that bid as a SECOND TIER (the managed-book bench,
+    HANDOVER 3.88): first-tier orders are sized exactly as if the tier-2 names
+    did not exist (cash * w / first-tier weight sum), tier-2 orders are sized
+    as members of the whole pool (cash * w / all-bidder weight sum) -- so the
+    morning's orders overbook cash -- and fills are processed first tier first:
+    a tier-2 fill takes min(its order, cash left after the day's earlier fills)
+    and is skipped when that is nothing. Cash never goes negative. Assumes the
+    core's fills come first intraday, which favours the core. None (default)
+    is the original single-tier pool. Pooled mode only; not wired for name_cap
+    or gate_cash. tier2_first=True is the pessimistic bound on that intraday
+    assumption: the same orders, but tier-2 fills are processed FIRST and the
+    first tier takes whatever cash is left. t2_cut / t2_skip in the result count
+    the fills squeezed (filled smaller) or skipped for want of cash.
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
     no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
@@ -199,6 +215,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     cash_curve = []
     trades = []
     fills = 0
+    t2_cut = t2_skip = 0
     free_days = 0
     sleeve_days = 0
     bk_peak, bk_tripped, bk_trips, bk_days = capital, False, 0, 0
@@ -297,6 +314,9 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
         if mode == 'pooled' and active:
             wsum = sum(s['_w'] for s in active) + sum(x['w'] for x in gated_free)
             assert not (gate_cash and name_cap), 'gate_cash is not wired for name_cap'
+            if tier2:
+                assert not (name_cap or gate_cash), 'tier2 is not wired for name_cap/gate_cash'
+                w1 = sum(s['_w'] for s in active if s['name'] not in tier2)
             bmul = breaker[2] if (breaker is not None and bk_tripped) else 1.0
             if name_cap:
                 # Water-fill: a sleeve whose name carries a hard dollar cap takes the
@@ -325,7 +345,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                         x['_alloc'] = a
             else:
                 for s in active:
-                    a = cash * s['_w'] / wsum * bmul
+                    a = cash * s['_w'] / (w1 if (tier2 and s['name'] not in tier2) else wsum) * bmul
                     if cap_frac is not None:
                         a = min(a, cap_frac * cash)
                     s['_alloc'] = a
@@ -421,7 +441,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                                        stopped=(px < s['target'] - 1e-12)))
                 s.update(holding=False, shares=0.0, target=None, entry=None)
 
-        # -------- fills for free sleeves
+        # -------- fills for free sleeves (tier 2 last, from what is left)
+        if tier2:
+            first = [s for s in active if (s['name'] in tier2) == tier2_first]
+            active = first + [s for s in active if s not in first]
         for s in active:
             if s['holding']:
                 continue
@@ -443,6 +466,13 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     if touch is None or touch > sd_tau:
                         continue                # touched only after the trigger
             budget = s['_alloc'] if mode == 'pooled' else s['own']
+            if tier2 and ((s['name'] in tier2) != tier2_first):
+                if budget > cash:
+                    budget = cash
+                    if budget < TIER2_MIN:
+                        t2_skip += 1
+                        continue
+                    t2_cut += 1
             if budget <= 0:
                 continue
             px = min(bid, nd['O'][i])          # limit above the open fills at the open
@@ -539,7 +569,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 bk_trips=bk_trips, bk_days=bk_days,
                 hh_days=hh_days, frac_series=frac_series,
                 sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars,
-                we_exits=we_exits)
+                we_exits=we_exits, t2_cut=t2_cut, t2_skip=t2_skip)
 
 
 def report(label, r):

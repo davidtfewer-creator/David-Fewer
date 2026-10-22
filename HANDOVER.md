@@ -4670,3 +4670,48 @@ AAOI, LUNR, NVTS lead standalone efficiency); per-name deep samples are small (P
 the 2024–26 high is truncated (files start Apr 2024); 2021–23 covers only the 12 bear files.
 
 Roster and gate options were put to the user (see chat); nothing is modelled yet.
+
+### 3.88 The 20-name managed book, D + A: core first, bench admitted on deep drops (22 Oct)
+
+User: *"Ignore 2022 for the moment. model D + A first"*. 2024–26 only. Core = the twelve (PM rule,
+ATH gate on, 50-day stop); bench = PLTR TSLA RKLB APLD AAOI (rebound) + NEM LEN DLTR (diversifiers;
+fitted vectors — the rest neutral). `managed20.py`, `managed20_check.py` and their JSON.
+
+**D in the simulator — `book_sim(tier2=…)`, default off.** The pooled book already commits all
+morning cash to orders; the ~37% idle cash is unfilled orders. So "core first" is modelled as
+**overbooking with core priority**: core orders sized exactly as without the bench, bench orders
+sized as pool members, bench fills only from cash left after the core's fills that day (orders
+squeezed below $10k skipped). `tier2_first=True` is the pessimistic bound (bench fills first).
+Regression: `tier2=None` reproduces the twelve.
+
+**A — `managed20.admitted(X, N, R)`**: a bench name may bid while admitted; admitted when its prior
+close is ≥X below its trailing 252-session high, for N sessions after the last such day, optionally
+ending when it comes back within R of the high.
+
+| arm | full | train | test | maxDD | test DD | fills/yr | bench P&L share |
+|---|---|---|---|---|---|---|---|
+| twelve (live) | 71.3 | 50.1 | 94.3 | 20.5 | 7.5 | 633 | — |
+| twenty, flat pool, all on | 68.2 | 60.0 | 76.5 | 18.0 | 7.5 | 867 | 23% |
+| D only (all on, core first) | 77.0 | 63.9 | 90.4 | 20.0 | 8.1 | 864 | 17% |
+| A only, X40 N60 | 78.4 | 60.8 | 97.0 | 18.0 | 6.7 | 734 | 13% |
+| **D+A, X40 N60** | **81.4** | 59.9 | **104.6** | 19.6 | 6.7 | 732 | 10% |
+| **D+A, rebound names gated, diversifiers always on** | **81.6** | 63.2 | **101.0** | **17.9** | **6.2** | **784** | 14% |
+
+**It is a plateau, not a spike.** Across X 30/40/50 × N 40/60/120 × R none/15%, D+A runs 76–83%
+full and 98–109% test; the recovery exit (R15) is slightly worse everywhere; N barely matters.
+
+**The ordering assumption is nearly irrelevant.** Over 2.3 years only 1–9 bench fills were
+squeezed or skipped for cash; with bench fills FIRST the result is the same or marginally better
+(82.7 / 82.4). The core's orders almost never all fill on one day, so the overbook is nearly
+always funded.
+
+**But the return uplift leans on two hindsight names.** Bench P&L: APLD +$1.27m, AAOI +$0.68m,
+DLTR +$0.40m, TSLA +$0.35m, PLTR +$0.35m, LEN +$0.06m, NEM 0 (never fell 40%), **RKLB −$0.79m**.
+Without APLD and AAOI: **73.7–74.4% full, 89–92% test, 17.7–19.4% DD, 686–739 fills** — the
+structure alone is roughly return-neutral against the twelve, a little better on drawdown, and
+adds ~50–100 fills/yr. Dropping RKLB helps in every cut (84.6 all-gated).
+
+**Reading.** D+A is the right structure for a managed book: no dilution of the core (unlike the
+flat pool, −2.8pp, or BRKB §3.85), bench cash comes from orders that would not have filled, and the
+gate is not finely tuned. How much it adds depends on the bench, and the two names that make the
+headline were picked by someone who knew they ran. 2022 not yet tested (user's call).
