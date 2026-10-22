@@ -87,7 +87,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              date_lo=None, date_hi=None, breaker=None, price_stop=None,
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
-             reentry=None, regime_exit=None, tier2=None, tier2_first=False):
+             reentry=None, regime_exit=None, tier2=None, tier2_first=False,
+             tier2_cash=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     tier2: a set of names that bid as a SECOND TIER (the managed-book bench,
     HANDOVER 3.88): first-tier orders are sized exactly as if the tier-2 names
@@ -102,6 +103,17 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     assumption: the same orders, but tier-2 fills are processed FIRST and the
     first tier takes whatever cash is left. t2_cut / t2_skip in the result count
     the fills squeezed (filled smaller) or skipped for want of cash.
+    tier2_cash: the CASH-ACCOUNT version (HANDOVER 3.89) -- the morning's orders
+    may not exceed cash, so the bench is funded from the core's orders instead
+    of on top of them, and only on mornings when both tiers are bidding:
+      ('slice', b)  up to a fraction b of the morning cash goes to the bench,
+                    the core splits the rest;
+      ('cap', c)    a core order above c x yesterday's equity is cut to that,
+                    and the excess funds the bench; excess the bench does not
+                    use goes back to the orders it came from.
+    Each bench order is also held to its natural pool share (cash * w / all
+    bidders' weight). Orders then sum to the morning cash exactly, so fill
+    order within the day cannot matter. None = the overbooking version.
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
     no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
@@ -349,6 +361,26 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     if cap_frac is not None:
                         a = min(a, cap_frac * cash)
                     s['_alloc'] = a
+                core = [s for s in active if tier2 and s['name'] not in tier2]
+                bench = [s for s in active if tier2 and s['name'] in tier2]
+                if tier2_cash is not None and core and bench:
+                    kind, v = tier2_cash
+                    pot = cash * bmul
+                    w2 = sum(s['_w'] for s in bench)
+                    if kind == 'slice':
+                        room = v * pot
+                    else:
+                        lim = v * (equity_curve[-1] if equity_curve else capital)
+                        cut = {id(s): max(0.0, s['_alloc'] - lim) for s in core}
+                        room = sum(cut.values())
+                    for s in bench:
+                        s['_alloc'] = min(pot * s['_w'] / wsum, room * s['_w'] / w2)
+                    used = sum(s['_alloc'] for s in bench)
+                    for s in core:
+                        if kind == 'slice':
+                            s['_alloc'] = (pot - used) * s['_w'] / w1
+                        elif cut[id(s)] > 0:
+                            s['_alloc'] = lim + (room - used) * cut[id(s)] / room
 
         # -------- intraday fast-crash stand-down: today's trigger time (if any)
         sd_tau = None

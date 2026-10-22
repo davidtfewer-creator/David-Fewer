@@ -4715,3 +4715,33 @@ adds ~50–100 fills/yr. Dropping RKLB helps in every cut (84.6 all-gated).
 flat pool, −2.8pp, or BRKB §3.85), bench cash comes from orders that would not have filled, and the
 gate is not finely tuned. How much it adds depends on the bench, and the two names that make the
 headline were picked by someone who knew they ran. 2022 not yet tested (user's call).
+
+### 3.89 The managed book in a cash account: the bench must be funded from the core, and the gain mostly goes (22 Oct)
+
+User: keep the **cash account** — IBKR will not accept orders cash does not cover, so §3.88's
+overbooking is unavailable. New `book_sim(tier2_cash=…)` (default None = overbooking): on mornings
+when an admitted bench name bids, the bench is funded **from** the core's orders, so orders sum to
+the morning cash exactly and fill order within the day cannot matter.
+- `('slice', b)`: up to b of the morning cash to the bench, core splits the rest;
+- `('cap', c)`: core orders above c × equity are cut and the excess funds the bench.
+`managed20_cash.py` / `managed20_cash.json`; bench X40 N60 as §3.88.
+
+| arm (2024–26) | full | train | test | maxDD | test DD | fills/yr |
+|---|---|---|---|---|---|---|
+| twelve (live) | 71.3 | 50.1 | 94.3 | 20.5 | 7.5 | 633 |
+| rebound-gated, overbook (§3.88, needs margin) | 81.6 | 63.2 | 101.0 | 17.9 | 6.2 | 784 |
+| rebound-gated, slice 10 / 20 / 30% | 73.9 / 74.2 / 74.7 | 54–59 | 94.7 / 91.9 / 91.0 | 19.0 / 18.0 / 17.1 | 6.3–6.4 | 786 |
+| rebound-gated, core cap 5–15% | 71.8–73.5 | 53–55 | 90.2–94.2 | 20.2–20.5 | 6.5–7.6 | 640–713 |
+| all-gated, slice 10 / 20 / 30% | 73.3 / 75.6 / 76.7 | 54–58 | 93.6 / 96.0 / 96.7 | 19.5 / 18.9 / 18.6 | 6.7–6.9 | 734 |
+| no APLD/AAOI, slice 10 / 20 / 30% | 70.8 / 68.8 / 68.7 | 53–56 | 89.3 / 83.0 / 81.3 | 18.9 / 17.8 / 16.9 | 6.1–6.4 | 741 |
+
+**The cap version barely trades the bench** (APLD 1 trade, AAOI 1, against 57 / 48 overbooked): core
+orders rarely exceed the cap on the days a bench name is admitted, so there is seldom any excess.
+**The slice version trades the bench fully but at ~70% of the overbooked size**, and shrinks the
+core's orders on those mornings — the dilution §3.85 found with BRKB.
+
+**Reading.** §3.88's uplift came from **putting idle cash to work** — orders that would not have
+filled — which a cash account cannot do. Funded from the core instead, the bench must out-earn
+the core per dollar, and only APLD/AAOI do: with them, +2–5pp and ~1–3pp less drawdown; without
+them, **−0.5 to −2.6pp**, a little less drawdown, more fills. In a cash account the managed bench
+is a rotation and fill-count tool, not a return engine.
