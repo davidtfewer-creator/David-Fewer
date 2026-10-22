@@ -4597,3 +4597,46 @@ Net −5.4pp full, **−9.7pp test**.
 (§3.83) buys more drawdown (→15.5) for the same return cost, with the test half untouched; on top
 of the gate, BRKB adds 1.6pp of drawdown cut for another ~5pp. Not recommended on 2024–26 evidence.
 The case BRKB was proposed for is a 2022-style bear; that test needs its 2021–23 file.
+
+### 3.86 ATH gate on: every table moves ≤1pp; BRK.B through 2022 does not hedge (22 Oct)
+
+**1. User: "Does the above table also include the PM gate and ATH gate?"** PM rule: yes, every
+2024–26 run since §3.70 (`excl_fn=pm_rule_for`); the bear runs have none (no cache). **ATH gate:
+no — §3.83–3.85 ran with it OFF**, though the live workbook has it ON (`Active Trading!M7 = 0`,
+third MIN term in Dashboard C/E). `load_all` and `bear12_breadth.build` apply it only when
+`ath_target_guard` is passed. `ath_rerun.py` re-runs every table both ways; the OFF arm
+reproduces §3.84/§3.85 exactly. With it ON (live config):
+
+| | 24–26 full | test | maxDD | fills/yr | 2022 | 2022 maxDD |
+|---|---|---|---|---|---|---|
+| nine, no gate | 73.0 (73.2) | 104.4 | 24.2 | 528 | −14.2 (−13.8) | 24.1 |
+| twelve, no gate | 71.3 (72.0) | 94.3 | 20.5 | 633 | −8.9 (−8.6) | 19.7 |
+| twelve, K≥6 cash | 65.9 (66.5) | 94.3 | 15.1 | 596 | −7.5 (−7.2) | 13.2 |
+| twelve, per-name cash | 58.8 (59.6) | 80.5 | 15.9 | 551 | −4.0 (−3.7) | 10.5 |
+| +BRKB, no gate | 66.0 (66.6) | 84.5 | 18.6 | 653 | | |
+| +BRKB, K≥6 cash | 61.1 (61.6) | 84.4 | 13.6 | 617 | | |
+
+(gate-off figures in brackets; the 2022 columns are the eleven). Every conclusion stands.
+
+**2. BRK.B through 2022.** User uploaded 2021–23 BRK.B and NVDA as **1-minute** files to the bear
+folder (409265250781). New `ops/box_1min_to_5min.py` resamples a Box extraction to start-labelled
+5-minute bars (BRKB: 215,170 → 52,540 bars, 504 sessions, 25 Oct 2021 – 25 Oct 2023, 77.8 RTH
+bars/session). **NVDA_1min.xlsx (10 MB) is too large for the Box connector** — the call died
+before writing anything. `bear_brkb.py`, ATH gate on:
+
+| | 2022 | Jan22–Jun23 | maxDD | BRKB 2022 realised |
+|---|---|---|---|---|
+| eleven, no gate | −8.9% | +4.6% | 19.7% | |
+| +BRKB, no gate | −8.8% | +4.7% | 20.1% | −$55k |
+| eleven, K≥6 cash | −7.5% | +5.5% | 13.2% | |
+| +BRKB, K≥6 cash | −8.2% | +4.8% | 14.0% | −$68k |
+| eleven, per-name cash | −4.0% | +3.2% | 10.5% | |
+| +BRKB, per-name cash | −4.4% | +3.3% | 10.7% | −$67k |
+
+(+BRKB K≥7 cash: −9.9%, 18.8% DD — one step of K moves DD 5pp, the usual fragility.)
+
+**Why the hedge fails here:** BRK.B ended 2022 +3.3%, but fell **27% peak-to-trough (28 Mar – 12 Oct)**
+— close to RTX's 23%. Low daily correlation with the chips does not mean it didn't fall; it fell
+slowly, later, and on different days, which is the path a dip-buyer with a 50-day stop loses on.
+The sleeve lost money in 2022 in every arm. **Verdict: no BRK.B** — dilutive in 2024–26 (§3.85),
+no help in 2022.
