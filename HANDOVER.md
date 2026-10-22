@@ -4745,3 +4745,40 @@ filled — which a cash account cannot do. Funded from the core instead, the ben
 the core per dollar, and only APLD/AAOI do: with them, +2–5pp and ~1–3pp less drawdown; without
 them, **−0.5 to −2.6pp**, a little less drawdown, more fills. In a cash account the managed bench
 is a rotation and fill-count tool, not a return engine.
+
+### 3.90 Option E: lend the gated core's held cash to the bench — cash-account safe, and the best risk profile yet (22 Oct)
+
+User: *"model option E"*. `book_sim`: `tier2` + `gate_cash` together = E. Core orders are sized
+exactly as under the hold-cash gate (§3.83); the cash a gated core sleeve holds back is lent to
+admitted bench orders (each held to one ordinary sleeve's share); the rest stays in cash. Orders
+never exceed cash. Bench admission as §3.88 (X40 N60); bench names are not 200dma-gated.
+Defaults unchanged. `managed20_e.py` / `managed20_e.json`. 2024–26, live config (PM, ATH, 50d).
+
+The breadth gate gates **0%** of core name-days in the test half (it fires only Feb–Apr 2025);
+the per-name 200dma gate gates 15%.
+
+| arm | full | train | test | maxDD | test DD | fills/yr | bench P&L |
+|---|---|---|---|---|---|---|---|
+| twelve, no gate (live) | 71.3 | 50.1 | 94.3 | 20.5 | 7.5 | 633 | |
+| breadth K≥6, hold cash (§3.83) | 65.9 | 40.7 | 94.3 | 15.1 | 7.5 | 596 | |
+| **breadth K≥6 + E** (rebound drop-admitted, diversifiers always) | **73.9** | 55.0 | **94.1** | **13.5** | 7.5 | 631 | +$1.36m |
+| — without APLD/AAOI | 73.4 | 54.2 | 94.1 | 13.1 | 7.5 | 624 | +$1.28m |
+| — without APLD/AAOI/RKLB | 72.3 | 52.1 | 94.1 | 13.3 | 7.5 | 618 | +$1.10m |
+| breadth + E, all bench drop-admitted | 70.6 | 48.8 | 94.3 | 15.2 | 7.5 | 623 | +$0.76m |
+| per-name 200dma, hold cash | 58.8 | 39.0 | 80.5 | 15.9 | 7.5 | 551 | |
+| **per-name + E** (rebound/diversifiers) | 73.4 | 59.7 | 87.6 | **12.0** | 6.5 | 671 | +$3.21m |
+| — without APLD/AAOI | 68.7 | 58.7 | 78.9 | 11.4 | 6.8 | 637 | +$2.05m |
+
+**Breadth + E** is the first managed-book variant that beats the live twelve on every 2024–26 line
+without leaning on the hindsight names: +2.6pp full, test unchanged, **maxDD 20.5 → 13.5%**, and it
+holds without APLD/AAOI (13.1%) and without RKLB. Bench P&L is spread (breadth arm: NEM +$542k,
+RKLB +$194k, APLD +$175k, TSLA +$172k, DLTR +$130k, PLTR +$116k, LEN +$102k, AAOI −$76k); the
+diversifiers must be always eligible (drop-admitting NEM means it never trades: 70.6 / 15.2).
+
+**Per-name + E** has the lowest drawdown (12.0%) but costs 6.7pp of test-half return against the
+live book and leans more on APLD/AAOI.
+
+**Caveat, and it is the main one.** Breadth + E acts in ONE episode — Feb–Apr 2025, train half —
+and its drawdown cut comes from what the bench did then (NEM rode the 2025 gold rally). The test
+half cannot confirm it because the gate never fires there. The 2022 run (eleven core + bench bear
+files: RKLB, NEM, LEN in Box; PLTR, TSLA, DLTR, AAOI needed) is the out-of-sample check.

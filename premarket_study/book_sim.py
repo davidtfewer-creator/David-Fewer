@@ -114,6 +114,13 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     Each bench order is also held to its natural pool share (cash * w / all
     bidders' weight). Orders then sum to the morning cash exactly, so fill
     order within the day cannot matter. None = the overbooking version.
+    tier2 together with gate_cash is OPTION E (HANDOVER 3.90): the cash a gated
+    FIRST-tier sleeve holds back is lent to the admitted tier-2 orders instead
+    of sitting idle -- and that is the bench's only funding. Core orders are
+    sized exactly as under gate_cash alone; each bench order is held to one
+    ordinary sleeve's share (cash * w / (core bidding + core gated weight));
+    what the bench does not use stays in cash. Tier-2 names never hold cash
+    back themselves (their no_buy days are admission, not a gate).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
     no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
@@ -320,14 +327,16 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if s['_bid'] is not None:
                     active.append(s)
                 elif (gate_cash and gate_pause and not other_pause
-                      and bid is not None and i > 0):
+                      and bid is not None and i > 0
+                      and not (tier2 and s['name'] in tier2)):
                     gated_free.append(s)
         free_days += len(active)
         if mode == 'pooled' and active:
             wsum = sum(s['_w'] for s in active) + sum(x['w'] for x in gated_free)
             assert not (gate_cash and name_cap), 'gate_cash is not wired for name_cap'
             if tier2:
-                assert not (name_cap or gate_cash), 'tier2 is not wired for name_cap/gate_cash'
+                assert not name_cap, 'tier2 is not wired for name_cap'
+                assert not (gate_cash and tier2_cash), 'option E is not wired for tier2_cash'
                 w1 = sum(s['_w'] for s in active if s['name'] not in tier2)
             bmul = breaker[2] if (breaker is not None and bk_tripped) else 1.0
             if name_cap:
@@ -381,6 +390,16 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                             s['_alloc'] = (pot - used) * s['_w'] / w1
                         elif cut[id(s)] > 0:
                             s['_alloc'] = lim + (room - used) * cut[id(s)] / room
+                if tier2 and gate_cash:
+                    pot = cash * bmul
+                    wg = sum(x['w'] for x in gated_free)
+                    den = w1 + wg
+                    for s in core:
+                        s['_alloc'] = pot * s['_w'] / den
+                    w2 = sum(s['_w'] for s in bench)
+                    lend = pot * wg / den if den else 0.0
+                    for s in bench:
+                        s['_alloc'] = min(lend * s['_w'] / w2, pot * s['_w'] / den) if den else 0.0
 
         # -------- intraday fast-crash stand-down: today's trigger time (if any)
         sd_tau = None
