@@ -4945,3 +4945,38 @@ fast gate stops the core buying exactly when names first break trend — the dip
 most on (§3.87) — and reopens into bear rallies. Keep the 200dma K≥6 trigger. The October dip is
 the kind of short, AI-led sell-off the core is built to buy; 9 of 2024–26's 10 worst drawdowns
 were 1–2 week dips that recovered (§3.90 table).
+
+### 3.97 A per-name exposure cap: no drawdown tool for the core, a weak bench-funding route — but a needed safety rail on E (23 Oct)
+
+User: test a cap on any one name (VRT is 27% of the live book), and use the freed cash to bring
+in the bench. New `book_sim(exp_cap=c, exp_to='cash'|'core'|'bench')`: each morning a name's new
+orders are cut so its held value (yesterday's close) plus today's orders ≤ c × equity; the cut
+goes to cash, other core bidders, or bench bidders (each ≤ one ordinary sleeve share). The result
+also reports `exp_max` (each name's peak share of equity). Defaults unchanged (regression: 71.3 /
+72.2 reproduced). `cap17.py` / `cap17.json`.
+
+| arm | 24–26 full | test | maxDD | fills | peak name | 2022 | 2022 maxDD |
+|---|---|---|---|---|---|---|---|
+| live twelve, no cap | 71.3 | 94.3 | 20.5 | 633 | MRVL 30% | −13.8% | 23.7% |
+| twelve, cap 10 / 12.5 / 15 / 20% → cash | 63.8 / 68.1 / 69.9 / 71.0 | 85.3 / 90.4 / 92.7 / 93.7 | 21.3 / 20.6 / 20.5 / 20.5 | ~630 | | −13.7 to −13.8% | 23.6–23.7% |
+| chosen (b), no cap | 72.2 | 94.0 | 13.0 | 622 | **NEM 78%** | −13.1% | 17.2% |
+| (b), cap 10 / 12.5 / 15 / 20% → bench | 66.3 / 67.0 / 69.0 / 70.7 | 89.8 / 91.6 / 93.3 / 93.8 | 13.6 / 13.3 / 12.9 / 13.0 | 718 / 681 / 653 / 631 | | −12.9 to −13.1% | 17.0–17.2% |
+| (b), cap 25 / 30% → bench | 70.9 / 71.0 | 94.0 / 94.1 | 13.0 | | NEM 25 / 30% | −13.1% | 17.2% |
+
+(→ core and → cash within ~0.5pp of → bench at every cap.)
+
+1. **A cap does not cut the core's drawdown in the backtest.** The twelve's maxDD is 20.5–21.8% at
+   every cap; it only costs return (−7.5pp at 10%, −1.4pp at 15%, −0.3pp at 20%). The Feb–Apr 2025
+   drawdown is broad, not one name. In 2022 no name exceeded 11%, so the cap never binds. The live
+   VRT weight includes the discretionary tickets (§3.76), which the simulation does not hold.
+2. **As a bench-funding route it is weak.** A tight cap (10%) sends more cash to the bench (718
+   fills/yr) but starves the core's biggest dip-buys; return falls 6pp for no drawdown gain.
+3. **But it exposes a flaw in E, and the cap fixes it.** On **23 Apr 2025** both NEM sleeves bought
+   **$4.02m each (39% of equity each, 78% combined)** and sold the next day for +$342k. With most
+   core sleeves holding or gated, "one ordinary sleeve share" is a large slice of a mostly-cash
+   book. That single trade is ~1.3pp of (b)'s 2024–26 return. **A 25% name cap removes it: (b) +
+   25% cap = 70.9 / 94.0 / 13.0 | −13.1% / 17.2%** — level with the live twelve on 2024–26 return,
+   −7.5pp drawdown in 2024–26 and −6.5pp in 2022.
+
+**Recommendation: (b) with a 25% per-name cap** as a safety rail (freed cash to the bench or held,
+indistinguishable). The cap belongs in Script 1's sizing for every name, core and bench.

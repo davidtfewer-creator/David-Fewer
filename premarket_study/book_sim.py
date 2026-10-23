@@ -88,7 +88,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
              reentry=None, regime_exit=None, tier2=None, tier2_first=False,
-             tier2_cash=None):
+             tier2_cash=None, exp_cap=None, exp_to='cash'):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     tier2: a set of names that bid as a SECOND TIER (the managed-book bench,
     HANDOVER 3.88): first-tier orders are sized exactly as if the tier-2 names
@@ -121,6 +121,14 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     ordinary sleeve's share (cash * w / (core bidding + core gated weight));
     what the bench does not use stays in cash. Tier-2 names never hold cash
     back themselves (their no_buy days are admission, not a gate).
+    exp_cap: per-NAME exposure cap (HANDOVER 3.97), a fraction of yesterday's
+    close equity. Each morning a name's new orders (both sleeves) are cut so its
+    held market value at yesterday's close plus today's orders cannot exceed
+    exp_cap x equity. The cut ("freed") cash goes to exp_to: 'cash' (held),
+    'core' (other first-tier bidders with room, pro rata to weight) or 'bench'
+    (tier-2 bidders with room, each up to one ordinary sleeve share). Orders still
+    sum to at most the morning cash. Pooled mode, not with name_cap. The result
+    carries exp_max {name: peak share of equity} and exp_freed (total cut $).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
     no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
@@ -235,6 +243,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     trades = []
     fills = 0
     t2_cut = t2_skip = 0
+    exp_max, exp_freed = {}, 0.0
     free_days = 0
     sleeve_days = 0
     bk_peak, bk_tripped, bk_trips, bk_days = capital, False, 0, 0
@@ -400,6 +409,52 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                     lend = pot * wg / den if den else 0.0
                     for s in bench:
                         s['_alloc'] = min(lend * s['_w'] / w2, pot * s['_w'] / den) if den else 0.0
+                if exp_cap is not None:
+                    lim = exp_cap * (equity_curve[-1] if equity_curve else capital)
+                    held = {}
+                    for x in sleeves:
+                        if x['holding']:
+                            xd = data[x['name']]
+                            held[x['name']] = (held.get(x['name'], 0.0)
+                                               + x['shares'] * xd['C'][xd['idx'][d] - 1])
+                    room, freed = {}, 0.0
+                    for nm in {x['name'] for x in active}:
+                        mine = [x for x in active if x['name'] == nm]
+                        tot = sum(x['_alloc'] for x in mine)
+                        room[nm] = max(0.0, lim - held.get(nm, 0.0))
+                        if tot > room[nm] + 1e-9:
+                            for x in mine:
+                                x['_alloc'] *= room[nm] / tot
+                            freed += tot - room[nm]
+                            room[nm] = 0.0
+                        else:
+                            room[nm] -= tot
+                    exp_freed += freed
+                    if freed > 0 and exp_to in ('core', 'bench'):
+                        per = cash * bmul / wsum
+                        tgt = [x for x in active
+                               if (exp_to == 'bench') == bool(tier2 and x['name'] in tier2)]
+                        for _ in range(6):
+                            head = {}
+                            for x in tgt:
+                                h = room[x['name']]
+                                if exp_to == 'bench':
+                                    h = min(h, per * x['_w'] - x['_alloc'])
+                                if h > 1e-6:
+                                    head[id(x)] = h
+                            live = [x for x in tgt if id(x) in head]
+                            if not live or freed <= 1e-6:
+                                break
+                            w = sum(x['_w'] for x in live)
+                            given = 0.0
+                            for x in live:
+                                g_ = min(freed * x['_w'] / w, head[id(x)], room[x['name']])
+                                x['_alloc'] += g_
+                                room[x['name']] -= g_
+                                given += g_
+                            freed -= given
+                            if given <= 1e-6:
+                                break
 
         # -------- intraday fast-crash stand-down: today's trigger time (if any)
         sd_tau = None
@@ -592,6 +647,15 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             elif mode == 'captive':
                 mv += s['own']
         equity_curve.append((cash if mode == 'pooled' else 0.0) + mv)
+        if mode == 'pooled' and equity_curve[-1] > 0:
+            nmv = {}
+            for s in sleeves:
+                if s['holding']:
+                    nmv[s['name']] = nmv.get(s['name'], 0.0) + s['shares'] * data[s['name']]['C'][s['_i']]
+            for nm, v in nmv.items():
+                f_ = v / equity_curve[-1]
+                if f_ > exp_max.get(nm, 0.0):
+                    exp_max[nm] = f_
         cash_curve.append(cash if mode == 'pooled' else 0.0)
         prev_mv = mv
         if intraday_sd is not None:
@@ -620,7 +684,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 bk_trips=bk_trips, bk_days=bk_days,
                 hh_days=hh_days, frac_series=frac_series,
                 sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars,
-                we_exits=we_exits, t2_cut=t2_cut, t2_skip=t2_skip)
+                we_exits=we_exits, t2_cut=t2_cut, t2_skip=t2_skip,
+                exp_max=exp_max, exp_freed=exp_freed)
 
 
 def report(label, r):
