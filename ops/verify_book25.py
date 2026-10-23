@@ -101,7 +101,29 @@ def main():
     print(f'   worst {worst:.1e}')
     ok &= worst < 1e-7
 
-    # 3 -- levels vs the live workbook's own Dashboard
+    # 3 -- levels vs the live workbook's own Dashboard (only meaningful on the same data;
+    #      when Query runs past the live file's last date, compare the overlapping prices)
+    lq = openpyxl.load_workbook(live, data_only=True, read_only=True)['Query']
+    lrows = list(lq.iter_rows(values_only=True))
+    lhdr, llast = lrows[0], max(as_date(r[0]) for r in lrows[1:] if r[0] is not None)
+    blast = max(as_date(r[0]) for r in qrows if r[0] is not None)
+    if blast > llast:
+        print(f'3. Query runs to {blast}, past the live file ({llast}): comparing overlapping prices')
+        qd = {as_date(r[0]): r for r in qrows if r[0] is not None}
+        w3, nn = 0.0, 0
+        for k in range(1, 10):
+            tk = sl.cell(SL0 + k - 1, 3).value
+            base = 1 + 6 * (k - 1)
+            for r in lrows[1:]:
+                d = as_date(r[0])
+                if d is None or d not in qd or r[lhdr.index(f'{tk}_C')] in (None, ''):
+                    continue
+                for j, f_ in enumerate('OHLC'):
+                    w3 = max(w3, rel(qd[d][base + j], r[lhdr.index(f'{tk}_{f_}')]))
+                    nn += 1
+        print(f'   {nn} prices compared, worst rel diff {w3:.1e}')
+        ok &= w3 < 1e-7
+        return finish(ok, wv, sl)
     print('3. next-session levels vs the live workbook Dashboard (nine names)')
     ld = openpyxl.load_workbook(live, data_only=True)['Dashboard']
     en = wv['Engine']
@@ -123,6 +145,11 @@ def main():
     print(f'   worst {w3:.1e}')
     ok &= w3 < 1e-7
 
+    return finish(ok, wv, sl)
+
+
+def finish(ok, wv, sl):
+    en = wv['Engine']
     # 4 -- default morning
     print('4. default morning (cash $6.9m, no positions)')
     g = {en.cell(r, 2).value: en.cell(r, 3).value for r in range(4, 19)}

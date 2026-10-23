@@ -11,8 +11,13 @@ book25_seed.py — the data the 25-slot workbook is built from (HANDOVER 3.102).
   * daily dollar volume and FIRST-HOUR dollar volume (09:30-10:30) from the
     5-minute archive where it carries volume — the liquidity cap's input
 
+With --massive DIR (HANDOVER 3.103) every slot instead takes its official daily
+bars from DIR/daily/<TK>_daily.csv and its first-hour dollar volume from
+DIR/2024_2026/<TK>_5min.xlsx (09:30-10:30 ET, close x volume); daily dollar
+volume is the bar's volume x VWAP.
+
 Usage (from premarket_study/):
-    python3 ../ops/book25_seed.py <live_workbook.xlsx> <out.json>
+    python3 ../ops/book25_seed.py <live_workbook.xlsx> <out.json> [--massive data_massive]
 """
 import datetime as dt
 import json
@@ -75,8 +80,31 @@ def volume(n):
     return {d: (sum(x[3] for x in v), sum(x[3] for x in v if x[0] < P_.HOUR1)) for d, v in b.items()}
 
 
+def massive(tk, root):
+    """(ohlc, vol) from a Massive pull, or None when the files are missing."""
+    import csv
+    dpath = os.path.join(root, 'daily', f'{tk}_daily.csv')
+    mpath = os.path.join(root, '2024_2026', f'{tk}_5min.xlsx')
+    if not (os.path.exists(dpath) and os.path.exists(mpath)):
+        return None
+    ohlc, dv = {}, {}
+    for r in csv.DictReader(open(dpath)):
+        d = dt.date.fromisoformat(r['date'])
+        if d >= START:
+            ohlc[d] = tuple(float(r[k]) for k in ('open', 'high', 'low', 'close'))
+            dv[d] = float(r['dollar_volume'] or 0)
+    fh = {}
+    ws = openpyxl.load_workbook(mpath, read_only=True).active
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        t = row[0]
+        if isinstance(t, dt.datetime) and dt.time(9, 30) <= t.time() < dt.time(10, 30) and row[5]:
+            fh[t.date()] = fh.get(t.date(), 0.0) + row[4] * row[5]
+    return ohlc, {d: (dv[d], fh.get(d)) for d in ohlc}
+
+
 def main():
     live_path, out_path = sys.argv[1], sys.argv[2]
+    mroot = sys.argv[sys.argv.index('--massive') + 1] if '--massive' in sys.argv else None
     lq = live_query(live_path)
     dep = json.load(open('deployed_book17.json'))['params']
     shadow = [t for t, tier in SLOTS if tier == 'Shadow']
@@ -86,14 +114,20 @@ def main():
     alld = set()
     bars = {}
     for t, tier in SLOTS:
-        if t in LIVE_NINE:
+        mz = massive(t, mroot) if mroot else None
+        if mz:
+            ohlc, vol = mz
+            src = 'Massive official daily + 5-minute first hour'
+            bars[t] = (ohlc, vol)
+        elif t in LIVE_NINE:
             ohlc = lq[t]
             src = 'live workbook Query'
         else:
             dts, O, H, L, C = daily_from_5min(t)
             ohlc = {d: (O[i], H[i], L[i], C[i]) for i, d in enumerate(dts) if d >= START}
             src = '5-minute archive (RTH daily)'
-        vol = volume(t)
+        if not mz:
+            vol = volume(t)
         bars[t] = (ohlc, vol)
         alld |= set(ohlc)
         vec = dep[t] if t in dep else {k: getattr(po[t], k) for k in KEYS}
