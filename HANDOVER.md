@@ -4914,3 +4914,34 @@ bench = NEM, LEN, DLTR, RKT, TEAM, always eligible, funded only by the breadth g
 cash (≤ one ordinary sleeve share per order). 2024–26: 72.2 full / 94.0 test / 13.0% maxDD;
 2022: −13.1%, 17.2% maxDD (live twelve: 71.3 / 94.3 / 20.5; −13.8%, 23.7%). The user may keep
 PLTR/TSLA/RKLB in the workbook as manual include-flag names only. Next: the workbook build.
+
+### 3.96 The October 2026 AI sell-off under the chosen scheme, and faster triggers (23 Oct)
+
+User: 6-of-12 "rarely fires" — how would the scheme have handled the last two weeks? Data: the
+latest uploaded live workbook (`2307f491`, Query sheet, nine names, daily closes to **16 Oct
+2026**); RTX, DE and NVDA have no data after 3 Aug 2026 here.
+
+**Names below their own 200dma (of the nine), 16 Oct: 3** — VRT −23%, AVGO −11%, VST −2%. The rest
+stayed above despite the drop because they had run far above trend: TSM +4%, MU +22%, MRVL +30%,
+VLO +62% (TSM −15%, MU −20%, MRVL −21%, VRT −30%, AVGO −23% off their 60-day highs). The count never
+exceeded 4 in Sep–Oct. Even with RTX, DE and NVDA all below (two are non-AI), the max is 6 — **the
+200dma K≥6 gate would not have fired; the twelve keep buying the dip and the bench stays idle.**
+Against the 50dma, 6 of the nine were below from 14 Oct (7 on 16 Oct); against the 100dma, 3–5.
+
+**Faster triggers with the chosen bench** (`bear17_fast.py` / `.json`; 24–26 full / test / maxDD |
+2022 / Jan22–Jun23 / maxDD):
+
+| core gate, bench = NEM LEN DLTR RKT TEAM | 2024–26 | 2022 |
+|---|---|---|
+| live twelve, no gate | 71.3 / 94.3 / 20.5 | −13.8% / +2.3% / 23.7% |
+| **200dma K≥6 + E (chosen)** | **72.2 / 94.0 / 13.0** | **−13.1% / +2.6% / 17.2%** |
+| 200dma K≥5 + E | 72.1 / 94.0 / 13.1 | −15.5% / −0.9% / 19.1% |
+| 100dma K≥6 / K≥5 + E | 71.9 / 94.0 / 14.5; 72.5 / 95.8 / 13.8 | −18.5% / 26.5%; −17.6% / 25.5% DD |
+| 50dma K≥6 / K≥5 + E | 73.5 / 92.8 / 13.0; 74.0 / 87.8 / 9.7 | −16.2% / 26.4%; −16.9% / 26.4% DD |
+| 50dma K≥6 hold cash, no bench | 64.3 / 92.1 / 16.1 | −16.7% / 25.9% DD |
+
+**Every faster trigger is worse in 2022 (DD 25–27% vs 17.2%) and no better on 2024–26 drawdown.** A
+fast gate stops the core buying exactly when names first break trend — the dips this model earns
+most on (§3.87) — and reopens into bear rallies. Keep the 200dma K≥6 trigger. The October dip is
+the kind of short, AI-led sell-off the core is built to buy; 9 of 2024–26's 10 worst drawdowns
+were 1–2 week dips that recovered (§3.90 table).
