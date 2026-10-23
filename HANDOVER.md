@@ -4859,3 +4859,49 @@ identical to the twelve outside the gate episode.
 **Open:** (1) the out-of-sample check is a long bear (2022) — bench bear files still needed for
 PLTR, TSLA, DLTR, RKT, TEAM (RKLB, NEM, LEN in Box) plus NVDA at 5-minute; (2) workbook: 20 slots,
 breadth gate with held cash, lend-to-bench logic and the rebound admission flag in Script 1.
+
+### 3.94 The 20-name book through 2022: lending to the bench fails in a long bear, and firing it more often makes it worse (23 Oct)
+
+User uploaded 2021–23 5-minute files for NVDA, PLTR, TSLA, DLTR, RKT, TEAM (bear folder
+409265250781; 25 Oct 2021 – 25 Oct 2023, 504 sessions); RKLB, NEM, LEN re-fetched from the existing
+bear files. All nine imported to `data_bear/` with `ops/box_5min_import.py --out-dir`. **The 2022
+twelve now includes NVDA.** Calendar starts 25 Oct 2021 (the new files); expanding-window averages
+as `bear_replay.dma_gate_dates`. ATH gate on, no PM rule. Scripts: `bear20_gates.py`,
+`bear20_bench.py`, `bear20_trend.py` and their JSON.
+
+**1. Firing the bench more often (user's question): no.**
+
+| core gate + E | 24–26 full | test | maxDD | 2022 | Jan22–Jun23 | 2022 maxDD |
+|---|---|---|---|---|---|---|
+| live twelve, no gate | 71.3 | 94.3 | 20.5 | −13.8% | +2.3% | 23.7% |
+| 200dma K≥6, hold cash, no bench | 65.9 | 94.3 | 15.1 | **−11.2%** | **+4.7%** | **15.1%** |
+| 200dma K≥6 + E (§3.93) | 74.5 | 94.0 | 12.7 | −15.0% | +0.5% | 17.3% |
+| 200dma K≥5 / K≥4 / K≥3 + E | 74.5 / 75.2 / 76.1 | 94.0 / 93.9 / 90.8 | 12.8 / 12.3 / 10.3 | −17.1 / −20.6 / −20.4% | | 19.2 / 22.3 / 22.2% |
+| 200dma per-name + E | 68.7 | 74.1 | 10.2 | −20.4% | −8.6% | 22.2% |
+| 100dma K≥6 / K≥4 / per-name + E | 74.6 / 73.7 / 58.5 | 93.9 / 91.3 / 66.3 | 13.7 / 11.9 / 11.2 | −15.9 / −19.9 / −21.5% | | 24.5 / 27.3 / 27.0% |
+| 50dma K≥6 / K≥4 / per-name + E | 76.3 / 73.9 / 65.0 | 93.7 / 84.6 / 67.9 | 12.1 / 9.2 / 9.2 | −14.1 / −23.0 / −19.9% | | 24.2 / 30.9 / 28.0% |
+
+Every more-frequent trigger is worse in 2022 and no better in the 2024–26 test half; the 2024–26
+drawdown cuts are again in-sample.
+
+**2. Why E fails in 2022:** the bench fell with everything — 2022 price moves PLTR −65%, TSLA −65%,
+RKLB −69%, TEAM −66%, RKT −50%, NEM −24%, LEN −22%, DLTR +1%. Lending held cash to it turned the
+hold-cash gate's −11.2% / 15.1% into −15.0% / 17.3%. Bench realised P&L in 2022 was only −$176k; the
+rest of the cost is bench positions holding cash (and marked down) when the core's gate lifted.
+
+**3. Bench subsets under K≥6 + E** (24–26 full / test / maxDD | 2022 / maxDD): all eight 74.5 / 94.0 /
+12.7 | −15.0% / 17.3%; **diversifiers only (NEM LEN DLTR RKT TEAM) 72.2 / 94.0 / 13.0 | −13.1% /
+17.2%**; NEM LEN DLTR 70.7 / 94.0 / 13.6 | −12.7% / 16.8%. Single names: LEN, DLTR, RKT ≈ −11 to
+−12% / 15–16% in 2022 but ~67% in 2024–26. **Diversifiers-only is the only E variant better than
+the live twelve on all four lines** (return and maxDD in both periods).
+
+**4. A trend filter on the borrower does not rescue it** (`bear20_trend.py`, chosen after seeing
+2022): requiring a diversifier to be above its own 200/100/50dma to borrow gives 2022 −12.8 to
+−17.7%, DD 16.5–19.9%, none better than holding the cash. With the 200dma filter it is *worse*
+(−17.7%): the bench then borrows only during bear-market rallies — §3.87 again.
+
+**Reading.** The two gate episodes give opposite answers. Feb–Apr 2025 (short, AI-led, in-sample):
+lend the cash. 2022 (long, rate-led, out-of-sample): hold it. The gate with held cash is the robust
+part — better than the live book on drawdown in both periods; lending is a bet on the kind of
+sell-off. Options put to the user: (a) hold cash, no bench; (b) E to diversifiers only; (c) §3.93
+as is.
