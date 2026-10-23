@@ -3379,6 +3379,12 @@ precise, and do not re-fit expecting improvement. Only the OU lookback holds sti
 
 These were wrong and were fixed; a new session should not rediscover them as findings.
 
+- **`TradingExcel_12stock_live.xlsx` (§3.71) has WRONG order rows — do not trade from it.** Every
+  Active Trading order row reads its levels from the wrong Dashboard row (TSM → `Dashboard!C7`, AVGO's
+  row; VRT → C9; RTX/DE/NVDA → empty rows 25–29): the rows were moved +3 with openpyxl's formula
+  translator, which shifted the relative Dashboard references too. §3.71's verification checked
+  column N (200dma) but not F/G. Superseded by the 25-slot workbook (§3.102); never deployed.
+
 - Fold agreement in an expanding walk-forward is **not** independent evidence — the folds are nested.
 - `g` is inert in the weekly model; `m` is the live switch. (An early claim that `g` carried the
   overfit was wrong.)
@@ -5132,3 +5138,58 @@ a two-month shift of the window — unreliable either way. 12-month windows are 
 +0.13 in the recent pair against 0.42–0.50 elsewhere), so the admission rule should use the
 stable pattern across pairs, not one pair: LEN and TEAM pass in all four; DLTR is borderline; RKT
 fails in all four (it is on the bench on neutral settings, which is allowed).
+
+### 3.102 The 25-slot workbook, built and verified (23 Oct)
+
+User: *"start building the 25 slot workbook … a fresh start … visually clear and professional. The
+steps to make changes to the live book (promoting shadow to bench or bench to live) should be
+clear … scripts 1 and 2 will need an overhaul … let's get the book right first."* Output
+**`TradingExcel_25slot.xlsx`** (repo root, gitignored; 24 MB, 36 sheets). Builder
+`ops/build_book25.py`, data `ops/book25_seed.py` (→ scratchpad seed JSON), metadata
+`premarket_study/book25_meta.json`, checks `ops/verify_book25.py` and `ops/verify_book25_alloc.py`.
+
+**Structure (slot-based — tier or ticker changes never move the layout):** Guide · Dashboard ·
+Orders · Log · Shadow · Slots · Parameters · Change Log · Performance · Engine · Query · M01–M25.
+- **Slots** is the register (ticker, tier, β, settings basis, fit pairs, liquidity override, dates,
+  why-not text, T2–T4 results/evidence, the ten-number vector). Tier dropdown Core/Bench/Shadow/Off.
+- **Parameters**: 27 named parameters (`P_*`), each with value, what it does, evidence (§), review
+  cadence, last changed; Cash and Net liq are the Script-written cells.
+- **Query**: Date + six columns per slot (`Snn_O/H/L/C/DV/FH` — DV daily $ volume, FH first-hour $
+  volume). Capacity 1,260 rows (to ~2029). Seeded: the nine from the live workbook Query to 16 Oct
+  2026; RTX/DE/NVDA, Bench and Shadow from the 5-minute archive (to Aug–Oct 2026); DV/FH where the
+  archive has volume (none for NEM DLTR RKT TEAM APLD AAOI LUNR).
+- **M01–M25**: the live `Model TSM` engine formula-for-formula (Kalman, OU, both sleeves, stop,
+  interest, paper record), reading Query by slot and its vector from Slots. No Feed sheets.
+- **Engine**: next-session levels per slot (the live Dashboard's formulas, with the ATH guard),
+  gate (Core names below their own `P_GateDMA` average, ON at `P_GateK`), FH median and liquidity
+  cap, exposure from the Log, then per sleeve: category (held / no bid / shadow / off / paused /
+  veto / bench / gated / core) → base share (cash ÷ (core + gated + off)) → Bench lending (held
+  cash, ≤ one share each) → name scale min(1, min(exposure room, liquidity cap)/name orders) → shares.
+- **Orders**: 50 rows (two per slot), action text, Send = YES only for BUY and STOP rows, blue
+  inputs for the 09:00 price and overrides. Defined names `IBKR_Orders`, `IBKR_LogAnchor`,
+  `IBKR_QueryAnchor`, `IBKR_NAVAnchor`, `IBKR_AvailFunds`, `IBKR_BuyFee`, `IBKR_SellFee`,
+  `IBKR_Slots` — the contract for the Script 1/2 overhaul.
+- **Log**: one fresh table for model and discretionary fills (Type Model/Disc), stop due, open
+  value at last close (drives exposure), PAST STOP / OVER CAP flags.
+- **Dashboard**: eight tiles, an eight-line ✓/▲ alert checklist, and a 25-row slot table.
+- **Shadow**: tier-ranked list of Shadow slots with why-not, five tests, paper fills/return/
+  stop-outs since admission to Shadow (from the Model sheet), status READY FOR REVIEW at 5 of 5.
+- **Guide**: sheet map, colour key, daily routine, review cadence, procedures A–G (promote
+  Shadow→Bench, promote to Core, Off, new ticker, discretionary, parameter change, emergency stop).
+
+**Verification (LibreOffice headless recalculation):** 0 formula errors in all 36 sheets; every
+Model sheet's historical Bayes and OU bids equal `engine.run_model` on the same prices and vector
+(25 slots, worst relative difference **5e-15**); the nine live names' next-session levels (11
+fields each) equal the live workbook's own cached Dashboard to **4e-15**; default morning (cash
+$6.9m, no positions) = 24 Core BUY orders of ~$287k, Bench idle, Shadow paper. Stress scenario
+(cash $2.4m, K = 3, cap 10%, CF Off, TSM/MU model positions, a VRT disc ticket, a GM pre-market
+veto): every sleeve's category, dollars and shares equal an independent Python implementation;
+gated VRT/VST/AVGO hold cash and lend $685,714 → ten Bench orders of $68,571; TSM and MU spare
+sleeves cut to zero by the exposure cap; MU OU shows STOP DUE; orders $1.94m + held $0.46m = cash.
+
+**Note on Test 1:** every current Shadow name has β ≥ 0.27, so all show CORE ONLY — under the
+rules none can go to the Bench; they can only replace a Core name.
+
+**Before use:** open in Excel and let it calculate (full recalculation on load; ~1.8m formulas);
+back-fill Query for the slots whose data stops in Aug–Oct; re-export the seven volume-less names
+with volume; enter real Cash. Scripts 1/2 to be rebuilt against the defined names above.
