@@ -5097,3 +5097,11 @@ A uniform cap is too blunt (3% costs 1.8pp and holds back 12% of order dollars).
 CF at 1% (−0.7pp, CF p95 → 3.8%) plus a 10% backstop on every name (−0.1pp)**; VLO, GM, DE watched
 through the daily liquidity flag rather than capped. 2022 is unaffected by any cap ≥ 2%. Spec
 updated in `ops/book25_design.md`.
+
+**§3.100 addendum — run together, and in 2022 (supersedes the recommendation above).** The
+combination was run rather than added up (`liq17b.json`): 10% backstop alone 70.7 / 93.8 / 13.0 |
+2022 −12.9% / 17.1% (free); CF 4 / 3 / **2** / 1% + backstop: 69.2 / 69.3 / **69.7** / 70.0 full,
+90.6 / 90.8 / **91.5** / 92.3 test | 2022 −12.9 / −13.0 / **−13.3** / −14.2%, DD 17.1 / 17.2 /
+**17.5** / 18.3%; CF p95 (held $10m) 15.5 / 11.6 / **7.7** / 3.8%. CF was a 2022 winner, so the 1%
+cap costs 1.3pp there. **Recommendation revised to CF 2% + 10% backstop**: −1.0pp in 2024–26,
+−0.4pp in 2022, CF p95 at 7.7%. Spec updated.

@@ -20,7 +20,7 @@ Script 2 depend on.
 2. Count ≥ 6: each core name below its own average places no buy; its share is held back.
 3. Held-back cash is lent to Bench orders, each at most one ordinary sleeve share.
 4. Liquidity cap: a name's orders ≤ L × its median first-hour dollar volume over the prior 20
-   sessions (CF 1%, others 10%); excess held in cash. Then the exposure cap: no name's held value (prior close) + today's orders may exceed 25% of equity.
+   sessions (CF 2%, others 10%); excess held in cash. Then the exposure cap: no name's held value (prior close) + today's orders may exceed 25% of equity.
    Applies to every name, and to the user's discretionary tickets.
 5. Off: the name's share is held in cash.
 6. Orders never exceed cash (cash account).
@@ -34,7 +34,7 @@ Script 2 depend on.
 | Discretionary tickets (inside the cap, 10-session stop enforced) | — | §3.77 | Daily |
 | Emergency stop: place no new buys | off | — | Daily |
 | Exposure cap per name | 25% | 10–30%, §3.97 | Weekly look, change quarterly |
-| Liquidity cap: a name's orders ≤ L × median first-hour $ volume of the prior 20 sessions | CF 1%; all others 10% backstop | 1–10%, §3.100 | Weekly look (daily liquidity flag) |
+| Liquidity cap: a name's orders ≤ L × median first-hour $ volume of the prior 20 sessions | CF 2%; all others 10% backstop | 1–10%, §3.100 | Weekly look (daily liquidity flag) |
 | Capital | $6.9m → ~$10m | §3.99 | Monthly |
 | Shadow admission / removal decisions | — | §3.99 | Monthly |
 | Breadth K | 6 of 12 | 3–6, §3.94 | Quarterly, only with a two-regime backtest |
