@@ -4980,3 +4980,10 @@ also reports `exp_max` (each name's peak share of equity). Defaults unchanged (r
 
 **Recommendation: (b) with a 25% per-name cap** as a safety rail (freed cash to the bench or held,
 indistinguishable). The cap belongs in Script 1's sizing for every name, core and bench.
+
+**§3.97 addendum — why the cap is worth its ~1.3pp.** The backtest shows no drawdown gain because
+the 78% NEM trade happened to win. Its value is tail risk the backtest does not price: worst
+single days 2024–26 were NEM −14.8% (24 Oct 2024), DLTR −22.2%, TEAM −17.1%, RKT −15.5%, VRT
+−29.8%. At 78% of the book a NEM-sized day costs ~11.5% of equity overnight (DLTR-sized: ~17%);
+at the 25% cap, ≤ ~3.7% (5.5%). The cap also bounds order size (≤ ~$1.7m at $6.9m) for the
+smaller bench names, where a $4m limit order may not fill as the simulation assumes.
