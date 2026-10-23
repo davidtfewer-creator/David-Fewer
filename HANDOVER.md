@@ -4905,3 +4905,12 @@ lend the cash. 2022 (long, rate-led, out-of-sample): hold it. The gate with held
 part — better than the live book on drawdown in both periods; lending is a bet on the kind of
 sell-off. Options put to the user: (a) hold cash, no bench; (b) E to diversifiers only; (c) §3.93
 as is.
+
+### 3.95 Decision: option (b) — the twelve + a five-name diversifier bench (23 Oct)
+
+User chose **(b)** from §3.94. Spec: **`deployed_book17.json`** (derived from deployed_book20.json;
+PLTR/TSLA/RKLB and the deep-drop admission rule removed). Core = the deployed twelve, unchanged;
+bench = NEM, LEN, DLTR, RKT, TEAM, always eligible, funded only by the breadth gate's held-back
+cash (≤ one ordinary sleeve share per order). 2024–26: 72.2 full / 94.0 test / 13.0% maxDD;
+2022: −13.1%, 17.2% maxDD (live twelve: 71.3 / 94.3 / 20.5; −13.8%, 23.7%). The user may keep
+PLTR/TSLA/RKLB in the workbook as manual include-flag names only. Next: the workbook build.
