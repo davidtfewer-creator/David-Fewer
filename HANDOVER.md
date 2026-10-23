@@ -5072,3 +5072,28 @@ with volume needed. Largest single order: $3.7m at $6.9m start, $5.4m at $10m st
 - **LUNR** — helped as a filler (+0.5pp) but a small-cap AI-adjacent multi-bagger; 10% trade
   spread; no 2022 data (listed 2023).
 Alternates: BRKB (dilutive, no 2022 hedge §3.85–3.86), AXTI, NVTS, FCX.
+
+### 3.100 The liquidity cap at $10m: cap CF, backstop the rest (23 Oct)
+
+User: run the liquidity-cap test. New `book_sim(order_cap={name: {date: $}})` (default None): a
+name's total new orders that morning ≤ the cap, excess held in cash. Cap decidable each morning:
+**L × the median first-hour total dollar volume of the previous 20 sessions** (≥ 10 needed). Book
+= (b) + 25% exposure cap, $10m start. `liq17.py`, `liq17b.py` and JSON. NEM, DLTR, RKT, TEAM (and
+NVDA, PLTR, TSLA in 2022) have no volume → uncapped.
+
+**Correction to §3.99:** its participation figures were on a *compounding* book (a $10m start
+grows to several times that by 2026). Re-expressed for a book **held at $10m** (each fill × $10m /
+equity on the day), uncapped p95 / share of fills > 5% of first-hour at-bid volume: **CF 22.7% /
+20%**, VLO 7.0% / 12%, GM 6.6% / 8%, DE 5.9% / 9%, RTX 3.7% / 2%. Only CF is a real problem.
+
+| cap | 24–26 full | test | maxDD | CF p95 (held $10m) | 2022 / maxDD |
+|---|---|---|---|---|---|
+| none | 70.7 | 93.8 | 13.0 | 22.7% | −13.1% / 17.2% |
+| uniform 10% / 5% / 3% / 2% / 1% | 70.6 / 69.4 / 68.9 / 66.9 / 60.3 | 93.5 / 90.9 / 90.5 / 88.4 / 82.7 | 13.0 / 13.1 / 13.6 / 15.0 / 17.9 | (compounding: 55 / 30 / 18 / 12 / 6%) | −12.8 to −14.7% / 16.9–18.4% |
+| CF 3% / 2% / **1%** | 69.3 / 69.7 / **70.0** | 90.8 / 91.5 / **92.3** | 13.3 / 13.4 / **13.5** | 11.6 / 7.7 / **3.8%** | |
+| CF 2% + VLO 3%; CF 1% + VLO 2% | 69.3; 68.8 | 91.4; 91.2 | 13.7; 14.5 | 7.7; 3.9% | |
+
+A uniform cap is too blunt (3% costs 1.8pp and holds back 12% of order dollars). **Recommendation:
+CF at 1% (−0.7pp, CF p95 → 3.8%) plus a 10% backstop on every name (−0.1pp)**; VLO, GM, DE watched
+through the daily liquidity flag rather than capped. 2022 is unaffected by any cap ≥ 2%. Spec
+updated in `ops/book25_design.md`.

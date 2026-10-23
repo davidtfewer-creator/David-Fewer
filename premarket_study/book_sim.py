@@ -89,7 +89,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
              reentry=None, regime_exit=None, tier2=None, tier2_first=False,
              tier2_cash=None, exp_cap=None, exp_to='cash',
-             toggle_off=None, toggle_to='redistribute'):
+             toggle_off=None, toggle_to='redistribute', order_cap=None):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     tier2: a set of names that bid as a SECOND TIER (the managed-book bench,
     HANDOVER 3.88): first-tier orders are sized exactly as if the tier-2 names
@@ -135,6 +135,10 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     (the current workbook: it leaves the pool, everyone else's order grows),
     'cash' (held back, not lent) or 'bench' (held back and lent to tier-2
     exactly like a gated name's share under option E; needs tier2+gate_cash).
+    order_cap: {name: {date: dollars}} -- the LIQUIDITY cap (HANDOVER 3.100): a
+    name's total new orders that morning (both sleeves) may not exceed it; the
+    excess is held in cash. Applied after exp_cap. Names/dates absent are
+    uncapped. Result carries liq_freed (total $ held back by it).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
     no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
@@ -250,6 +254,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     fills = 0
     t2_cut = t2_skip = 0
     exp_max, exp_freed = {}, 0.0
+    liq_freed = 0.0
     free_days = 0
     sleeve_days = 0
     bk_peak, bk_tripped, bk_trips, bk_days = capital, False, 0, 0
@@ -471,6 +476,18 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                             freed -= given
                             if given <= 1e-6:
                                 break
+
+        if mode == 'pooled' and active and order_cap:
+            for nm in {x['name'] for x in active}:
+                lim_ = order_cap.get(nm, {}).get(d)
+                if lim_ is None:
+                    continue
+                mine = [x for x in active if x['name'] == nm]
+                tot = sum(x['_alloc'] for x in mine)
+                if tot > lim_:
+                    for x in mine:
+                        x['_alloc'] *= lim_ / tot
+                    liq_freed += tot - lim_
 
         # -------- intraday fast-crash stand-down: today's trigger time (if any)
         sd_tau = None
@@ -701,7 +718,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 hh_days=hh_days, frac_series=frac_series,
                 sd_trips=sd_trips, sd_days=sd_days, sd_nobars=sd_nobars,
                 we_exits=we_exits, t2_cut=t2_cut, t2_skip=t2_skip,
-                exp_max=exp_max, exp_freed=exp_freed)
+                exp_max=exp_max, exp_freed=exp_freed, liq_freed=liq_freed)
 
 
 def report(label, r):
