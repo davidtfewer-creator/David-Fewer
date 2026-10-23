@@ -5022,3 +5022,53 @@ User: test what a toggled-off name's share should do in the new book. New `book_
 redistributes); Off is for genuine events (halts, corporate actions, a removal decision), not a
 fill forecast. Active management belongs in admissions (Shadow slots), monitoring, and the
 cap/gate — not in day-to-day toggling of core names.
+
+### 3.99 Design for the 25-slot managed book; admission evidence, liquidity at $10m (23 Oct)
+
+User agreed: Off = hold the share in cash; discretionary trades bound by the cap; tiers Core /
+Bench / Shadow / Off with **all eight Shadow slots populated**; asked for an admission basis
+(*"not sure whether 3 months of additional data will inform this"*), a Shadow panel (why each
+name missed the cut, what admission needs), a daily monitoring panel, a parameter panel with
+daily/weekly/monthly review, and **capital to ~$10m**. Spec written to **`ops/book25_design.md`**.
+`capacity17.py` / `capacity17.json`.
+
+**1. Three months cannot decide admission on P&L.** Standalone 2024–26, trades needed for the
+average trade to clear noise (t = 2), and the years that takes at the name's fill rate: TSM 0.3,
+MU 0.2, VLO 0.1, NVDA 0.2; NEM 0.8, DLTR 0.6, LEN 0.4, RKT 4.6, **TEAM 9.4**; Shadow candidates
+PLTR 1.7, **TSLA 12.0, RKLB 8.1**, APLD 0.2, AAOI 2.0, CEG 2.1, UAL 2.6, LUNR 4.0. And the per-trade
+test is too easy anyway: ~90% of trades hit target, so almost every name has a positive average
+trade; what separates names is the stop-out tail and behaviour when the core is falling, which a
+quiet three months will not show. **Shadow time should check execution and data (fill rate and
+premium capture vs model, feed health, liquidity), while admission rests on the two-regime book
+test re-run quarterly on the extended data.** Admission tests in the spec.
+
+**2. Liquidity at $10m** (order / first-hour at-bid dollar volume, median / p95 / share of fills
+> 5%; book (b) + 25% cap; note the simulation compounds, so later fills are on a larger book than
+the starting capital — conservative):
+
+| | $6.9m | $10m |
+|---|---|---|
+| TSM, AVGO, MU, NVDA, MRVL | ≤0.3% / ≤2.8% / ≤3% | ≤0.4% / ≤4.1% / ≤4% |
+| VRT, VST | 0.4–0.5% / 2.8–4.6% / 3–5% | 0.5–0.7% / 4.1–6.7% / 4–9% |
+| GM | 0.8% / 6.5% / 11% | 1.2% / 9.5% / 20% |
+| RTX, DE | 0.9–1.0% / 5.0–5.3% / 8–9% | 1.3–1.5% / 7.3–7.7% / 17–22% |
+| VLO | 1.4% / 7.8% / 19% | 2.1% / 11.3% / 28% |
+| **CF** | 2.7% / **38%** / 33% | 3.9% / **56%** / 43% |
+
+The AI names absorb $10m easily; **CF is the constraint** (as §3.63), then VLO, GM, RTX, DE.
+Returns are scale-invariant in the simulation (no impact model), so $10m is purely a liquidity
+question → a **per-name liquidity cap** is proposed for the parameter panel (to test). **NEM, DLTR,
+RKT, TEAM cannot be measured: their 2024–26 Box files carry no volume** (LEN does) — re-export
+with volume needed. Largest single order: $3.7m at $6.9m start, $5.4m at $10m start.
+
+**3. Shadow roster** (user to confirm) and why each missed the cut:
+- **PLTR** — settings don't carry over (rho −0.59); −65% in 2022, lost money as bench in 2022.
+- **TSLA** — rho −0.30; average trade 0.76% against a 6.9% spread (12 years to judge); −65% in 2022.
+- **RKLB** — user risk decision 2 Sep; −$0.8m in the overbooked D+A; 10% trade spread; −69% in 2022.
+- **APLD** — strongest standalone record but a hindsight pick (+538%); no full 2022 test (listed 2022).
+- **AAOI** — hindsight (+628%), 79% of profit in three months; no 2022 file fetched.
+- **CEG** — AI-related (beta 0.75), duplicates core exposure; worsened drawdown as a bench filler.
+- **UAL** — borderline beta (0.45); −0.8pp and +1.6pp DD as a bench filler; 2022 file exists.
+- **LUNR** — helped as a filler (+0.5pp) but a small-cap AI-adjacent multi-bagger; 10% trade
+  spread; no 2022 data (listed 2023).
+Alternates: BRKB (dilutive, no 2022 hedge §3.85–3.86), AXTI, NVTS, FCX.
