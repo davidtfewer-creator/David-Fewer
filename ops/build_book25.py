@@ -287,22 +287,124 @@ SHADOW_WHY = {
     'RKLB': 'Removed by risk decision 2 Sep 2026; lost $0.8m in the overbooked D+A test; fit test '
             'unstable (−0.23 to +0.66); −69% in 2022.',
     'APLD': 'Strongest standalone record but a hindsight pick (+538%); listed 2022, so no full 2022 '
-            'test; no volume data for the liquidity check.',
-    'AAOI': 'Hindsight pick (+628%); 79% of its profit in three months; no 2022 test yet; no volume '
-            'data.',
+            'test.',
+    'AAOI': 'Hindsight pick (+628%); 79% of its profit in three months; no 2022 test yet; the tightest '
+            'Shadow name for liquidity (median order 6% of first-hour volume).',
     'CEG': 'AI-related (β 0.75), so it duplicates Core exposure; worsened drawdown as a Bench filler.',
     'UAL': 'Borderline β 0.45; −0.8pp and +1.6pp drawdown as a Bench filler; 2022 file exists for '
            'the book test.',
     'LUNR': 'Helped slightly as a Bench filler (+0.5pp) but a small-cap AI-adjacent multi-bagger; '
-            '10% trade spread; listed 2023 (no 2022 test); no volume data.',
+            '10% trade spread; listed 2023 (no 2022 test).',
 }
 NOTE = {
     'CF': 'Liquidity cap 2% (§3.100): the tightest name at $10m.',
-    'NEM': 'Bench diversifier. No volume column yet: liquidity unmeasured.',
+    'NEM': 'Bench diversifier.',
     'LEN': 'Bench diversifier.',
-    'DLTR': 'Bench diversifier. No volume column yet: liquidity unmeasured.',
-    'RKT': 'Bench diversifier on NEUTRAL settings (fit test fails in all 4 pairs). No volume yet.',
-    'TEAM': 'Bench diversifier. No volume column yet: liquidity unmeasured.',
+    'DLTR': 'Bench diversifier.',
+    'RKT': 'Bench diversifier on NEUTRAL settings (fit test fails in all 4 pairs). Tightest liquidity in the book at $10m (p95 10%): consider a per-name cap.',
+    'TEAM': 'Bench diversifier.',
+}
+LIQ = {
+ "TSM": [
+  "PASS",
+  "p95 1.0% of first-hour at-bid volume at $10m (194 fills; §3.103)"
+ ],
+ "VRT": [
+  "PASS",
+  "p95 2.5% of first-hour at-bid volume at $10m (159 fills; §3.103)"
+ ],
+ "VST": [
+  "PASS",
+  "p95 3.5% of first-hour at-bid volume at $10m (163 fills; §3.103)"
+ ],
+ "AVGO": [
+  "PASS",
+  "p95 0.7% of first-hour at-bid volume at $10m (139 fills; §3.103)"
+ ],
+ "MU": [
+  "PASS",
+  "p95 0.8% of first-hour at-bid volume at $10m (125 fills; §3.103)"
+ ],
+ "GM": [
+  "WATCH",
+  "p95 6.6% of first-hour at-bid volume at $10m (130 fills; §3.103)"
+ ],
+ "VLO": [
+  "WATCH",
+  "p95 7.2% of first-hour at-bid volume at $10m (75 fills; §3.103)"
+ ],
+ "CF": [
+  "WATCH",
+  "p95 7.7% of first-hour at-bid volume at $10m (49 fills; §3.103)"
+ ],
+ "MRVL": [
+  "PASS",
+  "p95 2.4% of first-hour at-bid volume at $10m (116 fills; §3.103)"
+ ],
+ "RTX": [
+  "PASS",
+  "p95 3.8% of first-hour at-bid volume at $10m (49 fills; §3.103)"
+ ],
+ "DE": [
+  "WATCH",
+  "p95 6.0% of first-hour at-bid volume at $10m (47 fills; §3.103)"
+ ],
+ "NVDA": [
+  "PASS",
+  "p95 0.0% of first-hour at-bid volume at $10m (124 fills; §3.103)"
+ ],
+ "NEM": [
+  "PASS",
+  "p95 1.8% of first-hour at-bid volume at $10m (16 fills; §3.103)"
+ ],
+ "LEN": [
+  "PASS",
+  "p95 1.3% of first-hour at-bid volume at $10m (5 fills; §3.103)"
+ ],
+ "DLTR": [
+  "PASS",
+  "p95 5.0% of first-hour at-bid volume at $10m (9 fills; §3.103)"
+ ],
+ "RKT": [
+  "FAIL",
+  "p95 10.3% of first-hour at-bid volume at $10m (14 fills; §3.103)"
+ ],
+ "TEAM": [
+  "WATCH",
+  "p95 5.6% of first-hour at-bid volume at $10m (18 fills; §3.103)"
+ ],
+ "PLTR": [
+  "PASS",
+  "p95 0.1% of first-hour at-bid volume at $10m (11 fills; §3.103)"
+ ],
+ "TSLA": [
+  "PASS",
+  "p95 0.0% of first-hour at-bid volume at $10m (13 fills; §3.103)"
+ ],
+ "RKLB": [
+  "PASS",
+  "p95 3.4% of first-hour at-bid volume at $10m (16 fills; §3.103)"
+ ],
+ "APLD": [
+  "WATCH",
+  "p95 5.5% of first-hour at-bid volume at $10m (12 fills; §3.103)"
+ ],
+ "AAOI": [
+  "WATCH",
+  "p95 6.2% of first-hour at-bid volume at $10m (4 fills; §3.103)"
+ ],
+ "CEG": [
+  "PASS",
+  "p95 0.6% of first-hour at-bid volume at $10m (8 fills; §3.103)"
+ ],
+ "UAL": [
+  "PASS",
+  "p95 0.7% of first-hour at-bid volume at $10m (5 fills; §3.103)"
+ ],
+ "LUNR": [
+  "PASS",
+  "p95 4.5% of first-hour at-bid volume at $10m (10 fills; §3.103)"
+ ]
 }
 VEC = ('lam', 'phi_L', 'psi', 'k', 'premium', 'peak_cap', 'ou_buf_k', 'ou_prem', 'ou_cap', 'ou_W')
 VEC_LAB = ('λ', 'φ_L', 'ψ', 'k', 'Bayes π', 'Peak cap', 'OU buffer k', 'OU π', 'OU cap', 'OU W')
@@ -358,14 +460,11 @@ def build_slots(wb, seed):
                     {'PLTR': '2022 bench test: lost money (§3.94)', 'TSLA': '2022 bench test: lost money (§3.94)',
                      'RKLB': '2022 bench test: lost money (§3.94)', 'CEG': 'Worsened DD as filler (§3.92)',
                      'UAL': '−0.8pp, +1.6pp DD as filler (§3.92)'}.get(t, 'To run with 2022 data'),
-                    'NOT RUN' if t in ('APLD', 'AAOI', 'LUNR') else 'NOT RUN',
-                    'No volume column' if t in ('APLD', 'AAOI', 'LUNR') else 'To measure at $10m']
+                    LIQ[t][0], LIQ[t][1]]
         else:
             vals = ['PASS' if (pairs != '' and pairs >= 3) else ('—' if pairs == '' else 'NEUTRAL'),
                     'PASS', '§3.93–3.95' if s['tier'] == 'Bench' else 'Live book',
-                    'PASS' if t not in ('NEM', 'DLTR', 'RKT', 'TEAM', 'CF') else (
-                        'CAPPED 2%' if t == 'CF' else 'NOT MEASURED'),
-                    '§3.100' if t not in ('NEM', 'DLTR', 'RKT', 'TEAM') else 'Needs volume re-export']
+                    LIQ[t][0] + (' (cap 2%)' if t == 'CF' else ''), LIQ[t][1]]
         for j, v in enumerate(vals):
             c = ws[f'{CL(15 + j)}{r}']
             c.value = v
@@ -385,7 +484,7 @@ def build_slots(wb, seed):
     dv.error, dv.errorTitle = 'Choose Core, Bench, Shadow or Off', 'Tier'
     ws.add_data_validation(dv)
     dv.add(f'D{SL0}:D{last}')
-    dv2 = DataValidation(type='list', formula1='"PASS,FAIL,NEUTRAL,NOT RUN,NOT MEASURED,CAPPED 2%,—"',
+    dv2 = DataValidation(type='list', formula1='"PASS,FAIL,WATCH,NEUTRAL,NOT RUN,NOT MEASURED,PASS (cap 2%),WATCH (cap 2%),—"',
                          allow_blank=True)
     ws.add_data_validation(dv2)
     for col in ('O', 'P', 'R'):
@@ -1076,6 +1175,7 @@ def build_shadow(wb):
             ws.cell(r, c).border = Border(bottom=HAIR)
     rng = 'I6:T17'
     for word, (bg, fg) in (('PASS', (GRN_F, GRN_T)), ('FAIL', (RED_F, RED_T)), ('CORE ONLY', (AMB_F, AMB_T)),
+                           ('WATCH', (AMB_F, AMB_T)),
                            ('PENDING', (AMB_F, AMB_T)), ('NOT RUN', (GREY, '595959')),
                            ('NOT MEASURED', (GREY, '595959'))):
         ws.conditional_formatting.add(rng, CellIsRule(operator='equal', formula=[f'"{word}"'],

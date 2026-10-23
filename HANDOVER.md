@@ -5193,3 +5193,36 @@ rules none can go to the Bench; they can only replace a Core name.
 **Before use:** open in Excel and let it calculate (full recalculation on load; ~1.8m formulas);
 back-fill Query for the slots whose data stops in Aug–Oct; re-export the seven volume-less names
 with volume; enter real Cash. Scripts 1/2 to be rebuilt against the defined names above.
+
+### 3.103 Massive data pull; the workbook re-seeded; liquidity for every name (23 Oct)
+
+User supplied a Massive API key and allowed `api.massive.com` in the environment's network
+settings. **The key is passed only as the `MASSIVE_API_KEY` environment variable** to
+`ops/massive_fetch.py` (never written to a file, commit or log; errors are scrubbed); it was pasted
+in chat, so it should be rotated. Data → `premarket_study/data_massive/` (gitignored):
+`2024_2026/<TK>_5min.xlsx` (5-minute bars 04:00–20:00 ET with volume, 1 Apr 2024 → 22 Oct 2026,
+644 sessions, all 25 slots) and `daily/<TK>_daily.csv` (official daily bars + dollar volume).
+**Jan–Jun 2020 failed: the plan does not cover that timeframe** — no crash test with this key.
+
+**Quality.** Massive 5-minute bars equal the old archive exactly (TSM Jul 2026: prices and volume);
+Massive daily equals the live Query where the live feed was Massive (TSM 16 Oct 412.61). The live
+Query differs for **AVGO, GM, VLO, CF, MRVL** (closes ~0.1–0.4% off on 430–520 days — their history
+was built from the 5-minute archive's last RTH bar, not the official close) and carries a few
+**extended-hours prints** (MU low 24 Jun 2026 1031 vs RTH 991.10; MRVL high 3 Nov 2025 102 vs RTH
+94.84). Massive daily = the RTH 5-minute range, so it is the cleaner source.
+
+**Workbook re-seeded** (`ops/book25_seed.py --massive data_massive`): all 25 slots from Massive
+official daily, DV = volume × VWAP, FH from the 5-minute bars; prices to **22 Oct 2026**. Verify:
+0 errors, Model bids vs engine 5.5e-15, allocation stress test PASS. On these prices **5 of 12 Core
+names are below their 200-day average** (VRT −27%, AVGO −12%, VST −9%, GM −4%, RTX −0.2%) — one
+short of the gate.
+
+**Liquidity at $10m for every name** (`premarket_study/liq_massive.py` / `.json`; order vs
+first-hour at-bid volume, book held at $10m; PASS p95 ≤ 5%, WATCH ≤ 10%, FAIL > 10% — written into
+Slots T4): Core PASS except GM 6.6%, VLO 7.2%, CF 7.7% (after its 2% cap), DE 6.0% (WATCH). Bench:
+NEM 1.8%, LEN 1.3%, DLTR 5.0% PASS; TEAM 5.6% WATCH; **RKT 10.3% FAIL** (29% of fills > 5%) — a
+per-name cap is needed. Shadow: PLTR, TSLA, RKLB, CEG, UAL, LUNR PASS; APLD 5.5%, AAOI 6.2% WATCH
+(AAOI median 6.2%). Bench/Shadow samples are small (4–18 fills: they trade only in the gate episode).
+
+Box: folder `00 Live Trading/data/Massive pull 2026-10-23` (430372292978) holds a README; the
+connector uploads text only, so the data went to the user as a zip to drop in.
