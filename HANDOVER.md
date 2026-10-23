@@ -4987,3 +4987,38 @@ single days 2024–26 were NEM −14.8% (24 Oct 2024), DLTR −22.2%, TEAM −17
 −29.8%. At 78% of the book a NEM-sized day costs ~11.5% of equity overnight (DLTR-sized: ~17%);
 at the 25% cap, ≤ ~3.7% (5.5%). The cap also bounds order size (≤ ~$1.7m at $6.9m) for the
 smaller bench names, where a $4m limit order may not fill as the simulation assumes.
+
+### 3.98 The include-toggle in the new book: don't redistribute, don't lend — and long toggles are the costliest habit tested (23 Oct)
+
+User: test what a toggled-off name's share should do in the new book. New `book_sim(toggle_off=
+{name: dates}, toggle_to='redistribute'|'cash'|'bench')` (default None). Book = (b) + 25% name cap
+(freed → cash). Toggled names CF and VLO, the three §3.77 brackets. `toggle17.py` / `.json`.
+
+| toggle (CF, VLO) | share goes to | 24–26 full | test | maxDD | test DD | 2022 | 2022 maxDD |
+|---|---|---|---|---|---|---|---|
+| none | — | **70.7** | **93.8** | **13.0** | 7.5 | **−13.1%** | **17.2%** |
+| S1 off on no-fill mornings (foresight; ~60–70% of days) | redistribute | 71.3 | 94.6 | 12.9 | 7.7 | −15.5% | 19.6% |
+| | cash | 68.5 | 91.1 | 13.2 | 7.2 | −13.1% | 17.2% |
+| | bench | 66.3 | 86.2 | 13.2 | 5.9 | −14.1% | 18.1% |
+| S2 off while above 50dma (~50–58% of days) | redistribute | 68.1 | 84.8 | 13.9 | 10.1 | −20.4% | 24.1% |
+| | cash | 59.6 | 70.8 | 12.9 | 8.3 | −16.7% | 20.4% |
+| | bench | 59.1 | 68.0 | 11.4 | 6.3 | −18.6% | 22.3% |
+| S3 off permanently | redistribute | 70.9 | 87.7 | 15.8 | 10.8 | −21.7% | 24.1% |
+| | cash | 55.4 | 67.7 | 13.0 | 8.9 | −17.8% | 20.1% |
+| | bench | 59.9 | 66.8 | 10.1 | 6.8 | −20.2% | 22.1% |
+
+1. **Long toggles (S2, S3) are the most expensive habit in this whole study:** −9 to −27pp of
+   test-half return and +3 to +7pp of 2022 drawdown, whatever happens to the share. CF and VLO were
+   the book's 2022 winners (fertiliser and refining); switching them off "because they are rising"
+   removes exactly the diversification the book relies on in a bear.
+2. **Short no-fill toggles (S1):** redistributing is +0.6pp in 2024–26 but −2.4pp / +2.4pp DD in
+   2022 — the concentration mechanism (§3.77) bites in a bear. Holding the share in cash is exactly
+   neutral in 2022 and −2.2pp in 2024–26. Leaving the name on costs nothing: an unfilled order's
+   reserved cash simply stays cash.
+3. **Lending a toggled share to the bench is never better than cash.** The bench is a
+   bear-rotation tool funded by the gate; fed routinely it dilutes the core.
+
+**Workbook design:** the per-slot tier flag's **Off holds the name's share in cash** (never
+redistributes); Off is for genuine events (halts, corporate actions, a removal decision), not a
+fill forecast. Active management belongs in admissions (Shadow slots), monitoring, and the
+cap/gate — not in day-to-day toggling of core names.

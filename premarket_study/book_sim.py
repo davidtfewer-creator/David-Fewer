@@ -88,7 +88,8 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
              deep_excl=None, excl_fn=None, bid_fn=None, weight_fn=None,
              gap_exit=False, hold_halt=None, intraday_sd=None, week_end_exit=None,
              reentry=None, regime_exit=None, tier2=None, tier2_first=False,
-             tier2_cash=None, exp_cap=None, exp_to='cash'):
+             tier2_cash=None, exp_cap=None, exp_to='cash',
+             toggle_off=None, toggle_to='redistribute'):
     """no_buy: dict name -> set of dates with entries suppressed (both sleeves).
     tier2: a set of names that bid as a SECOND TIER (the managed-book bench,
     HANDOVER 3.88): first-tier orders are sized exactly as if the tier-2 names
@@ -129,6 +130,11 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
     (tier-2 bidders with room, each up to one ordinary sleeve share). Orders still
     sum to at most the morning cash. Pooled mode, not with name_cap. The result
     carries exp_max {name: peak share of equity} and exp_freed (total cut $).
+    toggle_off: {name: dates} the user's include flag switched OFF (HANDOVER
+    3.98). toggle_to says what the name's morning share does: 'redistribute'
+    (the current workbook: it leaves the pool, everyone else's order grows),
+    'cash' (held back, not lent) or 'bench' (held back and lent to tier-2
+    exactly like a gated name's share under option E; needs tier2+gate_cash).
     weights: dict name -> relative weight (renormalised over the sleeves free each
     morning; equal when None). gate_cash: when True, a sleeve suppressed ONLY by
     no_buy (the 200dma gate) keeps its share of the morning pot in CASH instead of
@@ -293,6 +299,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
         # -------- morning: who is free and has a live bid?
         active = []
         gated_free = []
+        tog_cash = []
         re_open = sum(1 for s in sleeves if s['kind'] == 'R' and s['holding'])
         for s in sleeves:
             nd = data[s['name']]
@@ -320,6 +327,11 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
             gate_pause = bool(no_buy and d in no_buy.get(s['name'], ()))
             paused = gate_pause or halted
             other_pause = bool(halted)
+            tog = bool(toggle_off and d in toggle_off.get(s['name'], ()))
+            if tog:
+                paused = True
+                if toggle_to == 'redistribute':
+                    other_pause = True
             if (deep_excl is not None and bid is not None and i > 0
                     and bid < nd['C'][i - 1] * (1 - deep_excl)):
                 paused = other_pause = True
@@ -335,13 +347,17 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 sleeve_days += 1
                 if s['_bid'] is not None:
                     active.append(s)
+                elif (tog and toggle_to in ('cash', 'bench') and not halted
+                      and bid is not None and i > 0):
+                    (tog_cash if toggle_to == 'cash' else gated_free).append(s)
                 elif (gate_cash and gate_pause and not other_pause
                       and bid is not None and i > 0
                       and not (tier2 and s['name'] in tier2)):
                     gated_free.append(s)
         free_days += len(active)
         if mode == 'pooled' and active:
-            wsum = sum(s['_w'] for s in active) + sum(x['w'] for x in gated_free)
+            wsum = (sum(s['_w'] for s in active) + sum(x['w'] for x in gated_free)
+                    + sum(x['w'] for x in tog_cash))
             assert not (gate_cash and name_cap), 'gate_cash is not wired for name_cap'
             if tier2:
                 assert not name_cap, 'tier2 is not wired for name_cap'
@@ -402,7 +418,7 @@ def simulate(data, sleeves, cal, capital=8_000_000, mode='pooled',
                 if tier2 and gate_cash:
                     pot = cash * bmul
                     wg = sum(x['w'] for x in gated_free)
-                    den = w1 + wg
+                    den = w1 + wg + sum(x['w'] for x in tog_cash)
                     for s in core:
                         s['_alloc'] = pot * s['_w'] / den
                     w2 = sum(s['_w'] for s in bench)
