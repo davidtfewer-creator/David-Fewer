@@ -5105,3 +5105,30 @@ combination was run rather than added up (`liq17b.json`): 10% backstop alone 70.
 **17.5** / 18.3%; CF p95 (held $10m) 15.5 / 11.6 / **7.7** / 3.8%. CF was a 2022 winner, so the 1%
 cap costs 1.3pp there. **Recommendation revised to CF 2% + 10% backstop**: −1.0pp in 2024–26,
 −0.4pp in 2022, CF p95 at 7.7%. Spec updated.
+
+### 3.101 Fit test on the most recent two 12-month windows: PLTR and TSLA still fail (23 Oct)
+
+User: PLTR and TSLA have changed character — recompute rho on their most recent 2 × 12 months.
+`fit_recent.py` / `fit_recent.json`: the fittability.py protocol (same 300 seed-42 vectors), each
+vector run once over the whole file and scored on several window pairs. Rank correlation of
+first-window vs second-window annualised return:
+
+| name | original split (May 25) | **recent: Aug 24–Jul 25 → Aug 25–Jul 26** | Jun 24–May 25 → Jun 25–May 26 | Apr 24–Mar 25 → Apr 25–Mar 26 | recent medians |
+|---|---|---|---|---|---|
+| PLTR | −0.59 | **−0.78** | −0.52 | +0.11 | +39.3% → +1.5% |
+| TSLA | −0.30 | **−0.14** | −0.35 | −0.11 | +1.0% → +8.4% |
+| RKLB | −0.06 | −0.23 | +0.66 | +0.48 | +68.9% → −1.0% |
+| RKT | −0.19 | −0.33 | −0.22 | −0.15 | +15.4% → −13.7% |
+| NEM | +0.50 | +0.13 | +0.45 | +0.42 | |
+| LEN | +0.37 | +0.41 | +0.34 | +0.54 | |
+| TEAM | +0.34 | +0.43 | +0.26 | +0.47 | |
+| DLTR | +0.20 | +0.20 | +0.15 | −0.01 | |
+
+**PLTR: the recent pair is the most negative yet (−0.78)** — the settings that worked best in the
+first recent year worked worst in the second, and the random-vector median fell from +39% to +1.5%.
+The character change has not made it fittable; it has made the past a worse guide. **TSLA is ≤ 0
+in every pair.** Both stay on neutral settings in Shadow. **RKLB swings from −0.23 to +0.66** with
+a two-month shift of the window — unreliable either way. 12-month windows are noisy (NEM drops to
++0.13 in the recent pair against 0.42–0.50 elsewhere), so the admission rule should use the
+stable pattern across pairs, not one pair: LEN and TEAM pass in all four; DLTR is borderline; RKT
+fails in all four (it is on the bench on neutral settings, which is allowed).
